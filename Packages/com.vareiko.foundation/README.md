@@ -104,7 +104,8 @@ Example `Packages/manifest.json`:
 - Runtime tests now include core modules (`Environment`, `Economy`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` templates into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project`.
-- CI workflow is available at `.github/workflows/ci.yml`; set `UNITY_LICENSE` secret to enable Unity EditMode tests in GitHub Actions.
+- CI workflow is available at `.github/workflows/ci.yml`; set `UNITY_LICENSE` secret to enable Unity EditMode + PlayMode tests in GitHub Actions.
+- Sample `Basic Setup` now includes a ready scene (`FoundationSampleScene`) and bootstrap helper (`FoundationSampleSceneBootstrap`).
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:

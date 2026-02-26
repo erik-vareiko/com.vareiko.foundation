@@ -1,5 +1,5 @@
 {
   "displayName": "Basic Setup",
-  "description": "Minimal setup instructions for ProjectContext + SceneContext integration.",
+  "description": "Ready starter scene and bootstrap helper for ProjectContext + SceneContext + UIRegistry wiring.",
   "path": "BasicSetup"
 }

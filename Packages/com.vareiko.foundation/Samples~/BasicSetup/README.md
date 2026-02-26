@@ -1,13 +1,19 @@
 # Basic Setup Sample
 
-1. Create a scene with `ProjectContext` and add `FoundationProjectInstaller`.
-2. Create gameplay scene with `SceneContext` and add `FoundationSceneInstaller`.
-3. Add `UIScreenRegistry` and a few `UIScreen` instances.
-4. Add optional bootstrap tasks implementing `IBootstrapTask`.
-5. Assign optional configs (`AnalyticsConfig`, `BackendConfig`, `BackendReliabilityConfig`, `RemoteConfigCacheConfig`, `AssetServiceConfig`, `ConnectivityConfig`, `SaveSchemaConfig`, `SaveSecurityConfig`, `AutosaveConfig`, `FeatureFlagsConfig`, `EnvironmentConfig`, `ObservabilityConfig`, `EconomyConfig`).
-6. Wire a consent UI to `IConsentService` before tracking analytics events in production.
-7. Optional: add `LoadingOverlayPresenter` to scene UI and inject it through `SceneContext`.
-8. Use `FoundationDomainInstaller` as a base for project-specific gameplay installers.
-9. Optional: add `RefreshFeatureFlagsBootstrapTask` as a scene bootstrap task for explicit early refresh.
+Included assets:
+- `Scenes/FoundationSampleScene.unity` - ready sample scene.
+- `Scripts/FoundationSampleSceneBootstrap.cs` - bootstrap helper that wires:
+  - `ProjectContext` + `FoundationProjectInstaller`
+  - `SceneContext` + `FoundationSceneInstaller`
+  - `UIRoot` + `UIRegistry`
 
-This sample folder is intentionally lightweight and code-only.
+Usage:
+1. Import sample from Package Manager.
+2. Open `FoundationSampleScene`.
+3. Press Play.
+4. Optional: call `Ensure Foundation Wiring` from component context menu to re-apply setup in edit mode.
+
+After that you can add project-specific modules:
+- bootstrap tasks implementing `IBootstrapTask`
+- optional configs (`AnalyticsConfig`, `BackendConfig`, `BackendReliabilityConfig`, `RemoteConfigCacheConfig`, `AssetServiceConfig`, `ConnectivityConfig`, `SaveSchemaConfig`, `SaveSecurityConfig`, `AutosaveConfig`, `FeatureFlagsConfig`, `EnvironmentConfig`, `LocalizationConfig`, `ObservabilityConfig`, `EconomyConfig`)
+- project installers derived from `FoundationDomainInstaller`

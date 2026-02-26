@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.26
+- Added integration smoke coverage for external entry points:
+  - `PlayFabServicesSmokeTests`
+  - `AddressablesAssetProviderTests`
+- Added dedicated PlayMode smoke assembly and test:
+  - `Vareiko.Foundation.PlayModeTests`
+  - `AudioServicePlayModeSmokeTests`
+- Upgraded CI workflow:
+  - Unity test matrix now runs both `editmode` and `playmode` when `UNITY_LICENSE` is configured.
+- Expanded sample quality:
+  - `Samples~/BasicSetup/Scenes/FoundationSampleScene.unity`
+  - `Samples~/BasicSetup/Scripts/FoundationSampleSceneBootstrap.cs`
+  - updated sample docs/metadata for ready scene wiring flow.
+
 ## 0.3.25
 - Added runtime tests for remaining bootstrap/observability gaps:
   - `ConfigRegistryTests`

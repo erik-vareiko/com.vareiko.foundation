@@ -36,30 +36,36 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Unity version: $VERSION"
 
-  unity-editmode-tests:
-    name: Unity EditMode Tests
+  unity-tests:
+    name: Unity ${{ matrix.test_mode }} Tests
     needs: preflight
     if: ${{ secrets.UNITY_LICENSE != '' }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test_mode:
+          - editmode
+          - playmode
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run EditMode Tests
+      - name: Run Unity Tests
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           projectPath: .
           unityVersion: ${{ needs.preflight.outputs.unity_version }}
-          testMode: editmode
-          artifactsPath: artifacts
+          testMode: ${{ matrix.test_mode }}
+          artifactsPath: artifacts/${{ matrix.test_mode }}
 
       - name: Upload Test Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: unity-editmode-test-results
+          name: unity-${{ matrix.test_mode }}-test-results
           path: artifacts
           if-no-files-found: warn
 
@@ -70,4 +76,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Explain Skip Reason
-        run: echo "UNITY_LICENSE secret is not configured; Unity EditMode tests are skipped."
+        run: echo "UNITY_LICENSE secret is not configured; Unity EditMode/PlayMode tests are skipped."
