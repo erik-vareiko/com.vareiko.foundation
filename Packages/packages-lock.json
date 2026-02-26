@@ -213,7 +213,7 @@
       "source": "embedded",
       "dependencies": {
         "com.cysharp.unitask": "2.5.10",
-        "com.svermeulen.extenject": "9.2.0"
+        "com.svermeulen.extenject": "9.2.0-stcf3"
       }
     },
     "com.unity.modules.accessibility": {
