@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.18
+- Added typed window payload helpers:
+  - `UIWindowResultPayload.Serialize<T>`
+  - `UIWindowResultPayload.TryDeserialize<T>`
+  - `UIWindowResult` extensions: `TryGetPayload<T>`, `GetPayloadOrDefault<T>`, `WithPayload<T>`
+- Added runtime tests:
+  - `UIWindowResultPayloadTests`
+
 ## 0.3.17
 - Added awaitable window result flow:
   - `IUIWindowResultService`

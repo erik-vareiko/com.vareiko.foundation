@@ -137,6 +137,14 @@ Example `Packages/manifest.json`:
   - `Status`
   - `Payload`
 
+### Typed Window Payload
+- Use `UIWindowResultPayload` helper for safe typed payload work:
+  - `UIWindowResultPayload.Serialize(payloadDto)`
+  - `UIWindowResultPayload.TryDeserialize<T>(raw, out value)`
+  - `result.TryGetPayload<T>(out value)`
+  - `result.GetPayloadOrDefault<T>(fallback)`
+- Primitive payloads (`int`, `bool`, `float`, enums) are also parsed from raw strings for backward compatibility.
+
 ### Collection Binding
 - `UIItemCollectionBinder` manages pooled `UIItemView` instances and supports:
   - grow/shrink by count
