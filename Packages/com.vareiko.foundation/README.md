@@ -69,7 +69,7 @@ If your project does not resolve Zenject/UniTask from the default Unity registry
   ],
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
-    "com.svermeulen.extenject": "https://github.com/svermeulen/Extenject.git?path=UnityProject/Assets/Plugins/Zenject#9.2.0"
+    "com.svermeulen.extenject": "9.2.0-stcf3"
   }
 }
 ```

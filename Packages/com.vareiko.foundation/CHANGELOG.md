@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+- Fixed package dependency resolution for Extenject:
+  - updated `com.svermeulen.extenject` from `9.2.0` to `9.2.0-stcf3` (OpenUPM available version).
+- Kept `com.cysharp.unitask` on `2.5.10`.
+
 ## 0.3.0
 - Added remote-config baseline for backend:
   - `RemoteConfigCacheConfig`
