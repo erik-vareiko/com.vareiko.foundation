@@ -55,7 +55,7 @@ namespace Vareiko.Foundation.Audio
 
             if (_root != null)
             {
-                Object.Destroy(_root);
+                UnityEngine.Object.Destroy(_root);
                 _root = null;
             }
         }
@@ -121,7 +121,7 @@ namespace Vareiko.Foundation.Audio
             }
 
             _root = new GameObject("[Foundation] AudioService");
-            Object.DontDestroyOnLoad(_root);
+            UnityEngine.Object.DontDestroyOnLoad(_root);
 
             _musicSource = _root.AddComponent<AudioSource>();
             _musicSource.playOnAwake = false;
