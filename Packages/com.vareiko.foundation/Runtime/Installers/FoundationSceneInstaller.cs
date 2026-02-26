@@ -10,15 +10,15 @@ namespace Vareiko.Foundation.Installers
 {
     public sealed class FoundationSceneInstaller : MonoInstaller
     {
-        [SerializeField] private UIScreenRegistry _uiRegistry;
+        [SerializeField] private UIRegistry _uiRegistry;
         [SerializeField] private MonoBehaviour[] _bootstrapTasks;
         [SerializeField] private ConfigRegistry[] _configRegistries;
 
         public override void InstallBindings()
         {
             FoundationBootstrapInstaller.Install(Container);
-            FoundationUiInstaller.Install(Container);
-            FoundationUiNavigationInstaller.Install(Container);
+            FoundationUIInstaller.Install(Container);
+            FoundationUINavigationInstaller.Install(Container);
 
             if (_uiRegistry != null)
             {

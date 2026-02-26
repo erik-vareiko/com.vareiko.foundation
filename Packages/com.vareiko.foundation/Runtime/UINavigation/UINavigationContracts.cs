@@ -1,9 +1,6 @@
-using System;
-
 namespace Vareiko.Foundation.UINavigation
 {
-    [Obsolete("Use IUINavigationService instead.")]
-    public interface IUiNavigationService
+    public interface IUINavigationService
     {
         bool Push(string screenId);
         bool Replace(string screenId);

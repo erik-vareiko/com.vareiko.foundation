@@ -4,6 +4,10 @@
 - `ProjectContext`: global runtime services.
 - `SceneContext`: scene-local UI and startup tasks.
   `FoundationSceneInstaller` can auto-bind `ConfigRegistry` components as bootstrap tasks.
+- Scene UI layer:
+  - `FoundationUIInstaller` (`IUIService`, `IUIWindowManager`)
+  - `FoundationUINavigationInstaller` (`IUINavigationService`)
+  - shared registry contract: `UIRegistry` (legacy bridge: `UIScreenRegistry`)
 
 ## Runtime Bootstrap Order
 1. `FoundationTimeInstaller`
@@ -42,3 +46,4 @@
 - Save reliability baseline with atomic writes, rolling backups and restore fallback.
 - Asset lifecycle baseline with reference tracking and leak diagnostics signals.
 - Localization lookup fallback chain (`current language -> fallback language -> key/default`).
+- Unified UI primitives for screens/windows/panels/items/buttons with queue-based window sequencing.

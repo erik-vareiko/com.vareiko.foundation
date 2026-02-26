@@ -1,14 +1,11 @@
-using System;
-
 namespace Vareiko.Foundation.UINavigation
 {
-    [Obsolete("Use UINavigationChangedSignal instead.")]
-    public readonly struct UiNavigationChangedSignal
+    public readonly struct UINavigationChangedSignal
     {
         public readonly string Current;
         public readonly int Depth;
 
-        public UiNavigationChangedSignal(string current, int depth)
+        public UINavigationChangedSignal(string current, int depth)
         {
             Current = current ?? string.Empty;
             Depth = depth;

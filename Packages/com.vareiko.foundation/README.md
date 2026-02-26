@@ -25,7 +25,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Audio service (`IAudioService`).
 - Observability (`IFoundationLogger`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`).
-- UI base and navigation (`UIScreen`, `IUiService`, `IUiNavigationService`).
+- UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - Analytics abstraction (`IAnalyticsService`).
 - Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and cloud-function queue.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
@@ -50,7 +50,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `EnvironmentConfig`
 - `LocalizationConfig`
 - `ObservabilityConfig`
-- `UIScreenRegistry`
+- `UIRegistry` (or legacy `UIScreenRegistry`)
 - `ConfigRegistry[]` (optional, auto-registered as bootstrap tasks)
 - `IBootstrapTask` MonoBehaviours
 

@@ -1,5 +1,8 @@
+using System;
+
 namespace Vareiko.Foundation.UI
 {
+    [Obsolete("Use IUIService instead.")]
     public interface IUiService
     {
         bool Show(string screenId, bool instant = true);

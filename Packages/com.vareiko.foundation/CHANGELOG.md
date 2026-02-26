@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.9
+- Standardized primary UI API naming to `UI`:
+  - added `IUIService` / `UIService`
+  - added `IUINavigationService` / `UINavigationService`
+  - added `FoundationUIInstaller` / `FoundationUINavigationInstaller`
+  - added `UI*` signals (`UIReadySignal`, `UIElementShownSignal`, `UINavigationChangedSignal`, etc.)
+- Kept `Ui*` contracts/signals/installers as `[Obsolete]` compatibility aliases.
+- Added shared UI base layer components:
+  - `UIElement`
+  - `UIWindow`
+  - `UIPanel`
+  - `UIItemView`
+  - `UIButtonView`
+  - `UIRegistry` (with legacy `UIScreenRegistry` bridge)
+- Added window sequencing manager:
+  - `IUIWindowManager`
+  - `UIWindowManager`
+  - window queue lifecycle signals (`UIWindowQueuedSignal`, `UIWindowShownSignal`, `UIWindowClosedSignal`, `UIWindowQueueDrainedSignal`)
+- Updated scene installer to use `FoundationUIInstaller` + `FoundationUINavigationInstaller` and `UIRegistry`.
+- Added runtime tests for window queue behavior:
+  - `UIWindowManagerTests`
+
 ## 0.3.8
 - Added localization baseline module:
   - `LocalizationConfig`

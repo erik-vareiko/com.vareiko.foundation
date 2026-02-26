@@ -22,6 +22,10 @@ Production-ready "new project starter" package:
 4. Completed in `0.3.8` (Milestone D partial):
 - Localization baseline module (`LocalizationConfig`, `ILocalizationService`, installer + tests).
 - Editor scaffolding tool for fast runtime module generation from templates.
+5. Completed in `0.3.9`:
+- Unified `UI` naming across primary runtime contracts (`IUIService`, `IUINavigationService`, installers/signals).
+- Added shared UI primitives (`UIElement`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`) and `UIRegistry`.
+- Added queue-based window orchestration layer (`IUIWindowManager` / `UIWindowManager`) with runtime tests.
 
 ## v0.4 Scope
 ### P0 (must have)

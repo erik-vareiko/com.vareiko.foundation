@@ -4,63 +4,39 @@ using UnityEngine;
 
 namespace Vareiko.Foundation.UI
 {
-    public sealed class UIScreenRegistry : MonoBehaviour
+    [Obsolete("Use UIRegistry instead.")]
+    public class UIScreenRegistry : UIRegistry
     {
         [SerializeField] private List<UIScreen> _screens = new List<UIScreen>();
-        [SerializeField] private bool _scanChildrenOnAwake = true;
-
-        private readonly Dictionary<string, UIScreen> _map = new Dictionary<string, UIScreen>(StringComparer.Ordinal);
-
-        public int Count => _map.Count;
-
-        private void Awake()
-        {
-            BuildMap();
-        }
 
         public bool TryGet(string screenId, out UIScreen screen)
         {
-            if (string.IsNullOrWhiteSpace(screenId))
-            {
-                screen = null;
-                return false;
-            }
-
-            return _map.TryGetValue(screenId, out screen);
-        }
-
-        public void BuildMap()
-        {
-            _map.Clear();
-
-            for (int i = 0; i < _screens.Count; i++)
-            {
-                Register(_screens[i]);
-            }
-
-            if (_scanChildrenOnAwake)
-            {
-                UIScreen[] screens = GetComponentsInChildren<UIScreen>(true);
-                for (int i = 0; i < screens.Length; i++)
-                {
-                    Register(screens[i]);
-                }
-            }
+            return TryGetScreen(screenId, out screen);
         }
 
         public IEnumerable<KeyValuePair<string, UIScreen>> Enumerate()
         {
-            return _map;
+            foreach (KeyValuePair<string, UIElement> pair in EnumerateElements())
+            {
+                UIScreen screen = pair.Value as UIScreen;
+                if (screen != null)
+                {
+                    yield return new KeyValuePair<string, UIScreen>(pair.Key, screen);
+                }
+            }
         }
 
-        private void Register(UIScreen screen)
+        protected override void CollectExplicitElements(List<UIElement> collector)
         {
-            if (screen == null || string.IsNullOrWhiteSpace(screen.Id))
+            base.CollectExplicitElements(collector);
+            for (int i = 0; i < _screens.Count; i++)
             {
-                return;
+                UIScreen screen = _screens[i];
+                if (screen != null)
+                {
+                    collector.Add(screen);
+                }
             }
-
-            _map[screen.Id] = screen;
         }
     }
 }
