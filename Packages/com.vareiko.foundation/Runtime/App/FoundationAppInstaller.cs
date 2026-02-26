@@ -6,7 +6,7 @@ namespace Vareiko.Foundation.App
     {
         public static void Install(DiContainer container)
         {
-            if (container.HasBinding<IAppStateMachine>())
+            if (container.HasBinding<IAppStateMachine>() && container.HasBinding<IApplicationLifecycleService>())
             {
                 return;
             }
@@ -17,7 +17,19 @@ namespace Vareiko.Foundation.App
             }
 
             container.DeclareSignal<AppStateChangedSignal>();
-            container.BindInterfacesAndSelfTo<AppStateMachine>().AsSingle().NonLazy();
+            container.DeclareSignal<ApplicationPauseChangedSignal>();
+            container.DeclareSignal<ApplicationFocusChangedSignal>();
+            container.DeclareSignal<ApplicationQuitSignal>();
+
+            if (!container.HasBinding<IAppStateMachine>())
+            {
+                container.BindInterfacesAndSelfTo<AppStateMachine>().AsSingle().NonLazy();
+            }
+
+            if (!container.HasBinding<IApplicationLifecycleService>())
+            {
+                container.BindInterfacesAndSelfTo<ApplicationLifecycleService>().AsSingle().NonLazy();
+            }
         }
     }
 }

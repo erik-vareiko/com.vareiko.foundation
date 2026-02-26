@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.20
+- Added application lifecycle baseline:
+  - `IApplicationLifecycleService`
+  - `ApplicationLifecycleService`
+  - `IApplicationLifecycleSource`
+  - `UnityApplicationLifecycleSource`
+  - lifecycle signals: pause/focus/quit
+- Updated `FoundationAppInstaller`:
+  - registers lifecycle signals
+  - binds `ApplicationLifecycleService`
+- Updated `AutosaveService` to consume `IApplicationLifecycleService` when available (with fallback to previous direct Unity hook path).
+- Added runtime tests:
+  - `ApplicationLifecycleServiceTests`
+  - autosave pause lifecycle integration coverage in `AutosaveServiceTests`
+
 ## 0.3.19
 - Added reusable confirm dialog layer:
   - `IUIConfirmDialogService`

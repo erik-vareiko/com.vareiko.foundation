@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
+using Vareiko.Foundation.App;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Save;
 using Vareiko.Foundation.Settings;
@@ -32,6 +33,32 @@ namespace Vareiko.Foundation.Tests.Save
             time.Time = 1f;
 
             service.Tick();
+            await UniTask.DelayFrame(2);
+
+            Assert.That(settings.SaveCalls, Is.EqualTo(1));
+            Assert.That(consent.SaveCalls, Is.EqualTo(1));
+            service.Dispose();
+        }
+
+        [Test]
+        public async Task Initialize_WhenPauseLifecycleEventRaised_SavesDirtyTargets()
+        {
+            FakeTimeProvider time = new FakeTimeProvider { Time = 0f, UnscaledTime = 0f };
+            AutosaveConfig config = ScriptableObject.CreateInstance<AutosaveConfig>();
+            ReflectionTestUtil.SetPrivateField(config, "_saveOnApplicationPause", true);
+            ReflectionTestUtil.SetPrivateField(config, "_saveOnApplicationQuit", false);
+
+            FakeSettingsService settings = new FakeSettingsService();
+            FakeConsentService consent = new FakeConsentService();
+            FakeLifecycleService lifecycle = new FakeLifecycleService();
+
+            AutosaveService service = new AutosaveService(time, config, settings, consent, null, lifecycle);
+            service.Initialize();
+
+            SetDirtyFlag(service, "_dirtySettings", true);
+            SetDirtyFlag(service, "_dirtyConsent", true);
+
+            lifecycle.EmitPause(true);
             await UniTask.DelayFrame(2);
 
             Assert.That(settings.SaveCalls, Is.EqualTo(1));
@@ -97,6 +124,35 @@ namespace Vareiko.Foundation.Tests.Save
 
             public void SetConsentCollected(bool isCollected, bool saveImmediately = false)
             {
+            }
+        }
+
+        private sealed class FakeLifecycleService : IApplicationLifecycleService
+        {
+            public bool IsPaused { get; private set; }
+            public bool HasFocus { get; private set; } = true;
+            public bool IsQuitting { get; private set; }
+
+            public event System.Action<bool> PauseChanged;
+            public event System.Action<bool> FocusChanged;
+            public event System.Action QuitRequested;
+
+            public void EmitPause(bool isPaused)
+            {
+                IsPaused = isPaused;
+                PauseChanged?.Invoke(isPaused);
+            }
+
+            public void EmitFocus(bool hasFocus)
+            {
+                HasFocus = hasFocus;
+                FocusChanged?.Invoke(hasFocus);
+            }
+
+            public void EmitQuit()
+            {
+                IsQuitting = true;
+                QuitRequested?.Invoke();
             }
         }
     }

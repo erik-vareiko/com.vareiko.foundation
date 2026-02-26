@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Vareiko.Foundation.App;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Settings;
 using Vareiko.Foundation.Time;
@@ -14,6 +15,7 @@ namespace Vareiko.Foundation.Save
         private readonly ISettingsService _settingsService;
         private readonly IConsentService _consentService;
         private readonly SignalBus _signalBus;
+        private readonly IApplicationLifecycleService _applicationLifecycleService;
 
         private bool _dirtySettings;
         private bool _dirtyConsent;
@@ -27,13 +29,15 @@ namespace Vareiko.Foundation.Save
             [InjectOptional] AutosaveConfig config = null,
             [InjectOptional] ISettingsService settingsService = null,
             [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IApplicationLifecycleService applicationLifecycleService = null)
         {
             _timeProvider = timeProvider;
             _config = config;
             _settingsService = settingsService;
             _consentService = consentService;
             _signalBus = signalBus;
+            _applicationLifecycleService = applicationLifecycleService;
         }
 
         public void Initialize()
@@ -48,13 +52,27 @@ namespace Vareiko.Foundation.Save
 
             if (ShouldSaveOnPause())
             {
-                _lifecycleHook = AutosaveLifecycleHook.EnsureExists();
-                _lifecycleHook.PauseChanged += OnPauseChanged;
+                if (_applicationLifecycleService != null)
+                {
+                    _applicationLifecycleService.PauseChanged += OnPauseChanged;
+                }
+                else
+                {
+                    _lifecycleHook = AutosaveLifecycleHook.EnsureExists();
+                    _lifecycleHook.PauseChanged += OnPauseChanged;
+                }
             }
 
             if (ShouldSaveOnQuit())
             {
-                Application.quitting += OnApplicationQuitting;
+                if (_applicationLifecycleService != null)
+                {
+                    _applicationLifecycleService.QuitRequested += OnApplicationQuitting;
+                }
+                else
+                {
+                    Application.quitting += OnApplicationQuitting;
+                }
             }
         }
 
@@ -68,7 +86,11 @@ namespace Vareiko.Foundation.Save
 
             if (ShouldSaveOnPause())
             {
-                if (_lifecycleHook != null)
+                if (_applicationLifecycleService != null)
+                {
+                    _applicationLifecycleService.PauseChanged -= OnPauseChanged;
+                }
+                else if (_lifecycleHook != null)
                 {
                     _lifecycleHook.PauseChanged -= OnPauseChanged;
                 }
@@ -76,7 +98,14 @@ namespace Vareiko.Foundation.Save
 
             if (ShouldSaveOnQuit())
             {
-                Application.quitting -= OnApplicationQuitting;
+                if (_applicationLifecycleService != null)
+                {
+                    _applicationLifecycleService.QuitRequested -= OnApplicationQuitting;
+                }
+                else
+                {
+                    Application.quitting -= OnApplicationQuitting;
+                }
             }
         }
 

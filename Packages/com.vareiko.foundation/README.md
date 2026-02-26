@@ -7,6 +7,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Common runtime helpers (`RetryPolicy`, health checks).
 - Composition helpers (`FoundationDomainInstaller`).
 - App state machine (`IAppStateMachine`).
+- Application lifecycle service (`IApplicationLifecycleService`) with pause/focus/quit events.
 - Asset management (`IAssetService`, Resources/Addressables providers, reference tracking).
 - Config registry (`IConfigService`, `ConfigRegistry` bootstrap task).
 - Runtime environments (`IEnvironmentService`, profile-based key/value access).
