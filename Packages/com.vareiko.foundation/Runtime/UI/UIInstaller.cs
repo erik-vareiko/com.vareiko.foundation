@@ -25,6 +25,10 @@ namespace Vareiko.Foundation.UI
             container.DeclareSignal<UIWindowShownSignal>();
             container.DeclareSignal<UIWindowClosedSignal>();
             container.DeclareSignal<UIWindowQueueDrainedSignal>();
+            container.DeclareSignal<UIIntValueChangedSignal>();
+            container.DeclareSignal<UIFloatValueChangedSignal>();
+            container.DeclareSignal<UIBoolValueChangedSignal>();
+            container.DeclareSignal<UIStringValueChangedSignal>();
 
             container.DeclareSignal<UiReadySignal>();
             container.DeclareSignal<UiScreenShownSignal>();
@@ -32,6 +36,7 @@ namespace Vareiko.Foundation.UI
 
             container.BindInterfacesAndSelfTo<UIService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<UIWindowManager>().AsSingle().NonLazy();
+            container.BindInterfacesAndSelfTo<UIValueEventService>().AsSingle();
         }
     }
 }

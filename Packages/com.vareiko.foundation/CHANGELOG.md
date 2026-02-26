@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.10
+- Added event-driven UI value bridge:
+  - `IUIValueEventService` / `UIValueEventService`
+  - typed value signals (`UIIntValueChangedSignal`, `UIFloatValueChangedSignal`, `UIBoolValueChangedSignal`, `UIStringValueChangedSignal`)
+  - installer integration via `FoundationUIInstaller`
+- Added ready UI binders for push-based updates:
+  - `UIIntTextBinder`
+  - `UIFloatTextBinder`
+  - `UIStringTextBinder`
+  - `UIBoolGameObjectBinder`
+- Added runtime tests for value service behavior:
+  - `UIValueEventServiceTests`
+
 ## 0.3.9
 - Standardized primary UI API naming to `UI`:
   - added `IUIService` / `UIService`

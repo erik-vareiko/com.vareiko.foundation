@@ -98,3 +98,16 @@ Example `Packages/manifest.json`:
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` templates into your `Assets` folder.
+
+## Event-Driven UI Template
+- Publish values from domain/services through `IUIValueEventService`:
+  - `SetInt("hud.coins", value)`
+  - `SetFloat("hud.hp", value)`
+  - `SetBool("hud.alive", value)`
+  - `SetString("hud.player_name", value)`
+- Bind values on scene objects with ready components:
+  - `UIIntTextBinder`
+  - `UIFloatTextBinder`
+  - `UIStringTextBinder`
+  - `UIBoolGameObjectBinder`
+- All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
