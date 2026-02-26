@@ -134,3 +134,11 @@ void Unbind()
     _coinsSubscription = null;
 }
 ```
+
+- Compose derived streams without extra dependencies:
+```csharp
+var hpPercent = values.ObserveFloat("hud.hp")
+    .Combine(values.ObserveFloat("hud.hp_max"), (hp, max) => max <= 0f ? 0f : hp / max);
+
+var hpLabel = hpPercent.Map(p => $"{p * 100f:0}%");
+```

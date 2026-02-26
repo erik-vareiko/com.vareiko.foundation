@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.12
+- Added built-in reactive operators for `IReadOnlyValueStream<T>`:
+  - `Map`
+  - `Combine`
+- Added `ComputedValueStream<T>` and `IComputedValueStream<T>` with disposable upstream subscriptions.
+- Added runtime tests for reactive operators:
+  - `ValueStreamOperatorsTests`
+
 ## 0.3.11
 - Added built-in dependency-free reactive primitives:
   - `IReadOnlyValueStream<T>`
