@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.17
+- Added awaitable window result flow:
+  - `IUIWindowResultService`
+  - `UIWindowResultStatus`
+  - `UIWindowResult`
+  - `UIWindowResolveButtonAction`
+- Updated `UIWindowManager` to support:
+  - `EnqueueAndWaitAsync`
+  - `TryResolveCurrent`
+  - `TryResolve`
+  - `UIWindowResolvedSignal`
+- Added runtime tests:
+  - `UIWindowResultServiceTests`
+  - `UIWindowResolveButtonActionTests`
+
 ## 0.3.16
 - Fixed editor assembly references:
   - added `Zenject` reference to `Vareiko.Foundation.Editor.asmdef`

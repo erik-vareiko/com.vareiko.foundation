@@ -25,6 +25,7 @@ namespace Vareiko.Foundation.UI
             container.DeclareSignal<UIWindowShownSignal>();
             container.DeclareSignal<UIWindowClosedSignal>();
             container.DeclareSignal<UIWindowQueueDrainedSignal>();
+            container.DeclareSignal<UIWindowResolvedSignal>();
             container.DeclareSignal<UIIntValueChangedSignal>();
             container.DeclareSignal<UIFloatValueChangedSignal>();
             container.DeclareSignal<UIBoolValueChangedSignal>();

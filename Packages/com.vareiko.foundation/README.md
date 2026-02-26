@@ -27,6 +27,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
+- UI modal results (`IUIWindowResultService`, `UIWindowResult`, `UIWindowResolveButtonAction`) for awaitable confirm/cancel flows.
 - Analytics abstraction (`IAnalyticsService`).
 - Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and cloud-function queue.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
@@ -123,6 +124,18 @@ Example `Packages/manifest.json`:
 - `UIWindowCloseButtonAction`:
   - closes current window by default
   - can close a specific window id when configured
+- `UIWindowResolveButtonAction`:
+  - resolves current (or specific) window with status (`Confirmed/Canceled/Closed`) and optional payload
+
+### Window Result Flow
+- Use `IUIWindowResultService.EnqueueAndWaitAsync(windowId)` when you need modal-like UI flow.
+- Resolve from UI button:
+  - set `UIWindowResolveButtonAction` status to `Confirmed`/`Canceled`
+  - optionally set payload (for example selected reward/item id)
+- Runtime receives `UIWindowResult` with:
+  - `WindowId`
+  - `Status`
+  - `Payload`
 
 ### Collection Binding
 - `UIItemCollectionBinder` manages pooled `UIItemView` instances and supports:

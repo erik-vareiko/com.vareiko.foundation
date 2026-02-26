@@ -39,4 +39,18 @@ namespace Vareiko.Foundation.UI
     public readonly struct UIWindowQueueDrainedSignal
     {
     }
+
+    public readonly struct UIWindowResolvedSignal
+    {
+        public readonly string WindowId;
+        public readonly UIWindowResultStatus Status;
+        public readonly string Payload;
+
+        public UIWindowResolvedSignal(string windowId, UIWindowResultStatus status, string payload = "")
+        {
+            WindowId = windowId ?? string.Empty;
+            Status = status;
+            Payload = payload ?? string.Empty;
+        }
+    }
 }
