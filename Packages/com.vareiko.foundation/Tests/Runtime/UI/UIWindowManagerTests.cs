@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Tests.TestDoubles;
@@ -75,15 +76,12 @@ namespace Vareiko.Foundation.Tests.UI
         private static TestContext CreateContext()
         {
             GameObject root = new GameObject("UI Root");
-            UIRegistry registry = root.AddComponent<UIRegistry>();
 
             UIWindow windowA = CreateWindow(root.transform, "WindowA", "window.a");
             UIWindow windowB = CreateWindow(root.transform, "WindowB", "window.b");
             UIWindow windowC = CreateWindow(root.transform, "WindowC", "window.c");
 
-            registry.BuildMap();
-            UIService uiService = new UIService(registry, null, null);
-            uiService.Initialize();
+            FakeUIService uiService = new FakeUIService(windowA, windowB, windowC);
             UIWindowManager manager = new UIWindowManager(uiService, null);
 
             return new TestContext(root, windowA, windowB, windowC, manager);
@@ -96,6 +94,114 @@ namespace Vareiko.Foundation.Tests.UI
             UIWindow window = gameObject.AddComponent<UIWindow>();
             ReflectionTestUtil.SetPrivateField(window, "_id", id);
             return window;
+        }
+
+        private sealed class FakeUIService : IUIService
+        {
+            private readonly Dictionary<string, UIElement> _elements = new Dictionary<string, UIElement>();
+
+            public FakeUIService(params UIElement[] elements)
+            {
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    UIElement element = elements[i];
+                    if (element == null || string.IsNullOrWhiteSpace(element.Id))
+                    {
+                        continue;
+                    }
+
+                    _elements[element.Id] = element;
+                }
+            }
+
+            public bool Show(string elementId, bool instant = true)
+            {
+                UIElement element;
+                if (!TryGetElement(elementId, out element))
+                {
+                    return false;
+                }
+
+                element.Show(instant);
+                return true;
+            }
+
+            public bool Hide(string elementId, bool instant = true)
+            {
+                UIElement element;
+                if (!TryGetElement(elementId, out element))
+                {
+                    return false;
+                }
+
+                element.Hide(instant);
+                return true;
+            }
+
+            public bool Toggle(string elementId, bool instant = true)
+            {
+                UIElement element;
+                if (!TryGetElement(elementId, out element))
+                {
+                    return false;
+                }
+
+                if (element.IsVisible)
+                {
+                    element.Hide(instant);
+                }
+                else
+                {
+                    element.Show(instant);
+                }
+
+                return true;
+            }
+
+            public void HideAll(bool instant = true)
+            {
+                foreach (KeyValuePair<string, UIElement> pair in _elements)
+                {
+                    pair.Value.Hide(instant);
+                }
+            }
+
+            public bool TryGetElement(string elementId, out UIElement element)
+            {
+                if (string.IsNullOrWhiteSpace(elementId))
+                {
+                    element = null;
+                    return false;
+                }
+
+                return _elements.TryGetValue(elementId, out element);
+            }
+
+            public bool TryGetScreen(string screenId, out UIScreen screen)
+            {
+                screen = null;
+                UIElement element;
+                if (!TryGetElement(screenId, out element))
+                {
+                    return false;
+                }
+
+                screen = element as UIScreen;
+                return screen != null;
+            }
+
+            public bool TryGetWindow(string windowId, out UIWindow window)
+            {
+                window = null;
+                UIElement element;
+                if (!TryGetElement(windowId, out element))
+                {
+                    return false;
+                }
+
+                window = element as UIWindow;
+                return window != null;
+            }
         }
 
         private sealed class TestContext
