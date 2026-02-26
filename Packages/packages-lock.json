@@ -7,13 +7,6 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
-    "com.svermeulen.extenject": {
-      "version": "https://github.com/svermeulen/Extenject.git?path=UnityProject/Assets/Plugins/Zenject#9.2.0",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "c2e33500a84f9408a809deca2af2c55494ab2482"
-    },
     "com.unity.ai.navigation": {
       "version": "2.0.9",
       "depth": 0,
@@ -213,8 +206,15 @@
       "source": "embedded",
       "dependencies": {
         "com.cysharp.unitask": "2.5.10",
-        "com.svermeulen.extenject": "9.2.0-stcf3"
+        "net.bobbo.extenject": "9.3.2"
       }
+    },
+    "net.bobbo.extenject": {
+      "version": "9.3.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
