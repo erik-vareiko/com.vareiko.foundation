@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.23
+- Expanded runtime core test coverage:
+  - `EnvironmentServiceTests`
+  - `InMemoryEconomyServiceTests`
+  - `SettingsServiceTests`
+  - `AnalyticsServiceTests`
+- Covered key baseline scenarios:
+  - environment profile loading and typed parsing
+  - economy seed initialization and operation validation paths
+  - settings load/apply/save flow behavior
+  - analytics consent gating, property merge behavior, and event buffer cap
+
 ## 0.3.22
 - Added GitHub Actions CI workflow:
   - preflight package validation (`Tools/ci/validate-package.ps1`)
