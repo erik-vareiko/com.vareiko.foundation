@@ -47,6 +47,27 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - UniTask (`UniTask` asmdef)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 
+If your project does not resolve Zenject/UniTask from the default Unity registry, add OpenUPM scoped registry in `Packages/manifest.json`:
+
+```json
+{
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.cysharp",
+        "com.svermeulen"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.cysharp.unitask": "2.5.10",
+    "com.svermeulen.extenject": "9.2.0"
+  }
+}
+```
+
 ## Notes
 - `PlayFabBackendService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.
 - `PlayFabCloudFunctionService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.
