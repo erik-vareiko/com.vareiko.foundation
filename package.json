@@ -1,0 +1,23 @@
+{
+  "name": "com.vareiko.foundation",
+  "version": "0.2.0",
+  "displayName": "Vareiko Foundation",
+  "description": "Zenject-first foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
+  "unity": "2022.3",
+  "license": "MIT",
+  "author": {
+    "name": "Vareiko"
+  },
+  "dependencies": {
+    "com.cysharp.unitask": "2.5.10",
+    "com.svermeulen.extenject": "9.2.0"
+  },
+  "keywords": [
+    "zenject",
+    "architecture",
+    "foundation",
+    "analytics",
+    "backend",
+    "unity"
+  }
+}

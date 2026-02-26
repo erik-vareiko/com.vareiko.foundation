@@ -1,0 +1,17 @@
+{
+  "name": "Vareiko.Foundation",
+  "rootNamespace": "Vareiko.Foundation",
+  "references": [
+    "Zenject",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
