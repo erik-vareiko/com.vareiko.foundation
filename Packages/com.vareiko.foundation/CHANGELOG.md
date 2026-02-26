@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.11
+- Added built-in dependency-free reactive primitives:
+  - `IReadOnlyValueStream<T>`
+  - `IValueStream<T>`
+  - `ValueStream<T>`
+- Extended `IUIValueEventService` with reactive observers:
+  - `ObserveInt`
+  - `ObserveFloat`
+  - `ObserveBool`
+  - `ObserveString`
+- Updated `UIValueEventService` to publish both:
+  - `SignalBus` signals
+  - `ValueStream<T>` updates
+- Updated UI binders to prefer reactive stream subscription with SignalBus fallback.
+- Extended `UIValueEventServiceTests` with stream behavior coverage.
+
 ## 0.3.10
 - Added event-driven UI value bridge:
   - `IUIValueEventService` / `UIValueEventService`

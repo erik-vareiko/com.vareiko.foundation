@@ -11,6 +11,10 @@ namespace Vareiko.Foundation.UI
         bool TryGetFloat(string key, out float value);
         bool TryGetBool(string key, out bool value);
         bool TryGetString(string key, out string value);
+        IReadOnlyValueStream<int> ObserveInt(string key);
+        IReadOnlyValueStream<float> ObserveFloat(string key);
+        IReadOnlyValueStream<bool> ObserveBool(string key);
+        IReadOnlyValueStream<string> ObserveString(string key);
 
         void Clear(string key);
         void ClearAll();

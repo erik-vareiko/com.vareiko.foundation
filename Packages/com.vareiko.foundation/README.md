@@ -111,3 +111,26 @@ Example `Packages/manifest.json`:
   - `UIStringTextBinder`
   - `UIBoolGameObjectBinder`
 - All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
+
+### Reactive Streams (Built-in)
+- `IUIValueEventService` also exposes reactive streams:
+  - `ObserveInt(key)`
+  - `ObserveFloat(key)`
+  - `ObserveBool(key)`
+  - `ObserveString(key)`
+- Example:
+```csharp
+private IDisposable _coinsSubscription;
+
+void Bind(IUIValueEventService values)
+{
+    _coinsSubscription = values.ObserveInt("hud.coins")
+        .Subscribe(v => coinsText.text = v.ToString(), true);
+}
+
+void Unbind()
+{
+    _coinsSubscription?.Dispose();
+    _coinsSubscription = null;
+}
+```

@@ -42,5 +42,70 @@ namespace Vareiko.Foundation.Tests.UI
             Assert.That(service.TryGetInt("hud.gems", out int gems), Is.True);
             Assert.That(gems, Is.EqualTo(7));
         }
+
+        [Test]
+        public void ObserveInt_EmitsCurrentAndNextValues()
+        {
+            UIValueEventService service = new UIValueEventService(null);
+            service.SetInt("hud.coins", 10);
+
+            IReadOnlyValueStream<int> stream = service.ObserveInt("hud.coins");
+            int received = -1;
+            int calls = 0;
+
+            using (stream.Subscribe(value =>
+                   {
+                       received = value;
+                       calls++;
+                   }))
+            {
+                Assert.That(calls, Is.EqualTo(1));
+                Assert.That(received, Is.EqualTo(10));
+
+                service.SetInt("hud.coins", 25);
+                Assert.That(calls, Is.EqualTo(2));
+                Assert.That(received, Is.EqualTo(25));
+
+                service.SetInt("hud.coins", 25);
+                Assert.That(calls, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void ObserveString_WaitsUntilFirstValue()
+        {
+            UIValueEventService service = new UIValueEventService(null);
+            IReadOnlyValueStream<string> stream = service.ObserveString("hud.player_name");
+
+            string received = string.Empty;
+            int calls = 0;
+            using (stream.Subscribe(value =>
+                   {
+                       received = value;
+                       calls++;
+                   }))
+            {
+                Assert.That(calls, Is.EqualTo(0));
+
+                service.SetString("hud.player_name", "Rogue");
+                Assert.That(calls, Is.EqualTo(1));
+                Assert.That(received, Is.EqualTo("Rogue"));
+            }
+        }
+
+        [Test]
+        public void ClearAll_ResetsStreamValueState()
+        {
+            UIValueEventService service = new UIValueEventService(null);
+            service.SetBool("hud.is_alive", true);
+            IReadOnlyValueStream<bool> stream = service.ObserveBool("hud.is_alive");
+
+            Assert.That(stream.HasValue, Is.True);
+            Assert.That(stream.Value, Is.True);
+
+            service.ClearAll();
+
+            Assert.That(stream.HasValue, Is.False);
+        }
     }
 }

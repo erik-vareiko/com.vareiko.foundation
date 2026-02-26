@@ -12,6 +12,10 @@ namespace Vareiko.Foundation.UI
         private readonly Dictionary<string, float> _floatValues = new Dictionary<string, float>(StringComparer.Ordinal);
         private readonly Dictionary<string, bool> _boolValues = new Dictionary<string, bool>(StringComparer.Ordinal);
         private readonly Dictionary<string, string> _stringValues = new Dictionary<string, string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, ValueStream<int>> _intStreams = new Dictionary<string, ValueStream<int>>(StringComparer.Ordinal);
+        private readonly Dictionary<string, ValueStream<float>> _floatStreams = new Dictionary<string, ValueStream<float>>(StringComparer.Ordinal);
+        private readonly Dictionary<string, ValueStream<bool>> _boolStreams = new Dictionary<string, ValueStream<bool>>(StringComparer.Ordinal);
+        private readonly Dictionary<string, ValueStream<string>> _stringStreams = new Dictionary<string, ValueStream<string>>(StringComparer.Ordinal);
 
         [Inject]
         public UIValueEventService([InjectOptional] SignalBus signalBus = null)
@@ -32,6 +36,7 @@ namespace Vareiko.Foundation.UI
             }
 
             _intValues[normalized] = value;
+            GetOrCreateStream(_intStreams, normalized).SetValue(value);
             _signalBus?.Fire(new UIIntValueChangedSignal(normalized, value));
         }
 
@@ -48,6 +53,7 @@ namespace Vareiko.Foundation.UI
             }
 
             _floatValues[normalized] = value;
+            GetOrCreateStream(_floatStreams, normalized).SetValue(value);
             _signalBus?.Fire(new UIFloatValueChangedSignal(normalized, value));
         }
 
@@ -64,6 +70,7 @@ namespace Vareiko.Foundation.UI
             }
 
             _boolValues[normalized] = value;
+            GetOrCreateStream(_boolStreams, normalized).SetValue(value);
             _signalBus?.Fire(new UIBoolValueChangedSignal(normalized, value));
         }
 
@@ -81,6 +88,7 @@ namespace Vareiko.Foundation.UI
             }
 
             _stringValues[normalized] = safeValue;
+            GetOrCreateStream(_stringStreams, normalized).SetValue(safeValue);
             _signalBus?.Fire(new UIStringValueChangedSignal(normalized, safeValue));
         }
 
@@ -108,6 +116,82 @@ namespace Vareiko.Foundation.UI
             return TryNormalizeKey(key, out string normalized) && _stringValues.TryGetValue(normalized, out value);
         }
 
+        public IReadOnlyValueStream<int> ObserveInt(string key)
+        {
+            if (!TryNormalizeKey(key, out string normalized))
+            {
+                return NullValueStream<int>.Instance;
+            }
+
+            ValueStream<int> stream = GetOrCreateStream(_intStreams, normalized);
+            if (_intValues.TryGetValue(normalized, out int value))
+            {
+                if (!stream.HasValue || stream.Value != value)
+                {
+                    stream.SetValue(value);
+                }
+            }
+
+            return stream;
+        }
+
+        public IReadOnlyValueStream<float> ObserveFloat(string key)
+        {
+            if (!TryNormalizeKey(key, out string normalized))
+            {
+                return NullValueStream<float>.Instance;
+            }
+
+            ValueStream<float> stream = GetOrCreateStream(_floatStreams, normalized);
+            if (_floatValues.TryGetValue(normalized, out float value))
+            {
+                if (!stream.HasValue || !Mathf.Approximately(stream.Value, value))
+                {
+                    stream.SetValue(value);
+                }
+            }
+
+            return stream;
+        }
+
+        public IReadOnlyValueStream<bool> ObserveBool(string key)
+        {
+            if (!TryNormalizeKey(key, out string normalized))
+            {
+                return NullValueStream<bool>.Instance;
+            }
+
+            ValueStream<bool> stream = GetOrCreateStream(_boolStreams, normalized);
+            if (_boolValues.TryGetValue(normalized, out bool value))
+            {
+                if (!stream.HasValue || stream.Value != value)
+                {
+                    stream.SetValue(value);
+                }
+            }
+
+            return stream;
+        }
+
+        public IReadOnlyValueStream<string> ObserveString(string key)
+        {
+            if (!TryNormalizeKey(key, out string normalized))
+            {
+                return NullValueStream<string>.Instance;
+            }
+
+            ValueStream<string> stream = GetOrCreateStream(_stringStreams, normalized);
+            if (_stringValues.TryGetValue(normalized, out string value))
+            {
+                if (!stream.HasValue || !string.Equals(stream.Value, value, StringComparison.Ordinal))
+                {
+                    stream.SetValue(value);
+                }
+            }
+
+            return stream;
+        }
+
         public void Clear(string key)
         {
             if (!TryNormalizeKey(key, out string normalized))
@@ -119,6 +203,10 @@ namespace Vareiko.Foundation.UI
             _floatValues.Remove(normalized);
             _boolValues.Remove(normalized);
             _stringValues.Remove(normalized);
+            ClearStream(_intStreams, normalized);
+            ClearStream(_floatStreams, normalized);
+            ClearStream(_boolStreams, normalized);
+            ClearStream(_stringStreams, normalized);
         }
 
         public void ClearAll()
@@ -127,6 +215,10 @@ namespace Vareiko.Foundation.UI
             _floatValues.Clear();
             _boolValues.Clear();
             _stringValues.Clear();
+            ClearAllStreams(_intStreams);
+            ClearAllStreams(_floatStreams);
+            ClearAllStreams(_boolStreams);
+            ClearAllStreams(_stringStreams);
         }
 
         private static bool TryNormalizeKey(string key, out string normalized)
@@ -139,6 +231,33 @@ namespace Vareiko.Foundation.UI
 
             normalized = key.Trim();
             return normalized.Length > 0;
+        }
+
+        private static ValueStream<T> GetOrCreateStream<T>(Dictionary<string, ValueStream<T>> streams, string key)
+        {
+            if (!streams.TryGetValue(key, out ValueStream<T> stream))
+            {
+                stream = new ValueStream<T>();
+                streams[key] = stream;
+            }
+
+            return stream;
+        }
+
+        private static void ClearStream<T>(Dictionary<string, ValueStream<T>> streams, string key)
+        {
+            if (streams.TryGetValue(key, out ValueStream<T> stream))
+            {
+                stream.Clear();
+            }
+        }
+
+        private static void ClearAllStreams<T>(Dictionary<string, ValueStream<T>> streams)
+        {
+            foreach (KeyValuePair<string, ValueStream<T>> pair in streams)
+            {
+                pair.Value.Clear();
+            }
         }
     }
 }

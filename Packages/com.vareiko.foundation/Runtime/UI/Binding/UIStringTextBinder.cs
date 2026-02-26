@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -11,6 +12,7 @@ namespace Vareiko.Foundation.UI
 
         private SignalBus _signalBus;
         private IUIValueEventService _valueService;
+        private IDisposable _subscription;
 
         [Inject]
         public void Construct([InjectOptional] SignalBus signalBus = null, [InjectOptional] IUIValueEventService valueService = null)
@@ -21,16 +23,22 @@ namespace Vareiko.Foundation.UI
 
         private void OnEnable()
         {
-            if (_signalBus != null)
+            if (_valueService != null && TryNormalizeKey(out string key))
+            {
+                IReadOnlyValueStream<string> stream = _valueService.ObserveString(key);
+                _subscription = stream.Subscribe(Apply, true);
+            }
+            else if (_signalBus != null)
             {
                 _signalBus.Subscribe<UIStringValueChangedSignal>(OnValueChanged);
             }
-
-            RefreshFromStore();
         }
 
         private void OnDisable()
         {
+            _subscription?.Dispose();
+            _subscription = null;
+
             if (_signalBus != null)
             {
                 _signalBus.Unsubscribe<UIStringValueChangedSignal>(OnValueChanged);
@@ -45,19 +53,6 @@ namespace Vareiko.Foundation.UI
             }
 
             Apply(signal.Value);
-        }
-
-        private void RefreshFromStore()
-        {
-            if (_valueService == null || !TryNormalizeKey(out string key))
-            {
-                return;
-            }
-
-            if (_valueService.TryGetString(key, out string value))
-            {
-                Apply(value);
-            }
         }
 
         private void Apply(string value)
