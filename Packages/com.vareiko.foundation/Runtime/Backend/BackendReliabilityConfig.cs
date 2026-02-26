@@ -12,6 +12,8 @@ namespace Vareiko.Foundation.Backend
         [SerializeField] private bool _queueFailedCloudFunctions = true;
         [SerializeField] private bool _autoFlushQueueOnReconnect = true;
         [SerializeField] private int _maxQueuedCloudFunctions = 32;
+        [SerializeField] private bool _enablePersistentCloudFunctionQueue = true;
+        [SerializeField] private string _cloudFunctionQueueStorageKey = "vareiko.foundation.backend.cloud_function_queue";
 
         public bool EnableRetry => _enableRetry;
         public int MaxAttempts => _maxAttempts < 1 ? 1 : _maxAttempts;
@@ -20,5 +22,7 @@ namespace Vareiko.Foundation.Backend
         public bool QueueFailedCloudFunctions => _queueFailedCloudFunctions;
         public bool AutoFlushQueueOnReconnect => _autoFlushQueueOnReconnect;
         public int MaxQueuedCloudFunctions => _maxQueuedCloudFunctions < 1 ? 1 : _maxQueuedCloudFunctions;
+        public bool EnablePersistentCloudFunctionQueue => _enablePersistentCloudFunctionQueue;
+        public string CloudFunctionQueueStorageKey => _cloudFunctionQueueStorageKey ?? string.Empty;
     }
 }

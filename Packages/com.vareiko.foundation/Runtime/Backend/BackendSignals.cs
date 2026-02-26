@@ -56,6 +56,16 @@ namespace Vareiko.Foundation.Backend
         }
     }
 
+    public readonly struct CloudFunctionQueueRestoredSignal
+    {
+        public readonly int RestoredCount;
+
+        public CloudFunctionQueueRestoredSignal(int restoredCount)
+        {
+            RestoredCount = restoredCount;
+        }
+    }
+
     public readonly struct RemoteConfigRefreshedSignal
     {
         public readonly int ValueCount;

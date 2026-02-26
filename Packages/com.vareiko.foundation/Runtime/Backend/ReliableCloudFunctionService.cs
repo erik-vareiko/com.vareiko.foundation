@@ -15,7 +15,8 @@ namespace Vareiko.Foundation.Backend
         private readonly BackendReliabilityConfig _config;
         private readonly SignalBus _signalBus;
         private readonly RetryPolicy _retryPolicy;
-        private readonly Queue<QueuedCloudFunction> _queue = new Queue<QueuedCloudFunction>();
+        private readonly ICloudFunctionQueueStore _queueStore;
+        private readonly Queue<CloudFunctionQueueItem> _queue = new Queue<CloudFunctionQueueItem>();
         private bool _isFlushing;
 
         [Inject]
@@ -23,12 +24,14 @@ namespace Vareiko.Foundation.Backend
             [Inject(Id = "CloudFunctionInner")] ICloudFunctionService inner,
             [InjectOptional] IConnectivityService connectivityService = null,
             [InjectOptional] BackendReliabilityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] ICloudFunctionQueueStore queueStore = null)
         {
             _inner = inner;
             _connectivityService = connectivityService;
             _config = config;
             _signalBus = signalBus;
+            _queueStore = queueStore;
 
             bool retryEnabled = _config == null || _config.EnableRetry;
             int attempts = _config != null ? _config.MaxAttempts : 3;
@@ -38,12 +41,20 @@ namespace Vareiko.Foundation.Backend
 
         public void Initialize()
         {
+            RestorePersistedQueue();
+
+            bool autoFlushOnReconnect = _config == null || _config.AutoFlushQueueOnReconnect;
+            if (autoFlushOnReconnect && _connectivityService != null && _connectivityService.IsOnline && _queue.Count > 0)
+            {
+                FlushQueueAsync().Forget();
+            }
+
             if (_signalBus == null || _connectivityService == null)
             {
                 return;
             }
 
-            if (_config != null && !_config.AutoFlushQueueOnReconnect)
+            if (!autoFlushOnReconnect)
             {
                 return;
             }
@@ -53,6 +64,8 @@ namespace Vareiko.Foundation.Backend
 
         public void Dispose()
         {
+            PersistQueue();
+
             if (_signalBus == null || _connectivityService == null)
             {
                 return;
@@ -105,7 +118,7 @@ namespace Vareiko.Foundation.Backend
                 return false;
             }
 
-            if (_config != null && !_config.EnableCloudFunctionQueue)
+            if (!IsQueueEnabled())
             {
                 return false;
             }
@@ -115,23 +128,24 @@ namespace Vareiko.Foundation.Backend
 
         private bool ShouldQueueFailedOperations()
         {
-            if (_config == null)
-            {
-                return true;
-            }
-
-            return _config.EnableCloudFunctionQueue && _config.QueueFailedCloudFunctions;
+            return IsQueueEnabled() && (_config == null || _config.QueueFailedCloudFunctions);
         }
 
         private void Enqueue(string functionName, string payloadJson, string reason)
         {
+            if (string.IsNullOrWhiteSpace(functionName))
+            {
+                return;
+            }
+
             int maxSize = _config != null ? _config.MaxQueuedCloudFunctions : 32;
             while (_queue.Count >= maxSize)
             {
                 _queue.Dequeue();
             }
 
-            _queue.Enqueue(new QueuedCloudFunction(functionName, payloadJson));
+            _queue.Enqueue(new CloudFunctionQueueItem(functionName.Trim(), payloadJson ?? string.Empty));
+            PersistQueue();
             _signalBus?.Fire(new CloudFunctionQueuedSignal(functionName, _queue.Count, reason));
         }
 
@@ -154,7 +168,7 @@ namespace Vareiko.Foundation.Backend
             {
                 while (_queue.Count > 0)
                 {
-                    QueuedCloudFunction queued = _queue.Peek();
+                    CloudFunctionQueueItem queued = _queue.Peek();
                     CloudFunctionResult result = await _inner.ExecuteAsync(queued.FunctionName, queued.PayloadJson);
                     if (!result.Success)
                     {
@@ -174,19 +188,112 @@ namespace Vareiko.Foundation.Backend
                 _isFlushing = false;
             }
 
+            PersistQueue();
             _signalBus?.Fire(new CloudFunctionQueueFlushedSignal(startCount, flushed, _queue.Count));
         }
 
-        private readonly struct QueuedCloudFunction
+        private void RestorePersistedQueue()
         {
-            public readonly string FunctionName;
-            public readonly string PayloadJson;
-
-            public QueuedCloudFunction(string functionName, string payloadJson)
+            if (!ShouldPersistQueue())
             {
-                FunctionName = functionName;
-                PayloadJson = payloadJson;
+                return;
             }
+
+            IReadOnlyList<CloudFunctionQueueItem> saved;
+            try
+            {
+                saved = _queueStore.Load();
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception);
+                return;
+            }
+
+            if (saved == null || saved.Count == 0)
+            {
+                return;
+            }
+
+            int maxSize = _config != null ? _config.MaxQueuedCloudFunctions : 32;
+            int start = saved.Count > maxSize ? saved.Count - maxSize : 0;
+            int restored = 0;
+
+            for (int i = start; i < saved.Count; i++)
+            {
+                CloudFunctionQueueItem item = saved[i];
+                if (string.IsNullOrWhiteSpace(item.FunctionName))
+                {
+                    continue;
+                }
+
+                _queue.Enqueue(new CloudFunctionQueueItem(item.FunctionName.Trim(), item.PayloadJson ?? string.Empty));
+                restored++;
+            }
+
+            if (restored <= 0)
+            {
+                try
+                {
+                    _queueStore.Clear();
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+                return;
+            }
+
+            PersistQueue();
+            _signalBus?.Fire(new CloudFunctionQueueRestoredSignal(restored));
+        }
+
+        private void PersistQueue()
+        {
+            if (!ShouldPersistQueue())
+            {
+                return;
+            }
+
+            if (_queue.Count == 0)
+            {
+                try
+                {
+                    _queueStore.Clear();
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+                return;
+            }
+
+            List<CloudFunctionQueueItem> snapshot = new List<CloudFunctionQueueItem>(_queue.Count);
+            foreach (CloudFunctionQueueItem item in _queue)
+            {
+                snapshot.Add(item);
+            }
+
+            try
+            {
+                _queueStore.Save(snapshot);
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+        }
+
+        private bool IsQueueEnabled()
+        {
+            return _config == null || _config.EnableCloudFunctionQueue;
+        }
+
+        private bool ShouldPersistQueue()
+        {
+            return IsQueueEnabled() &&
+                   (_config == null || _config.EnablePersistentCloudFunctionQueue) &&
+                   _queueStore != null;
         }
     }
 }

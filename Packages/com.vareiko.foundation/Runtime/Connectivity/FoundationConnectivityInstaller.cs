@@ -22,6 +22,7 @@ namespace Vareiko.Foundation.Connectivity
             }
 
             container.DeclareSignal<ConnectivityChangedSignal>();
+            container.Bind<INetworkReachabilityProvider>().To<UnityNetworkReachabilityProvider>().AsSingle().IfNotBound();
             container.BindInterfacesAndSelfTo<ConnectivityService>().AsSingle().NonLazy();
         }
     }

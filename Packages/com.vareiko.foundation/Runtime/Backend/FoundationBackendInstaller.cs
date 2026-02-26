@@ -24,6 +24,7 @@ namespace Vareiko.Foundation.Backend
             container.DeclareSignal<BackendOperationRetriedSignal>();
             container.DeclareSignal<CloudFunctionQueuedSignal>();
             container.DeclareSignal<CloudFunctionQueueFlushedSignal>();
+            container.DeclareSignal<CloudFunctionQueueRestoredSignal>();
             container.DeclareSignal<RemoteConfigRefreshedSignal>();
             container.DeclareSignal<RemoteConfigRefreshFailedSignal>();
 
@@ -70,6 +71,7 @@ namespace Vareiko.Foundation.Backend
             }
 
             container.Bind<IBackendService>().To<RetryingBackendService>().AsSingle();
+            container.Bind<ICloudFunctionQueueStore>().To<PlayerPrefsCloudFunctionQueueStore>().AsSingle().IfNotBound();
             container.BindInterfacesAndSelfTo<CachedRemoteConfigService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<ReliableCloudFunctionService>().AsSingle().NonLazy();
         }

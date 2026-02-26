@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.3.21
+- Backend reliability:
+  - added persistent cloud function queue storage contracts:
+    - `ICloudFunctionQueueStore`
+    - `PlayerPrefsCloudFunctionQueueStore`
+    - `CloudFunctionQueueItem`
+  - updated `ReliableCloudFunctionService`:
+    - restores queued cloud functions on initialize
+    - persists queue after enqueue/flush/dispose
+    - emits `CloudFunctionQueueRestoredSignal`
+  - updated backend installer to bind queue store by default.
+- Connectivity recovery:
+  - added network reachability abstraction:
+    - `INetworkReachabilityProvider`
+    - `UnityNetworkReachabilityProvider`
+  - updated `ConnectivityService`:
+    - optional focus-regained refresh via `IApplicationLifecycleService`
+    - refresh cooldown from `ConnectivityConfig`
+- Validation readiness:
+  - added severity model: `StartupValidationSeverity`
+  - added warning and completion signals:
+    - `StartupValidationWarningSignal`
+    - `StartupValidationCompletedSignal`
+  - updated `StartupValidationRunner` to produce aggregated summary counts.
+- Added runtime tests:
+  - `ReliableCloudFunctionServiceTests`
+  - `ConnectivityServiceTests`
+  - `StartupValidationRunnerTests`
+
 ## 0.3.20
 - Added application lifecycle baseline:
   - `IApplicationLifecycleService`

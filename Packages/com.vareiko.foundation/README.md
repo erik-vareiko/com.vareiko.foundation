@@ -11,7 +11,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Asset management (`IAssetService`, Resources/Addressables providers, reference tracking).
 - Config registry (`IConfigService`, `ConfigRegistry` bootstrap task).
 - Runtime environments (`IEnvironmentService`, profile-based key/value access).
-- Connectivity monitoring (`IConnectivityService`).
+- Connectivity monitoring (`IConnectivityService`) with focus-regained refresh policy.
 - Feature flags (`IFeatureFlagService`) with remote-config fallback and local overrides.
 - Localization baseline (`ILocalizationService`, language switching and fallback lookups).
 - Input service (`IInputService`, adapter-based architecture).
@@ -25,13 +25,13 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Economy service (`IEconomyService`, in-memory baseline).
 - Audio service (`IAudioService`).
 - Observability (`IFoundationLogger`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
-- Startup validation (`IStartupValidationRule`, `StartupValidationRunner`).
+- Startup validation (`IStartupValidationRule`, `StartupValidationRunner`) with summary signal (`StartupValidationCompletedSignal`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
 - UI modal results (`IUIWindowResultService`, `UIWindowResult`, `UIWindowResolveButtonAction`) for awaitable confirm/cancel flows.
 - Confirm dialog template (`IUIConfirmDialogService`, `UIConfirmDialogPresenter`, `UIConfirmDialogRequest`) for reusable modal confirmation flows.
 - Analytics abstraction (`IAnalyticsService`).
-- Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and cloud-function queue.
+- Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and persistent cloud-function queue.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
 
 ## Installation
