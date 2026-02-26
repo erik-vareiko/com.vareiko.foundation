@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.15
+- Added UI button baseline components:
+  - `UIWindowOpenButtonAction`
+  - `UIWindowCloseButtonAction`
+  - `UIBoolButtonInteractableBinder`
+- Added runtime tests:
+  - `UIWindowButtonActionsTests`
+  - `UIBoolButtonInteractableBinderTests`
+
 ## 0.3.14
 - Added UI collection binding baseline:
   - `UIItemCollectionBinder` (pooling + show/hide + optional destroy on shrink)

@@ -26,6 +26,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Observability (`IFoundationLogger`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
+- UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
 - Analytics abstraction (`IAnalyticsService`).
 - Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and cloud-function queue.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
@@ -111,8 +112,17 @@ Example `Packages/manifest.json`:
   - `UIFloatTextBinder`
   - `UIStringTextBinder`
   - `UIBoolGameObjectBinder`
+  - `UIBoolButtonInteractableBinder`
   - `UIItemCountBinder` (binds item collection size from int key)
 - All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
+
+### Button Actions
+- `UIWindowOpenButtonAction`:
+  - subscribes to `UIButtonView.OnClicked`
+  - enqueues target window in `IUIWindowManager` with configured priority/duplicate policy
+- `UIWindowCloseButtonAction`:
+  - closes current window by default
+  - can close a specific window id when configured
 
 ### Collection Binding
 - `UIItemCollectionBinder` manages pooled `UIItemView` instances and supports:
