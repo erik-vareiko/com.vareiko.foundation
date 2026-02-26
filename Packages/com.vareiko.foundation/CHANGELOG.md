@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.13
+- Added editor project validation tool:
+  - menu: `Tools/Vareiko/Foundation/Validate Project`
+  - validates scenes/prefabs for baseline Foundation wiring (`FoundationSceneInstaller`, `FoundationProjectInstaller` candidates)
+  - validates UI baseline (`UIRegistry` presence when `UIElement` exists, empty/duplicate UI ids)
+- Updated editor assembly references to include runtime assembly (`Vareiko.Foundation`).
+
 ## 0.3.12
 - Added built-in reactive operators for `IReadOnlyValueStream<T>`:
   - `Map`

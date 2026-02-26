@@ -98,6 +98,7 @@ Example `Packages/manifest.json`:
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` templates into your `Assets` folder.
+- Project validator menu: `Tools/Vareiko/Foundation/Validate Project`.
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:
