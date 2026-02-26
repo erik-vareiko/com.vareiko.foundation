@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.25
+- Added runtime tests for remaining bootstrap/observability gaps:
+  - `ConfigRegistryTests`
+  - `GlobalExceptionHandlerTests`
+- Covered key baseline scenarios:
+  - config registry entry execution, default id normalization, task name fallback, and cancellation handling
+  - global exception capture configuration gate, subscribe/dispose lifecycle, error-signal/log emission, and error-state transition guards
+
 ## 0.3.24
 - Expanded runtime test coverage for remaining core modules:
   - `ConfigServiceTests`
