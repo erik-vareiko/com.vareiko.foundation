@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+- Removed hard package dependencies on `UniTask` and `Extenject` from `package.json`.
+- Dependency installation is now explicit and manual in the host project after adding `com.vareiko.foundation`.
+
 ## 0.3.1
 - Fixed package dependency resolution for Extenject:
   - updated `com.svermeulen.extenject` from `9.2.0` to `9.2.0-stcf3` (OpenUPM available version).

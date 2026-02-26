@@ -53,23 +53,15 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - UniTask (`UniTask` asmdef)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 
-If your project does not resolve Zenject/UniTask from the default Unity registry, add OpenUPM scoped registry in `Packages/manifest.json`:
+`com.vareiko.foundation` does not auto-install Zenject/UniTask. Install them manually in the host project after adding this package.
+
+Example `Packages/manifest.json` dependencies:
 
 ```json
 {
-  "scopedRegistries": [
-    {
-      "name": "OpenUPM",
-      "url": "https://package.openupm.com",
-      "scopes": [
-        "com.cysharp",
-        "com.svermeulen"
-      ]
-    }
-  ],
   "dependencies": {
-    "com.cysharp.unitask": "2.5.10",
-    "com.svermeulen.extenject": "9.2.0-stcf3"
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10",
+    "com.svermeulen.extenject": "https://github.com/svermeulen/Extenject.git?path=UnityProject/Assets/Plugins/Zenject#9.2.0"
   }
 }
 ```
