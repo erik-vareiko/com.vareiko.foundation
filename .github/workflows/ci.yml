@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Preflight Checks
+    runs-on: ubuntu-latest
+    outputs:
+      unity_version: ${{ steps.unity.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Package
+        shell: pwsh
+        run: ./Tools/ci/validate-package.ps1
+
+      - name: Resolve Unity Version
+        id: unity
+        shell: bash
+        run: |
+          VERSION=$(grep 'm_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')
+          if [ -z "$VERSION" ]; then
+            echo "Unable to resolve Unity version from ProjectSettings/ProjectVersion.txt"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Unity version: $VERSION"
+
+  unity-editmode-tests:
+    name: Unity EditMode Tests
+    needs: preflight
+    if: ${{ secrets.UNITY_LICENSE != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run EditMode Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          unityVersion: ${{ needs.preflight.outputs.unity_version }}
+          testMode: editmode
+          artifactsPath: artifacts
+
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-editmode-test-results
+          path: artifacts
+          if-no-files-found: warn
+
+  unity-tests-skipped:
+    name: Unity Tests Skipped (No License)
+    needs: preflight
+    if: ${{ secrets.UNITY_LICENSE == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain Skip Reason
+        run: echo "UNITY_LICENSE secret is not configured; Unity EditMode tests are skipped."

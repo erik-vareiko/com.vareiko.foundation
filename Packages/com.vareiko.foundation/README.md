@@ -103,6 +103,7 @@ Example `Packages/manifest.json`:
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` templates into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project`.
+- CI workflow is available at `.github/workflows/ci.yml`; set `UNITY_LICENSE` secret to enable Unity EditMode tests in GitHub Actions.
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.22
+- Added GitHub Actions CI workflow:
+  - preflight package validation (`Tools/ci/validate-package.ps1`)
+  - Unity EditMode tests via `game-ci/unity-test-runner` when `UNITY_LICENSE` is configured
+  - explicit CI skip job when Unity license secret is absent
+- Added CI validation script checks:
+  - package/changelog version alignment
+  - required package dependencies presence
+  - `.meta` existence for package C# scripts
+  - merge-conflict marker scan in tracked project directories
+  - Unity version parse validation from `ProjectSettings/ProjectVersion.txt`
+
 ## 0.3.21
 - Backend reliability:
   - added persistent cloud function queue storage contracts:
