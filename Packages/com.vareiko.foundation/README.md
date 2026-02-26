@@ -111,7 +111,18 @@ Example `Packages/manifest.json`:
   - `UIFloatTextBinder`
   - `UIStringTextBinder`
   - `UIBoolGameObjectBinder`
+  - `UIItemCountBinder` (binds item collection size from int key)
 - All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
+
+### Collection Binding
+- `UIItemCollectionBinder` manages pooled `UIItemView` instances and supports:
+  - grow/shrink by count
+  - hide extra items or destroy on shrink
+  - retrieving active item views for data rendering
+- Typical flow:
+  - `UIItemCountBinder` listens to `IUIValueEventService` key (for example `inventory.count`)
+  - updates collection size reactively
+  - presenter fills visible items with domain data
 
 ### Reactive Streams (Built-in)
 - `IUIValueEventService` also exposes reactive streams:

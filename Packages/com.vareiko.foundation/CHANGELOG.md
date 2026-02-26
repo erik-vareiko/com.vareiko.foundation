@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.14
+- Added UI collection binding baseline:
+  - `UIItemCollectionBinder` (pooling + show/hide + optional destroy on shrink)
+  - `UIItemCountBinder` (reactive count binding from `IUIValueEventService`)
+- Added runtime tests:
+  - `UIItemCollectionBinderTests`
+  - `UIItemCountBinderTests`
+
 ## 0.3.13
 - Added editor project validation tool:
   - menu: `Tools/Vareiko/Foundation/Validate Project`
