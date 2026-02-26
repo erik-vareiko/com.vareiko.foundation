@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.19
+- Added reusable confirm dialog layer:
+  - `IUIConfirmDialogService`
+  - `UIConfirmDialogService`
+  - `UIConfirmDialogPresenter`
+  - `UIConfirmDialogRequest`
+- Registered `UIConfirmDialogService` in `FoundationUIInstaller`.
+- Added runtime tests:
+  - `UIConfirmDialogPresenterTests`
+  - `UIConfirmDialogServiceTests`
+
 ## 0.3.18
 - Added typed window payload helpers:
   - `UIWindowResultPayload.Serialize<T>`

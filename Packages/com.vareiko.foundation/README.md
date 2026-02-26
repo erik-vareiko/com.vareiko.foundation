@@ -28,6 +28,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
 - UI modal results (`IUIWindowResultService`, `UIWindowResult`, `UIWindowResolveButtonAction`) for awaitable confirm/cancel flows.
+- Confirm dialog template (`IUIConfirmDialogService`, `UIConfirmDialogPresenter`, `UIConfirmDialogRequest`) for reusable modal confirmation flows.
 - Analytics abstraction (`IAnalyticsService`).
 - Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and cloud-function queue.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
@@ -144,6 +145,15 @@ Example `Packages/manifest.json`:
   - `result.TryGetPayload<T>(out value)`
   - `result.GetPayloadOrDefault<T>(fallback)`
 - Primitive payloads (`int`, `bool`, `float`, enums) are also parsed from raw strings for backward compatibility.
+
+### Confirm Dialog Service
+- `IUIConfirmDialogService.ShowAsync(windowId, request)`:
+  - applies request data to `UIConfirmDialogPresenter` on target window
+  - opens window via `IUIWindowResultService.EnqueueAndWaitAsync`
+  - returns `UIWindowResult`
+- `UIConfirmDialogPresenter` updates title/message/labels and resolves:
+  - `Confirmed` with confirm payload
+  - `Canceled` with cancel payload
 
 ### Collection Binding
 - `UIItemCollectionBinder` manages pooled `UIItemView` instances and supports:

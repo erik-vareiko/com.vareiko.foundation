@@ -37,6 +37,7 @@ namespace Vareiko.Foundation.UI
 
             container.BindInterfacesAndSelfTo<UIService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<UIWindowManager>().AsSingle().NonLazy();
+            container.BindInterfacesAndSelfTo<UIConfirmDialogService>().AsSingle();
             container.BindInterfacesAndSelfTo<UIValueEventService>().AsSingle();
         }
     }
