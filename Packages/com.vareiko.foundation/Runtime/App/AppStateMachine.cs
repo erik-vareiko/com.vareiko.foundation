@@ -1,8 +1,9 @@
+using Vareiko.Foundation.Bootstrap;
 using Zenject;
 
 namespace Vareiko.Foundation.App
 {
-    public sealed class AppStateMachine : IAppStateMachine, IInitializable
+    public sealed class AppStateMachine : IAppStateMachine, IInitializable, System.IDisposable
     {
         private readonly SignalBus _signalBus;
         private AppState _current = AppState.None;
@@ -17,7 +18,13 @@ namespace Vareiko.Foundation.App
 
         public void Initialize()
         {
+            _signalBus?.Subscribe<ApplicationBootFailedSignal>(OnApplicationBootFailed);
             ForceEnter(AppState.Boot);
+        }
+
+        public void Dispose()
+        {
+            _signalBus?.Unsubscribe<ApplicationBootFailedSignal>(OnApplicationBootFailed);
         }
 
         public bool IsIn(AppState state)
@@ -46,6 +53,16 @@ namespace Vareiko.Foundation.App
             AppState previous = _current;
             _current = next;
             _signalBus?.Fire(new AppStateChangedSignal(previous, _current));
+        }
+
+        private void OnApplicationBootFailed(ApplicationBootFailedSignal signal)
+        {
+            if (_current == AppState.Shutdown || _current == AppState.Error)
+            {
+                return;
+            }
+
+            ForceEnter(AppState.Error);
         }
 
         private static bool CanTransition(AppState current, AppState next)

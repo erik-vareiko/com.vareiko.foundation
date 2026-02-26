@@ -53,4 +53,32 @@ namespace Vareiko.Foundation.Save
             Error = error;
         }
     }
+
+    public readonly struct SaveBackupWrittenSignal
+    {
+        public readonly string Slot;
+        public readonly string Key;
+        public readonly int BackupIndex;
+
+        public SaveBackupWrittenSignal(string slot, string key, int backupIndex)
+        {
+            Slot = slot;
+            Key = key;
+            BackupIndex = backupIndex;
+        }
+    }
+
+    public readonly struct SaveRestoredFromBackupSignal
+    {
+        public readonly string Slot;
+        public readonly string Key;
+        public readonly int BackupIndex;
+
+        public SaveRestoredFromBackupSignal(string slot, string key, int backupIndex)
+        {
+            Slot = slot;
+            Key = key;
+            BackupIndex = backupIndex;
+        }
+    }
 }

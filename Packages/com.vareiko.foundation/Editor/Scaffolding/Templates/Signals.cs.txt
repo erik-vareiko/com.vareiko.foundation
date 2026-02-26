@@ -1,0 +1,6 @@
+namespace {{NAMESPACE}}
+{
+    public readonly struct {{MODULE_NAME}}InitializedSignal
+    {
+    }
+}

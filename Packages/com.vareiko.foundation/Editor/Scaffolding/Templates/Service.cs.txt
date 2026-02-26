@@ -1,0 +1,23 @@
+using Zenject;
+
+namespace {{NAMESPACE}}
+{
+    public sealed class {{MODULE_NAME}}Service : I{{MODULE_NAME}}Service, IInitializable
+    {
+        private readonly SignalBus _signalBus;
+
+        [Inject]
+        public {{MODULE_NAME}}Service([InjectOptional] SignalBus signalBus = null)
+        {
+            _signalBus = signalBus;
+        }
+
+        public bool IsReady { get; private set; }
+
+        public void Initialize()
+        {
+            IsReady = true;
+            _signalBus?.Fire(new {{MODULE_NAME}}InitializedSignal());
+        }
+    }
+}

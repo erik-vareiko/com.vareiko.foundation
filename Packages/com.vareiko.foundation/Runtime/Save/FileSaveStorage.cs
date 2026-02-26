@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -37,7 +38,41 @@ namespace Vareiko.Foundation.Save
                 Directory.CreateDirectory(directory);
             }
 
-            File.WriteAllText(path, value ?? string.Empty, Encoding.UTF8);
+            string payload = value ?? string.Empty;
+            string tempPath = path + ".tmp";
+            File.WriteAllText(tempPath, payload, Encoding.UTF8);
+
+            if (File.Exists(path))
+            {
+                string backupPath = path + ".swap";
+                if (File.Exists(backupPath))
+                {
+                    File.Delete(backupPath);
+                }
+
+                try
+                {
+                    File.Replace(tempPath, path, backupPath, true);
+                    if (File.Exists(backupPath))
+                    {
+                        File.Delete(backupPath);
+                    }
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    File.Delete(path);
+                    File.Move(tempPath, path);
+                }
+                catch (IOException)
+                {
+                    File.Delete(path);
+                    File.Move(tempPath, path);
+                }
+            }
+            else
+            {
+                File.Move(tempPath, path);
+            }
         }
 
         public async UniTask DeleteAsync(string path, CancellationToken cancellationToken = default)

@@ -3,7 +3,9 @@ using Vareiko.Foundation.AssetManagement;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Economy;
+using Vareiko.Foundation.Environment;
 using Vareiko.Foundation.Features;
+using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Save;
 using UnityEngine;
@@ -20,9 +22,12 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private ConnectivityConfig _connectivityConfig;
         [SerializeField] private SaveSchemaConfig _saveSchemaConfig;
         [SerializeField] private SaveSecurityConfig _saveSecurityConfig;
+        [SerializeField] private AutosaveConfig _autosaveConfig;
         [SerializeField] private BackendReliabilityConfig _backendReliabilityConfig;
         [SerializeField] private RemoteConfigCacheConfig _remoteConfigCacheConfig;
         [SerializeField] private FeatureFlagsConfig _featureFlagsConfig;
+        [SerializeField] private EnvironmentConfig _environmentConfig;
+        [SerializeField] private LocalizationConfig _localizationConfig;
         [SerializeField] private ObservabilityConfig _observabilityConfig;
 
         public override void InstallBindings()
@@ -36,9 +41,12 @@ namespace Vareiko.Foundation.Installers
                 _connectivityConfig,
                 _saveSchemaConfig,
                 _saveSecurityConfig,
+                _autosaveConfig,
                 _backendReliabilityConfig,
                 _remoteConfigCacheConfig,
                 _featureFlagsConfig,
+                _environmentConfig,
+                _localizationConfig,
                 _observabilityConfig);
         }
     }

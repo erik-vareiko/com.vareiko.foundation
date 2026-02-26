@@ -1,5 +1,80 @@
 # Changelog
 
+## 0.3.8
+- Added localization baseline module:
+  - `LocalizationConfig`
+  - `ILocalizationService` / `LocalizationService`
+  - `FoundationLocalizationInstaller`
+  - localization signals (`LanguageChangedSignal`, `LocalizationKeyMissingSignal`)
+- Integrated localization config into:
+  - `FoundationRuntimeInstaller`
+  - `FoundationProjectInstaller`
+- Added runtime smoke tests for localization fallback and language switch flow:
+  - `LocalizationServiceTests`
+- Added editor tooling for feature/module scaffolding:
+  - `Vareiko.Foundation.Editor` assembly
+  - `Tools/Vareiko/Foundation/Create Runtime Module` window
+  - templates in `Editor/Scaffolding/Templates/*`
+
+## 0.3.7
+- Added package runtime test assembly `Vareiko.Foundation.Tests` (`Tests/Runtime`).
+- Added test doubles for deterministic tests:
+  - `FakeTimeProvider`
+  - `InMemorySaveStorage`
+  - `FakeConnectivityService`
+  - `FakeRemoteConfigService`
+- Added baseline tests for core runtime modules:
+  - `BootstrapRunnerTests`
+  - `SaveServiceTests`
+  - `AutosaveServiceTests`
+  - `LoadingServiceTests`
+  - `FeatureFlagServiceTests`
+  - `AssetServiceTests`
+  - `SceneFlowServiceTests` (argument/contract validation smoke checks)
+
+## 0.3.6
+- Added save hardening baseline:
+  - atomic write strategy in `FileSaveStorage`
+  - rolling backups and restore fallback in `SaveService`
+  - backup-related options in `SaveSecurityConfig`
+  - save backup/restore signals
+- Added autosave module:
+  - `AutosaveConfig`
+  - `AutosaveService`
+  - autosave lifecycle signals
+  - installer integration via `FoundationSaveInstaller`
+- Added asset lifecycle tracking baseline:
+  - reference counting and tracked release flow in `AssetService`
+  - new asset diagnostics signals (`AssetReferenceChangedSignal`, `AssetReleasedSignal`, `AssetLeakDetectedSignal`)
+  - diagnostics snapshot fields for tracked assets and references
+- Updated project/runtime installers and docs to expose `AutosaveConfig`.
+
+## 0.3.5
+- Added environment profile module:
+  - `EnvironmentConfig`
+  - `IEnvironmentService` / `EnvironmentService`
+  - `FoundationEnvironmentInstaller`
+  - environment signals for profile change and missing keys
+- Added global unhandled exception boundary in observability:
+  - `GlobalExceptionHandler`
+  - `UnhandledExceptionCapturedSignal`
+  - new observability config toggles for exception capture and error-state fallback
+- Added boot/runtime fallback to `AppState.Error` when boot task fails or unhandled exception is captured.
+- Updated runtime installer and project installer to support `EnvironmentConfig`.
+
+## 0.3.4
+- Switched Zenject dependency from `com.gamesoft.zenject` to `net.bobbo.extenject` (OpenUPM).
+- Updated versions to:
+  - `com.cysharp.unitask` `2.5.10`
+  - `net.bobbo.extenject` `9.3.2`
+- Updated README dependency setup and manifest examples accordingly.
+
+## 0.3.3
+- Restored explicit package dependencies in `package.json` for OpenUPM:
+  - `com.cysharp.unitask` `2.5.10`
+  - `com.gamesoft.zenject` `9.2.2`
+- Updated README dependency setup to OpenUPM flow (`openupm add ...`).
+
 ## 0.3.2
 - Removed hard package dependencies on `UniTask` and `Extenject` from `package.json`.
 - Dependency installation is now explicit and manual in the host project after adding `com.vareiko.foundation`.

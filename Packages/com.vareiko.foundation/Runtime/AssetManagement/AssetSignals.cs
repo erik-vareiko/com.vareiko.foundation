@@ -33,4 +33,44 @@ namespace Vareiko.Foundation.AssetManagement
             Count = count;
         }
     }
+
+    public readonly struct AssetReferenceChangedSignal
+    {
+        public readonly string Key;
+        public readonly int ReferenceCount;
+        public readonly int TotalTrackedAssets;
+
+        public AssetReferenceChangedSignal(string key, int referenceCount, int totalTrackedAssets)
+        {
+            Key = key;
+            ReferenceCount = referenceCount;
+            TotalTrackedAssets = totalTrackedAssets;
+        }
+    }
+
+    public readonly struct AssetReleasedSignal
+    {
+        public readonly string Key;
+        public readonly int ReferenceCount;
+        public readonly int TotalTrackedAssets;
+
+        public AssetReleasedSignal(string key, int referenceCount, int totalTrackedAssets)
+        {
+            Key = key;
+            ReferenceCount = referenceCount;
+            TotalTrackedAssets = totalTrackedAssets;
+        }
+    }
+
+    public readonly struct AssetLeakDetectedSignal
+    {
+        public readonly string Key;
+        public readonly int ReferenceCount;
+
+        public AssetLeakDetectedSignal(string key, int referenceCount)
+        {
+            Key = key;
+            ReferenceCount = referenceCount;
+        }
+    }
 }

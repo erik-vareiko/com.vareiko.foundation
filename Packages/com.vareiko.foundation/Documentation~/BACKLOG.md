@@ -1,58 +1,131 @@
 # Foundation Backlog
 
-## Core Runtime
-1. Deterministic startup test harness.
-2. Extended domain installer templates (stateful feature toggles + optional scene services).
-3. Add `ScriptableObjectInstaller` variants for package configs.
+## v0.4 Goal
+Production-ready "new project starter" package:
+- predictable startup and failure behavior;
+- safe default data/asset lifecycle;
+- testable and template-friendly architecture;
+- minimum host-project wiring.
 
-## UI and UX Platform
-1. Screen transition pipeline.
-2. Input-aware back-navigation policies.
-3. Advanced loading presenter kit (progress animation profiles + localization-ready status labels).
+## Progress
+1. Completed in `0.3.5` (Milestone A baseline):
+- Environment profile module (`EnvironmentConfig`, `IEnvironmentService`, installer + signals).
+- Global unhandled exception boundary (`GlobalExceptionHandler`, observability signal).
+- Runtime fallback to `AppState.Error` on boot failure/unhandled exception.
+2. Completed in `0.3.6` (Milestone B baseline):
+- Save hardening: atomic writes + rolling backups + restore fallback.
+- Autosave scheduler for `Settings` and `Consent` with interval/pause/quit triggers.
+- Asset lifecycle baseline: reference counting, release tracking and leak diagnostics signals.
+3. Completed in `0.3.7` (Milestone C baseline):
+- Runtime package test assembly and deterministic test doubles.
+- Smoke coverage for boot/save/loading/feature flags/assets plus scene flow contract checks.
+4. Completed in `0.3.8` (Milestone D partial):
+- Localization baseline module (`LocalizationConfig`, `ILocalizationService`, installer + tests).
+- Editor scaffolding tool for fast runtime module generation from templates.
 
-## Assets and Config
-1. Real Addressables provider (labels, groups, dependency tracking).
-2. Asset reference counting and leak diagnostics.
-3. Config schema validation and environment overrides.
+## v0.4 Scope
+### P0 (must have)
+1. Environment/Profile module (`dev`, `stage`, `prod`) with runtime access.
+2. Global runtime exception handling and fallback error flow.
+3. Save hardening: atomic writes + rolling backups + autosave scheduler.
+4. Addressables lifecycle: reference counting and leak diagnostics baseline.
+5. Smoke/integration tests for boot, save/settings, scene flow, loading, feature flags.
+6. Module/template tooling for rapid feature scaffolding.
 
-## Save and Settings
-1. Cloud/local conflict resolver.
-2. Secure storage adapters.
-3. Production-ready key management for save encryption/integrity.
+### P1 (should have)
+1. Input System adapter with persistent rebind storage.
+2. Structured logging sink abstraction (file/http adapters optional).
 
-## Audio
-1. AudioMixer integration and snapshots.
-2. Event-based routing profiles.
-3. Dynamic ducking policies.
+### Out of scope for v0.4
+1. PlayFab full production adapter.
+2. IAP/Ads/Push/Attribution.
+3. A/B experimentation platform and analytics governance toolkit.
 
-## Analytics
-1. Unity Analytics adapter.
-2. Custom HTTP analytics adapter.
-3. Event taxonomy registry and governance.
-4. Consent scope UI kit + legal text localization pipeline.
+## Execution Order
+1. Milestone A: startup reliability and environments.
+2. Milestone B: save safety and asset lifecycle.
+3. Milestone C: tests and diagnostics closure.
+4. Milestone D: scaffolding/tooling and docs release.
 
-## Backend and PlayFab
-1. Full PlayFab adapter implementation (auth, data, economy).
-2. Remote config service with cache and kill switches.
-3. PlayFab cloud-function adapter with typed request/response contracts.
-4. Persistent offline queue (disk-backed) for backend operations.
+## Milestone A (P0): Startup Reliability
+1. Add environment module.
+File targets:
+`Runtime/Environment/IEnvironmentService.cs`
+`Runtime/Environment/EnvironmentService.cs`
+`Runtime/Environment/EnvironmentConfig.cs`
+`Runtime/Environment/FoundationEnvironmentInstaller.cs`
+`Runtime/Environment/EnvironmentSignals.cs`
+`Runtime/FoundationRuntimeInstaller.cs` (install order)
+`Runtime/Installers/FoundationProjectInstaller.cs` (config injection)
+2. Add global exception boundary.
+File targets:
+`Runtime/Observability/GlobalExceptionHandler.cs`
+`Runtime/Observability/ObservabilitySignals.cs` (new exception signal)
+`Runtime/Observability/FoundationObservabilityInstaller.cs`
+3. Add fallback boot failure strategy.
+File targets:
+`Runtime/Bootstrap/BootstrapRunner.cs`
+`Runtime/App/AppStateMachine.cs` (error transition policy)
 
-## Feature Management
-1. Typed feature key registry/codegen.
-2. Experiment bucketing and A/B assignment service.
-3. Runtime feature audit trail (who/when changed override).
+## Milestone B (P0): Save + Assets Hardening
+1. Atomic save writes and backups.
+File targets:
+`Runtime/Save/FileSaveStorage.cs` (write temp + replace)
+`Runtime/Save/SaveService.cs` (backup generation/restore path)
+`Runtime/Save/SaveSecurityConfig.cs` (backup/security options)
+2. Autosave orchestration.
+File targets:
+`Runtime/Save/AutosaveService.cs` (new)
+`Runtime/Save/AutosaveConfig.cs` (new)
+`Runtime/Save/FoundationSaveInstaller.cs`
+3. Addressables reference tracking.
+File targets:
+`Runtime/AssetManagement/AddressablesAssetProvider.cs`
+`Runtime/AssetManagement/AssetService.cs`
+`Runtime/AssetManagement/AssetSignals.cs` (refcount/leak signals)
+`Runtime/Observability/DiagnosticsSnapshot.cs` (asset counters)
 
-## Observability
-1. Crash reporting adapter (Sentry/Backtrace/etc.).
-2. Structured log sinks (file/HTTP).
-3. In-game diagnostics panels with modules/widgets.
+## Milestone C (P0): Test Baseline
+1. Add package tests structure.
+File targets:
+`Tests/Runtime/Vareiko.Foundation.Tests.asmdef` (new)
+`Tests/Runtime/Boot/BootstrapRunnerTests.cs` (new)
+`Tests/Runtime/Save/SaveServiceTests.cs` (new)
+`Tests/Runtime/SceneFlow/SceneFlowServiceTests.cs` (new)
+`Tests/Runtime/Loading/LoadingServiceTests.cs` (new)
+`Tests/Runtime/Features/FeatureFlagServiceTests.cs` (new)
+2. Add deterministic test doubles for time/connectivity/storage.
+File targets:
+`Tests/Runtime/TestDoubles/FakeTimeProvider.cs` (new)
+`Tests/Runtime/TestDoubles/InMemorySaveStorage.cs` (new)
+`Tests/Runtime/TestDoubles/FakeConnectivityService.cs` (new)
 
-## Input and Economy
-1. New Input System adapter with rebinding persistence.
-2. Gamepad and touch adapters.
-3. Backend-backed economy adapter.
+## Milestone D (P0/P1): Tooling + Docs
+1. Feature module scaffolding tool. [DONE in 0.3.8]
+File targets:
+`Editor/Scaffolding/FoundationModuleScaffolder.cs` (new)
+`Editor/Scaffolding/Templates/*` (new)
+2. Localization baseline (P1). [DONE in 0.3.8]
+File targets:
+`Runtime/Localization/ILocalizationService.cs` (new)
+`Runtime/Localization/LocalizationService.cs` (new)
+`Runtime/Localization/LocalizationConfig.cs` (new)
+`Runtime/Localization/FoundationLocalizationInstaller.cs` (new)
+3. Input System adapter (P1). [NEXT]
+File targets:
+`Runtime/Input/NewInputSystemAdapter.cs` (new)
+`Runtime/Input/InputRebindStorage.cs` (new)
+`Runtime/Input/FoundationInputInstaller.cs`
+4. Release docs update. [IN PROGRESS]
+File targets:
+`README.md`
+`Documentation~/ARCHITECTURE.md`
+`Documentation~/BACKLOG.md`
+`CHANGELOG.md`
 
-## QA and Observability
-1. Smoke tests for boot/state/scene/save/settings.
-2. Integration tests for analytics/backend contracts.
-3. Runtime diagnostics dashboard (health checks, connectivity, queue, save schema).
+## Definition of Done for v0.4
+1. Clean import in fresh project with only OpenUPM dependencies configured.
+2. All P0 tests pass in Unity Test Runner (EditMode + Runtime-focused smoke tests).
+3. Boot failure path is observable and transitions to error state predictably.
+4. Save data survives interruption scenarios (atomic write + backup restore).
+5. Template tool can generate a new runtime module skeleton in under 1 minute.

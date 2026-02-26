@@ -1,0 +1,7 @@
+namespace {{NAMESPACE}}
+{
+    public interface I{{MODULE_NAME}}Service
+    {
+        bool IsReady { get; }
+    }
+}

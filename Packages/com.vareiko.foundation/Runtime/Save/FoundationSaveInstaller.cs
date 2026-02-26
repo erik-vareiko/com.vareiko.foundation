@@ -9,7 +9,8 @@ namespace Vareiko.Foundation.Save
         public static void Install(
             DiContainer container,
             SaveSchemaConfig schemaConfig = null,
-            SaveSecurityConfig securityConfig = null)
+            SaveSecurityConfig securityConfig = null,
+            AutosaveConfig autosaveConfig = null)
         {
             if (container.HasBinding<ISaveService>())
             {
@@ -25,6 +26,11 @@ namespace Vareiko.Foundation.Save
             container.DeclareSignal<SaveDeletedSignal>();
             container.DeclareSignal<SaveMigratedSignal>();
             container.DeclareSignal<SaveLoadFailedSignal>();
+            container.DeclareSignal<SaveBackupWrittenSignal>();
+            container.DeclareSignal<SaveRestoredFromBackupSignal>();
+            container.DeclareSignal<AutosaveTriggeredSignal>();
+            container.DeclareSignal<AutosaveCompletedSignal>();
+            container.DeclareSignal<AutosaveFailedSignal>();
 
             if (schemaConfig != null)
             {
@@ -34,6 +40,11 @@ namespace Vareiko.Foundation.Save
             if (securityConfig != null)
             {
                 container.BindInstance(securityConfig).IfNotBound();
+            }
+
+            if (autosaveConfig != null)
+            {
+                container.BindInstance(autosaveConfig).IfNotBound();
             }
 
             container.Bind<string>()
@@ -47,6 +58,7 @@ namespace Vareiko.Foundation.Save
             container.Bind<ISaveMigrationService>().To<SaveMigrationService>().AsSingle();
             container.Bind<ISaveConflictResolver>().To<PreferLocalSaveConflictResolver>().AsSingle();
             container.Bind<ISaveService>().To<SaveService>().AsSingle();
+            container.BindInterfacesAndSelfTo<AutosaveService>().AsSingle().NonLazy();
         }
     }
 }

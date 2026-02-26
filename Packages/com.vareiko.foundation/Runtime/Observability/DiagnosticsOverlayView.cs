@@ -53,7 +53,7 @@ namespace Vareiko.Foundation.Observability
             }
 
             DiagnosticsSnapshot s = _diagnosticsService.Snapshot;
-            GUILayout.BeginArea(new Rect(10f, 10f, 430f, 190f), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(10f, 10f, 460f, 220f), GUI.skin.box);
             GUILayout.Label("Foundation Diagnostics", _style);
             GUILayout.Label($"Boot Completed: {s.IsBootCompleted} | Boot Failed: {s.IsBootFailed}", _style);
             if (!string.IsNullOrWhiteSpace(s.LastBootError))
@@ -65,6 +65,7 @@ namespace Vareiko.Foundation.Observability
             GUILayout.Label($"Loading: {s.IsLoading} ({s.LoadingProgress:0.00})", _style);
             GUILayout.Label($"Backend Configured: {s.IsBackendConfigured} | Auth: {s.IsBackendAuthenticated}", _style);
             GUILayout.Label($"Remote Config Values: {s.RemoteConfigValues}", _style);
+            GUILayout.Label($"Assets Tracked: {s.TrackedAssets} | References: {s.AssetReferences}", _style);
             GUILayout.Label($"Updated At: {s.LastUpdatedAt:0.00}", _style);
             GUILayout.EndArea();
         }

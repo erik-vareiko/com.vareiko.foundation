@@ -11,6 +11,8 @@ namespace Vareiko.Foundation.Observability
         public bool IsBackendConfigured;
         public bool IsBackendAuthenticated;
         public int RemoteConfigValues;
+        public int TrackedAssets;
+        public int AssetReferences;
         public float LastUpdatedAt;
     }
 }

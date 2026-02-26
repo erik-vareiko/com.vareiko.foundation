@@ -1,0 +1,12 @@
+using UnityEngine;
+
+namespace {{NAMESPACE}}
+{
+    [CreateAssetMenu(menuName = "Vareiko/Foundation/{{MODULE_NAME}} Config")]
+    public sealed class {{MODULE_NAME}}Config : ScriptableObject
+    {
+        [SerializeField] private bool _enabled = true;
+
+        public bool Enabled => _enabled;
+    }
+}

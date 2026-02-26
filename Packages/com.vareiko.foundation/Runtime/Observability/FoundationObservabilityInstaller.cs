@@ -23,9 +23,11 @@ namespace Vareiko.Foundation.Observability
 
             container.DeclareSignal<LogMessageEmittedSignal>();
             container.DeclareSignal<DiagnosticsSnapshotUpdatedSignal>();
+            container.DeclareSignal<UnhandledExceptionCapturedSignal>();
 
             container.Bind<IFoundationLogger>().To<UnityFoundationLogger>().AsSingle();
             container.BindInterfacesAndSelfTo<FoundationDiagnosticsService>().AsSingle().NonLazy();
+            container.BindInterfacesAndSelfTo<GlobalExceptionHandler>().AsSingle().NonLazy();
         }
     }
 }

@@ -9,8 +9,10 @@ using Vareiko.Foundation.Config;
 using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Economy;
+using Vareiko.Foundation.Environment;
 using Vareiko.Foundation.Features;
 using Vareiko.Foundation.Input;
+using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Loading;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Save;
@@ -33,24 +35,29 @@ namespace Vareiko.Foundation
             ConnectivityConfig connectivityConfig = null,
             SaveSchemaConfig saveSchemaConfig = null,
             SaveSecurityConfig saveSecurityConfig = null,
+            AutosaveConfig autosaveConfig = null,
             BackendReliabilityConfig backendReliabilityConfig = null,
             RemoteConfigCacheConfig remoteConfigCacheConfig = null,
             FeatureFlagsConfig featureFlagsConfig = null,
+            EnvironmentConfig environmentConfig = null,
+            LocalizationConfig localizationConfig = null,
             ObservabilityConfig observabilityConfig = null)
         {
             FoundationTimeInstaller.Install(container);
             FoundationCommonInstaller.Install(container);
-            FoundationBootstrapInstaller.Install(container);
+            FoundationEnvironmentInstaller.Install(container, environmentConfig);
             FoundationAppInstaller.Install(container);
+            FoundationBootstrapInstaller.Install(container);
             FoundationConfigInstaller.Install(container);
             FoundationAssetInstaller.Install(container, assetConfig);
             FoundationConnectivityInstaller.Install(container, connectivityConfig);
             FoundationInputInstaller.Install(container);
             FoundationSceneFlowInstaller.Install(container);
             FoundationLoadingInstaller.Install(container);
-            FoundationSaveInstaller.Install(container, saveSchemaConfig, saveSecurityConfig);
+            FoundationSaveInstaller.Install(container, saveSchemaConfig, saveSecurityConfig, autosaveConfig);
             FoundationConsentInstaller.Install(container);
             FoundationSettingsInstaller.Install(container);
+            FoundationLocalizationInstaller.Install(container, localizationConfig);
             FoundationEconomyInstaller.Install(container, economyConfig);
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);

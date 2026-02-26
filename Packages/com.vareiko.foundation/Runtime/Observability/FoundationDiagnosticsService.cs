@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Vareiko.Foundation.App;
+using Vareiko.Foundation.AssetManagement;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Connectivity;
@@ -17,6 +18,7 @@ namespace Vareiko.Foundation.Observability
         private readonly ILoadingService _loadingService;
         private readonly IBackendService _backendService;
         private readonly IRemoteConfigService _remoteConfigService;
+        private readonly IAssetService _assetService;
         private readonly SignalBus _signalBus;
         private readonly DiagnosticsSnapshot _snapshot = new DiagnosticsSnapshot();
 
@@ -30,6 +32,7 @@ namespace Vareiko.Foundation.Observability
             [InjectOptional] ILoadingService loadingService = null,
             [InjectOptional] IBackendService backendService = null,
             [InjectOptional] IRemoteConfigService remoteConfigService = null,
+            [InjectOptional] IAssetService assetService = null,
             [InjectOptional] SignalBus signalBus = null)
         {
             _timeProvider = timeProvider;
@@ -38,6 +41,7 @@ namespace Vareiko.Foundation.Observability
             _loadingService = loadingService;
             _backendService = backendService;
             _remoteConfigService = remoteConfigService;
+            _assetService = assetService;
             _signalBus = signalBus;
         }
 
@@ -80,6 +84,8 @@ namespace Vareiko.Foundation.Observability
             _snapshot.IsBackendAuthenticated = _backendService != null && _backendService.IsAuthenticated;
             IReadOnlyDictionary<string, string> remoteValues = _remoteConfigService != null ? _remoteConfigService.Snapshot() : null;
             _snapshot.RemoteConfigValues = remoteValues != null ? remoteValues.Count : 0;
+            _snapshot.TrackedAssets = _assetService != null ? _assetService.TrackedAssetCount : 0;
+            _snapshot.AssetReferences = _assetService != null ? _assetService.TotalReferenceCount : 0;
             _snapshot.LastUpdatedAt = _timeProvider.Time;
 
             _nextUpdateAt = _timeProvider.Time + GetRefreshInterval();

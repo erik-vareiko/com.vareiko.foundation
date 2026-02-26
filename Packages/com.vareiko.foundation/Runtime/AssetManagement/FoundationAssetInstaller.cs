@@ -24,6 +24,9 @@ namespace Vareiko.Foundation.AssetManagement
             container.DeclareSignal<AssetLoadedSignal>();
             container.DeclareSignal<AssetLoadFailedSignal>();
             container.DeclareSignal<AssetWarmupCompletedSignal>();
+            container.DeclareSignal<AssetReferenceChangedSignal>();
+            container.DeclareSignal<AssetReleasedSignal>();
+            container.DeclareSignal<AssetLeakDetectedSignal>();
 
             container.Bind<IAssetProvider>().To<ResourcesAssetProvider>().AsSingle();
             container.Bind<IAssetProvider>().To<AddressablesAssetProvider>().AsSingle();

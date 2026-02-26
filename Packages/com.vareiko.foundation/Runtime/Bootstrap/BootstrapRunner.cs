@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Vareiko.Foundation.App;
 using UnityEngine;
 using Zenject;
 
@@ -11,15 +12,20 @@ namespace Vareiko.Foundation.Bootstrap
     {
         private readonly List<IBootstrapTask> _tasks;
         private readonly SignalBus _signalBus;
+        private readonly IAppStateMachine _appStateMachine;
 
         private CancellationTokenSource _lifecycleCts;
         private bool _started;
 
         [Inject]
-        public BootstrapRunner([InjectOptional] List<IBootstrapTask> tasks = null, [InjectOptional] SignalBus signalBus = null)
+        public BootstrapRunner(
+            [InjectOptional] List<IBootstrapTask> tasks = null,
+            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IAppStateMachine appStateMachine = null)
         {
             _tasks = tasks ?? new List<IBootstrapTask>(0);
             _signalBus = signalBus;
+            _appStateMachine = appStateMachine;
         }
 
         public void Initialize()
@@ -74,6 +80,10 @@ namespace Vareiko.Foundation.Bootstrap
                 {
                     Debug.LogException(exception);
                     _signalBus?.Fire(new ApplicationBootFailedSignal(taskName, exception.Message));
+                    if (_appStateMachine != null && !_appStateMachine.IsIn(AppState.Error))
+                    {
+                        _appStateMachine.TryEnter(AppState.Error);
+                    }
                     return;
                 }
 

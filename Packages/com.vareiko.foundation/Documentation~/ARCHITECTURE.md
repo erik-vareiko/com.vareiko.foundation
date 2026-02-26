@@ -8,24 +8,26 @@
 ## Runtime Bootstrap Order
 1. `FoundationTimeInstaller`
 2. `FoundationCommonInstaller`
-3. `FoundationBootstrapInstaller`
+3. `FoundationEnvironmentInstaller`
 4. `FoundationAppInstaller`
-5. `FoundationConfigInstaller`
-6. `FoundationAssetInstaller`
-7. `FoundationConnectivityInstaller`
-8. `FoundationInputInstaller`
-9. `FoundationSceneFlowInstaller`
-10. `FoundationLoadingInstaller`
-11. `FoundationSaveInstaller`
-12. `FoundationConsentInstaller`
-13. `FoundationSettingsInstaller`
-14. `FoundationEconomyInstaller`
-15. `FoundationAudioInstaller`
-16. `FoundationAnalyticsInstaller`
-17. `FoundationBackendInstaller`
-18. `FoundationFeatureFlagsInstaller`
-19. `FoundationValidationInstaller`
-20. `FoundationObservabilityInstaller`
+5. `FoundationBootstrapInstaller`
+6. `FoundationConfigInstaller`
+7. `FoundationAssetInstaller`
+8. `FoundationConnectivityInstaller`
+9. `FoundationInputInstaller`
+10. `FoundationSceneFlowInstaller`
+11. `FoundationLoadingInstaller`
+12. `FoundationSaveInstaller`
+13. `FoundationConsentInstaller`
+14. `FoundationSettingsInstaller`
+15. `FoundationLocalizationInstaller`
+16. `FoundationEconomyInstaller`
+17. `FoundationAudioInstaller`
+18. `FoundationAnalyticsInstaller`
+19. `FoundationBackendInstaller`
+20. `FoundationFeatureFlagsInstaller`
+21. `FoundationValidationInstaller`
+22. `FoundationObservabilityInstaller`
 
 ## Core Principles
 - Fail-fast dependency resolution.
@@ -36,3 +38,7 @@
 - Retry + queue wrappers for backend operations (offline-aware cloud functions).
 - Remote-config first feature rollout through feature flags service.
 - Unified runtime observability layer (logger + diagnostics snapshot).
+- Fallback to `AppState.Error` on boot failure and unhandled runtime exceptions.
+- Save reliability baseline with atomic writes, rolling backups and restore fallback.
+- Asset lifecycle baseline with reference tracking and leak diagnostics signals.
+- Localization lookup fallback chain (`current language -> fallback language -> key/default`).

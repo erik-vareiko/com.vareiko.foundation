@@ -1,0 +1,28 @@
+using Zenject;
+
+namespace {{NAMESPACE}}
+{
+    public static class Foundation{{MODULE_NAME}}Installer
+    {
+        public static void Install(DiContainer container, {{MODULE_NAME}}Config config = null)
+        {
+            if (container.HasBinding<I{{MODULE_NAME}}Service>())
+            {
+                return;
+            }
+
+            if (!container.HasBinding<SignalBus>())
+            {
+                SignalBusInstaller.Install(container);
+            }
+
+            if (config != null)
+            {
+                container.BindInstance(config).IfNotBound();
+            }
+
+            container.DeclareSignal<{{MODULE_NAME}}InitializedSignal>();
+            container.BindInterfacesAndSelfTo<{{MODULE_NAME}}Service>().AsSingle().NonLazy();
+        }
+    }
+}

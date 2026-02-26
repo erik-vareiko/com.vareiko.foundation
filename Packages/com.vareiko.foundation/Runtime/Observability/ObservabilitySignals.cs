@@ -23,4 +23,18 @@ namespace Vareiko.Foundation.Observability
             Snapshot = snapshot;
         }
     }
+
+    public readonly struct UnhandledExceptionCapturedSignal
+    {
+        public readonly string Source;
+        public readonly string Message;
+        public readonly string StackTrace;
+
+        public UnhandledExceptionCapturedSignal(string source, string message, string stackTrace)
+        {
+            Source = source ?? string.Empty;
+            Message = message ?? string.Empty;
+            StackTrace = stackTrace ?? string.Empty;
+        }
+    }
 }
