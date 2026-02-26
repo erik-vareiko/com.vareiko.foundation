@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.24
+- Expanded runtime test coverage for remaining core modules:
+  - `ConfigServiceTests`
+  - `InputServiceTests`
+  - `RetryPolicyTests`
+  - `HealthCheckRunnerTests`
+  - `FoundationDiagnosticsServiceTests`
+  - `AudioServiceTests`
+- Covered key baseline scenarios:
+  - config register/get/unregister and missing-config signaling
+  - input adapter resolution, preferred scheme switching, and fallback behavior
+  - retry policy clamping, retry callback behavior, and null-argument guards
+  - health-check pass/fail/exception paths and emitted check signals
+  - diagnostics snapshot refresh cadence and boot-state signal handling
+  - audio volume initialization/signal updates and clamping behavior
+
 ## 0.3.23
 - Expanded runtime core test coverage:
   - `EnvironmentServiceTests`
