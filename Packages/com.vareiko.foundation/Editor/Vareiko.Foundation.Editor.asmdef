@@ -2,7 +2,8 @@
   "name": "Vareiko.Foundation.Editor",
   "rootNamespace": "Vareiko.Foundation.Editor",
   "references": [
-    "Vareiko.Foundation"
+    "Vareiko.Foundation",
+    "Zenject"
   ],
   "includePlatforms": [
     "Editor"

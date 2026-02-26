@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.16
+- Fixed editor assembly references:
+  - added `Zenject` reference to `Vareiko.Foundation.Editor.asmdef`
+  - resolved compile errors in `FoundationProjectValidator` when using installer types derived from `MonoInstaller`
+
 ## 0.3.15
 - Added UI button baseline components:
   - `UIWindowOpenButtonAction`
