@@ -221,7 +221,7 @@ namespace Vareiko.Foundation.Localization
             string argName = _config != null ? _config.CommandLineArgName : "lang";
             string shortName = "-" + argName;
             string longName = "--" + argName;
-            string[] args = Environment.GetCommandLineArgs();
+            string[] args = System.Environment.GetCommandLineArgs();
             for (int i = 0; i < args.Length; i++)
             {
                 string arg = args[i];
