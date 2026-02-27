@@ -85,8 +85,13 @@ namespace Vareiko.Foundation.Tests.Settings
             public UniTask<T> LoadAsync<T>(string slot, string key, T fallback = default, CancellationToken cancellationToken = default)
             {
                 LoadCalls++;
-                object result = _loaded ?? fallback;
-                return UniTask.FromResult((T)result);
+                if (typeof(T) == typeof(GameSettings))
+                {
+                    object result = (object)_loaded ?? fallback;
+                    return UniTask.FromResult((T)result);
+                }
+
+                return UniTask.FromResult(fallback);
             }
 
             public UniTask<bool> ExistsAsync(string slot, string key, CancellationToken cancellationToken = default)

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.27
+- Fixed runtime test compile compatibility in `SettingsServiceTests`:
+  - removed invalid null-coalescing usage between `GameSettings` and generic `T` in fake `ISaveService.LoadAsync<T>` implementation.
+
 ## 0.3.26
 - Added integration smoke coverage for external entry points:
   - `PlayFabServicesSmokeTests`
