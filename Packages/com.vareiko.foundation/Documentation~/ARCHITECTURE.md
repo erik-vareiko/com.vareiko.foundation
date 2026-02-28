@@ -60,3 +60,4 @@
 - Observability logger supports structured sink fan-out via `IFoundationLogSink` and `FoundationLogEntry`.
 - Unhandled-exception boundary supports optional crash-provider forwarding via `ICrashReportingService` and `FoundationCrashReport`.
 - Diagnostics service supports snapshot export to a local QA/support file path via `IDiagnosticsSnapshotExportService`.
+- Editor scaffolder can bootstrap runtime module code plus optional test and sample-installer stubs for faster project wiring.

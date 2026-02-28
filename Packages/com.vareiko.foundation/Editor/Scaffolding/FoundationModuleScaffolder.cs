@@ -18,6 +18,8 @@ namespace Vareiko.Foundation.Editor.Scaffolding
         private string _moduleName = "NewModule";
         private string _namespaceRoot = "Game";
         private string _outputFolder = "Assets/Scripts";
+        private bool _generateTestStub = true;
+        private bool _generateIntegrationSample = true;
 
         [MenuItem("Tools/Vareiko/Foundation/Create Runtime Module")]
         private static void OpenWindow()
@@ -30,7 +32,7 @@ namespace Vareiko.Foundation.Editor.Scaffolding
         {
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Generate Runtime Module Skeleton", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Creates interface/service/config/signals/installer files from templates.", MessageType.Info);
+            EditorGUILayout.HelpBox("Creates runtime module files with optional test stub and integration sample installer.", MessageType.Info);
 
             _moduleName = EditorGUILayout.TextField("Module Name", _moduleName);
             _namespaceRoot = EditorGUILayout.TextField("Root Namespace", _namespaceRoot);
@@ -53,6 +55,10 @@ namespace Vareiko.Foundation.Editor.Scaffolding
                     }
                 }
             }
+
+            EditorGUILayout.Space(4f);
+            _generateTestStub = EditorGUILayout.ToggleLeft("Generate Test Stub", _generateTestStub);
+            _generateIntegrationSample = EditorGUILayout.ToggleLeft("Generate Integration Sample", _generateIntegrationSample);
 
             EditorGUILayout.Space(12f);
             EditorGUI.BeginDisabledGroup(!CanGenerate(out string validationMessage));
@@ -130,6 +136,19 @@ namespace Vareiko.Foundation.Editor.Scaffolding
             WriteFromTemplate(templateDirectory, "Config.cs.txt", Path.Combine(moduleFolder, $"{_moduleName}Config.cs"), replacements);
             WriteFromTemplate(templateDirectory, "Signals.cs.txt", Path.Combine(moduleFolder, $"{_moduleName}Signals.cs"), replacements);
             WriteFromTemplate(templateDirectory, "Installer.cs.txt", Path.Combine(moduleFolder, $"Foundation{_moduleName}Installer.cs"), replacements);
+            if (_generateTestStub)
+            {
+                string testsFolder = Path.Combine(moduleFolder, "Tests").Replace('\\', '/');
+                Directory.CreateDirectory(testsFolder);
+                WriteFromTemplate(templateDirectory, "Tests.cs.txt", Path.Combine(testsFolder, $"{_moduleName}ServiceTests.cs"), replacements);
+            }
+
+            if (_generateIntegrationSample)
+            {
+                string sampleFolder = Path.Combine(moduleFolder, "Sample").Replace('\\', '/');
+                Directory.CreateDirectory(sampleFolder);
+                WriteFromTemplate(templateDirectory, "SampleInstaller.cs.txt", Path.Combine(sampleFolder, $"{_moduleName}SampleInstaller.cs"), replacements);
+            }
 
             AssetDatabase.Refresh();
             EditorUtility.DisplayDialog("Foundation Scaffolder", $"Module '{_moduleName}' created in '{moduleFolder}'.", "OK");

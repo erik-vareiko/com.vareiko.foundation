@@ -61,6 +61,8 @@ Production-ready "new project starter" package:
 - Optional crash-reporting integration baseline: `ICrashReportingService`, `FoundationCrashReport`, crash-report submission/failure signals and unhandled-exception forwarding gate.
 10. Completed in `0.3.32` (observability increment):
 - Diagnostics snapshot export baseline: `IDiagnosticsSnapshotExportService`, local file export path, and export success/failure signals.
+11. Completed in `0.3.33` (developer experience increment):
+- Scaffolder upgrade baseline: optional test stub and integration sample installer generation.
 
 ## v0.4 Scope
 ### P0 (must have)

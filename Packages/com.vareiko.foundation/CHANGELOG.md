@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.33
+- Upgraded module scaffolder for developer-experience baseline:
+  - added optional test stub generation (`Tests/{{MODULE_NAME}}ServiceTests.cs`)
+  - added optional integration sample installer generation (`Sample/{{MODULE_NAME}}SampleInstaller.cs`)
+- Updated `FoundationModuleScaffolder` UI:
+  - `Generate Test Stub` toggle
+  - `Generate Integration Sample` toggle
+- Added new scaffolder templates:
+  - `Tests.cs.txt`
+  - `SampleInstaller.cs.txt`
+
 ## 0.3.32
 - Added diagnostics snapshot export baseline for QA/support:
   - `IDiagnosticsSnapshotExportService`

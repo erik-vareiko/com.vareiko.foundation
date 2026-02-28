@@ -1,0 +1,15 @@
+#if UNITY_INCLUDE_TESTS
+using NUnit.Framework;
+
+namespace {{NAMESPACE}}
+{
+    public sealed class {{MODULE_NAME}}ServiceTests
+    {
+        [Test]
+        public void Placeholder()
+        {
+            Assert.Pass("Replace scaffolded placeholder with real module tests.");
+        }
+    }
+}
+#endif

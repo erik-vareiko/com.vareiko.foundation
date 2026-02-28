@@ -1,0 +1,16 @@
+using UnityEngine;
+using Zenject;
+
+namespace {{NAMESPACE}}
+{
+    // Attach this installer to a SceneContext in a sample scene.
+    public sealed class {{MODULE_NAME}}SampleInstaller : MonoInstaller
+    {
+        [SerializeField] private {{MODULE_NAME}}Config _config;
+
+        public override void InstallBindings()
+        {
+            Foundation{{MODULE_NAME}}Installer.Install(Container, _config);
+        }
+    }
+}
