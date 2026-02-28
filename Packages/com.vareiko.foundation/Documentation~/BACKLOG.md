@@ -63,6 +63,8 @@ Production-ready "new project starter" package:
 - Diagnostics snapshot export baseline: `IDiagnosticsSnapshotExportService`, local file export path, and export success/failure signals.
 11. Completed in `0.3.33` (developer experience increment):
 - Scaffolder upgrade baseline: optional test stub and integration sample installer generation.
+12. Completed in `0.3.34` (developer experience increment):
+- Project validator release-gate baseline: version/dependency/meta/merge-marker/Unity-version checks in editor validation flow.
 
 ## v0.4 Scope
 ### P0 (must have)

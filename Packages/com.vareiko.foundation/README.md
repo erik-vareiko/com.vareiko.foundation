@@ -105,7 +105,7 @@ Example `Packages/manifest.json`:
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
 - Runtime tests now include core modules (`Environment`, `Economy`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` and can optionally generate a test stub plus integration sample installer into your `Assets` folder.
-- Project validator menu: `Tools/Vareiko/Foundation/Validate Project`.
+- Project validator menu: `Tools/Vareiko/Foundation/Validate Project` (scene wiring + release-gate checks).
 - CI workflow is available at `.github/workflows/ci.yml`; set `UNITY_LICENSE` secret to enable Unity EditMode + PlayMode tests in GitHub Actions.
 - Sample `Basic Setup` now includes a ready scene (`FoundationSampleScene`) and bootstrap helper (`FoundationSampleSceneBootstrap`).
 

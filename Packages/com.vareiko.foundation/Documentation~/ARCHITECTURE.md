@@ -61,3 +61,4 @@
 - Unhandled-exception boundary supports optional crash-provider forwarding via `ICrashReportingService` and `FoundationCrashReport`.
 - Diagnostics service supports snapshot export to a local QA/support file path via `IDiagnosticsSnapshotExportService`.
 - Editor scaffolder can bootstrap runtime module code plus optional test and sample-installer stubs for faster project wiring.
+- Editor project validator includes release-gate checks (package version/dependencies, script `.meta` completeness, merge markers and Unity version parse).

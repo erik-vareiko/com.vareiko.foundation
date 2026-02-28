@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.34
+- Upgraded editor project validator with release-gate checks (`Tools/Vareiko/Foundation/Validate Project`):
+  - package/changelog version alignment validation
+  - required package dependency validation
+  - missing `.meta` detection for package scripts
+  - merge conflict marker scan in release-critical roots (`Packages`, `ProjectSettings`, `Tools`, `.github`)
+  - Unity editor version parse validation from `ProjectSettings/ProjectVersion.txt`
+- Added release-gate result codes (`REL-*`) to validation report output.
+
 ## 0.3.33
 - Upgraded module scaffolder for developer-experience baseline:
   - added optional test stub generation (`Tests/{{MODULE_NAME}}ServiceTests.cs`)
