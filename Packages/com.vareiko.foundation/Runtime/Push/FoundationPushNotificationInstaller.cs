@@ -33,6 +33,10 @@ namespace Vareiko.Foundation.Push
             {
                 container.BindInterfacesAndSelfTo<SimulatedPushNotificationService>().AsSingle().NonLazy();
             }
+            else if (config != null && config.Provider == PushNotificationProviderType.UnityNotifications)
+            {
+                container.BindInterfacesAndSelfTo<UnityPushNotificationService>().AsSingle().NonLazy();
+            }
             else
             {
                 container.Bind<IPushNotificationService>().To<NullPushNotificationService>().AsSingle();

@@ -70,3 +70,4 @@
 - IAP module includes Unity IAP adapter path (`UnityInAppPurchaseService`) with dependency guard when `UNITY_PURCHASING` is unavailable.
 - Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers.
 - Push notifications module provides consent-aware permission/topic abstraction with simulated/null providers.
+- Push notifications module includes Unity adapter path (`UnityPushNotificationService`) guarded by `FOUNDATION_UNITY_NOTIFICATIONS`.

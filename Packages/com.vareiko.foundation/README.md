@@ -23,7 +23,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
 - Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating.
-- Push notifications abstraction (`IPushNotificationService`) with simulated and null providers baseline.
+- Push notifications abstraction (`IPushNotificationService`) with simulated/null providers and Unity adapter path.
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
@@ -71,6 +71,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 - Unity Input System (`Unity.InputSystem` asmdef / package `com.unity.inputsystem`)
 - Optional: Unity IAP (`UNITY_PURCHASING` define from package `com.unity.purchasing`)
+- Optional: Unity push notifications adapter (`FOUNDATION_UNITY_NOTIFICATIONS` define + host push SDK integration)
 
 `com.vareiko.foundation` declares Zenject/UniTask as package dependencies.
 Host project must have OpenUPM scoped registry configured.
@@ -217,8 +218,10 @@ Example `Packages/manifest.json`:
 - `PushNotificationConfig.Provider` supports:
   - `None` (safe fallback to `NullPushNotificationService`)
   - `Simulated` (`SimulatedPushNotificationService` for development flows)
-  - `UnityNotifications` (reserved provider id for production adapter wiring)
+  - `UnityNotifications` (`UnityPushNotificationService` adapter path; requires `FOUNDATION_UNITY_NOTIFICATIONS`)
 - `SimulatedPushNotificationService` supports consent-aware permission gate (`ConsentScope.PushNotifications`), topic subscription flow, and simulated token delivery.
+- `UnityPushNotificationService` provides production adapter path with dependency guard and topic flow.
+- Use `UnityPushNotificationBridge.ReportDeviceToken(token)` from your host push SDK callback to forward runtime device token into foundation layer.
 - Signals:
   - `PushInitializedSignal`
   - `PushPermissionChangedSignal`

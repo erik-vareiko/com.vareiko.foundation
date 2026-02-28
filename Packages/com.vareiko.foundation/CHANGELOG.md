@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.40
+- Added Unity push notifications provider adapter path:
+  - `UnityPushNotificationService`
+  - `UnityPushNotificationBridge`
+  - integrated into `FoundationPushNotificationInstaller` for `PushNotificationProviderType.UnityNotifications`
+- Added dependency-safe fallback behavior:
+  - when `FOUNDATION_UNITY_NOTIFICATIONS` is unavailable, initialization and permission flow return provider-unavailable failures with explicit diagnostics
+- Added runtime coverage:
+  - `UnityPushNotificationServiceTests`
+
 ## 0.3.39
 - Added Unity IAP provider adapter path:
   - `UnityInAppPurchaseService`
