@@ -32,6 +32,7 @@ Production-ready "new project starter" package:
 - Unity push notifications adapter path (`UnityPushNotificationService`). [DONE in 0.3.40]
 - Monetization policy hardening baseline (`IMonetizationPolicyService`). [DONE in 0.3.41]
 - Revenue/comms observability baseline (`IMonetizationObservabilityService`). [DONE in 0.3.42]
+- External ads bridge adapter path (`ExternalAdsBridgeService`). [DONE in 0.3.44]
 
 ## Progress
 1. Completed in `0.3.5` (Milestone A baseline):
@@ -87,6 +88,8 @@ Production-ready "new project starter" package:
 - Revenue/comms observability baseline: monetization counters and latency metrics (`IAP`/`Ads`/`Push`) in diagnostics snapshot via `IMonetizationObservabilityService`.
 21. Completed in `0.3.43` (release docs increment):
 - Release docs closure baseline: practical startup flow doc (`STARTER_FLOW.md`) plus updated README/architecture onboarding guidance.
+22. Completed in `0.3.44` (ads integration increment):
+- External ads bridge baseline: host-handler bridge (`ExternalAdsBridge`) and provider wiring (`ExternalAdsBridgeService`) for non-Unity mediation SDKs.
 
 ## v0.4 Scope
 ### P0 (must have)

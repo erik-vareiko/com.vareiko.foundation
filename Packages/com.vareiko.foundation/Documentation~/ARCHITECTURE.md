@@ -78,7 +78,7 @@
 - Environment module includes starter profile presets (`dev`, `stage`, `prod`) for quick project bootstrap.
 - IAP module provides provider abstraction with a simulated baseline and safe null fallback.
 - IAP module includes Unity IAP adapter path (`UnityInAppPurchaseService`) with dependency guard when `UNITY_PURCHASING` is unavailable.
-- Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers.
+- Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers plus external bridge adapter path (`ExternalAdsBridgeService`).
 - Push notifications module provides consent-aware permission/topic abstraction with simulated/null providers.
 - Push notifications module includes Unity adapter path (`UnityPushNotificationService`) guarded by `FOUNDATION_UNITY_NOTIFICATIONS`.
 - Monetization module provides centralized cooldown/session-cap policy for ad and IAP operations via `IMonetizationPolicyService`.

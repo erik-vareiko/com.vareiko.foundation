@@ -33,6 +33,10 @@ namespace Vareiko.Foundation.Ads
             {
                 container.BindInterfacesAndSelfTo<SimulatedAdsService>().AsSingle().NonLazy();
             }
+            else if (config != null && config.Provider == AdsProviderType.ExternalBridge)
+            {
+                container.BindInterfacesAndSelfTo<ExternalAdsBridgeService>().AsSingle().NonLazy();
+            }
             else
             {
                 container.Bind<IAdsService>().To<NullAdsService>().AsSingle();

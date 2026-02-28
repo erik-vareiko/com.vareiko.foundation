@@ -4,6 +4,7 @@ namespace Vareiko.Foundation.Ads
     {
         None = 0,
         Simulated = 1,
-        UnityAds = 2
+        UnityAds = 2,
+        ExternalBridge = 3
     }
 }

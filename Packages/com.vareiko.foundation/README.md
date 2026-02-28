@@ -22,7 +22,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
-- Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating.
+- Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating, including an external bridge provider path for non-Unity ad SDKs.
 - Push notifications abstraction (`IPushNotificationService`) with simulated/null providers and Unity adapter path.
 - Monetization policy service (`IMonetizationPolicyService`) with cooldown/session-cap guards for ad shows and IAP flow.
 - Privacy and consent (`IConsentService`).
@@ -225,8 +225,14 @@ Example `Packages/manifest.json`:
 - `AdsConfig.Provider` supports:
   - `None` (safe fallback to `NullAdsService`)
   - `Simulated` (`SimulatedAdsService` for development flows)
-  - `UnityAds` (reserved provider id for production adapter wiring)
+  - `UnityAds` (reserved provider id for custom Unity Ads wiring)
+  - `ExternalBridge` (`ExternalAdsBridgeService` + `ExternalAdsBridge` handlers for host mediation SDK integration)
 - `SimulatedAdsService` supports rewarded/interstitial placement simulation and respects advertising consent gate (`ConsentScope.Advertising`) when enabled in config.
+- `ExternalAdsBridgeService` expects host runtime callbacks:
+  - `ExternalAdsBridge.SetInitializeHandler(...)` (optional)
+  - `ExternalAdsBridge.SetLoadHandler(...)` (required)
+  - `ExternalAdsBridge.SetShowHandler(...)` (required)
+  - `ExternalAdsBridge.ClearHandlers()` on shutdown/domain reload
 - Signals:
   - `AdsInitializedSignal`
   - `AdLoadedSignal`

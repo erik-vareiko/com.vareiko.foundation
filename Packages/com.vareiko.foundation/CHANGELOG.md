@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.44
+- Added external ads bridge adapter baseline (Unity Ads independent):
+  - `ExternalAdsBridge` (host-registered initialize/load/show handlers)
+  - `ExternalAdsBridgeService` (`IAdsService` provider for `AdsProviderType.ExternalBridge`)
+- Updated ads installer selection:
+  - `FoundationAdsInstaller` now binds `ExternalAdsBridgeService` when provider is `ExternalBridge`
+- Added runtime coverage:
+  - `ExternalAdsBridgeServiceTests`
+- Updated docs for external ads bridge provider path.
+
 ## 0.3.43
 - Closed release docs baseline for package onboarding:
   - added starter flow guide (`Documentation~/STARTER_FLOW.md`) with clean-project wiring and first-run checklist
