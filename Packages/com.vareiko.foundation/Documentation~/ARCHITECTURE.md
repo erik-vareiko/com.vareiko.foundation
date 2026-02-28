@@ -31,12 +31,13 @@
 14. `FoundationSettingsInstaller`
 15. `FoundationLocalizationInstaller`
 16. `FoundationEconomyInstaller`
-17. `FoundationAudioInstaller`
-18. `FoundationAnalyticsInstaller`
-19. `FoundationBackendInstaller`
-20. `FoundationFeatureFlagsInstaller`
-21. `FoundationValidationInstaller`
-22. `FoundationObservabilityInstaller`
+17. `FoundationIapInstaller`
+18. `FoundationAudioInstaller`
+19. `FoundationAnalyticsInstaller`
+20. `FoundationBackendInstaller`
+21. `FoundationFeatureFlagsInstaller`
+22. `FoundationValidationInstaller`
+23. `FoundationObservabilityInstaller`
 
 ## Core Principles
 - Fail-fast dependency resolution.
@@ -63,3 +64,4 @@
 - Editor scaffolder can bootstrap runtime module code plus optional test and sample-installer stubs for faster project wiring.
 - Editor project validator includes release-gate checks (package version/dependencies, script `.meta` completeness, merge markers and Unity version parse).
 - Environment module includes starter profile presets (`dev`, `stage`, `prod`) for quick project bootstrap.
+- IAP module provides provider abstraction with a simulated baseline and safe null fallback.

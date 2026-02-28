@@ -11,6 +11,7 @@ using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Economy;
 using Vareiko.Foundation.Environment;
 using Vareiko.Foundation.Features;
+using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Input;
 using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Loading;
@@ -32,6 +33,7 @@ namespace Vareiko.Foundation
             BackendConfig backendConfig = null,
             AssetServiceConfig assetConfig = null,
             EconomyConfig economyConfig = null,
+            IapConfig iapConfig = null,
             ConnectivityConfig connectivityConfig = null,
             SaveSchemaConfig saveSchemaConfig = null,
             SaveSecurityConfig saveSecurityConfig = null,
@@ -59,6 +61,7 @@ namespace Vareiko.Foundation
             FoundationSettingsInstaller.Install(container);
             FoundationLocalizationInstaller.Install(container, localizationConfig);
             FoundationEconomyInstaller.Install(container, economyConfig);
+            FoundationIapInstaller.Install(container, iapConfig);
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);
             FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, remoteConfigCacheConfig);

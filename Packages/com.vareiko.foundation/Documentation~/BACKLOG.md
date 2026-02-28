@@ -25,7 +25,7 @@ Production-ready "new project starter" package:
 - Project validator release gate checks.
 - Starter template profile presets (`dev/stage/prod`).
 5. P2 - Monetization/comms layer (`v1.0` target):
-- IAP abstraction + provider baseline.
+- IAP abstraction + provider baseline. [DONE in 0.3.36]
 - Ads abstraction (`rewarded/interstitial`) behind consent.
 - Push notification abstraction baseline.
 
@@ -67,6 +67,8 @@ Production-ready "new project starter" package:
 - Project validator release-gate baseline: version/dependency/meta/merge-marker/Unity-version checks in editor validation flow.
 13. Completed in `0.3.35` (developer experience increment):
 - Starter template profile presets baseline (`dev` / `stage` / `prod`) with editor creation/apply tooling.
+14. Completed in `0.3.36` (monetization increment):
+- IAP abstraction baseline: `IInAppPurchaseService`, `IapConfig`, simulated/null providers and purchase/restore signals.
 
 ## v0.4 Scope
 ### P0 (must have)

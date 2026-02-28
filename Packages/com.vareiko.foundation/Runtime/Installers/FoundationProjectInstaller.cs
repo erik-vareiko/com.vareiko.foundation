@@ -5,6 +5,7 @@ using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Economy;
 using Vareiko.Foundation.Environment;
 using Vareiko.Foundation.Features;
+using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Save;
@@ -19,6 +20,7 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private BackendConfig _backendConfig;
         [SerializeField] private AssetServiceConfig _assetConfig;
         [SerializeField] private EconomyConfig _economyConfig;
+        [SerializeField] private IapConfig _iapConfig;
         [SerializeField] private ConnectivityConfig _connectivityConfig;
         [SerializeField] private SaveSchemaConfig _saveSchemaConfig;
         [SerializeField] private SaveSecurityConfig _saveSecurityConfig;
@@ -38,6 +40,7 @@ namespace Vareiko.Foundation.Installers
                 _backendConfig,
                 _assetConfig,
                 _economyConfig,
+                _iapConfig,
                 _connectivityConfig,
                 _saveSchemaConfig,
                 _saveSecurityConfig,

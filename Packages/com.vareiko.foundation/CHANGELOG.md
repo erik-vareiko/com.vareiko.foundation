@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.36
+- Added IAP abstraction + provider baseline:
+  - `IInAppPurchaseService`
+  - `IapConfig`
+  - `InAppPurchase*` result/error/product models
+  - `InAppPurchaseProviderType` (`None`, `Simulated`, `UnityIap`)
+- Added IAP runtime providers:
+  - `SimulatedInAppPurchaseService` (development/store-flow baseline)
+  - `NullInAppPurchaseService` (safe fallback)
+- Added installer/signal layer:
+  - `FoundationIapInstaller`
+  - `IapInitializedSignal`
+  - `IapPurchaseSucceededSignal`
+  - `IapPurchaseFailedSignal`
+  - `IapRestoreCompletedSignal`
+  - `IapRestoreFailedSignal`
+- Integrated IAP module into runtime install pipeline:
+  - `FoundationRuntimeInstaller`
+  - `FoundationProjectInstaller` (`IapConfig` reference)
+- Added runtime coverage:
+  - `SimulatedInAppPurchaseServiceTests`
+
 ## 0.3.35
 - Added starter environment profile presets baseline (`dev/stage/prod`):
   - `EnvironmentConfig.ApplyStarterPresets()`

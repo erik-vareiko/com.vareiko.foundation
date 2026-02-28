@@ -21,6 +21,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Save system (`ISaveService`, atomic file storage, JSON serializer, rolling backups, autosave scheduler).
 - Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
+- IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
@@ -46,6 +47,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `BackendReliabilityConfig`
 - `AssetServiceConfig`
 - `EconomyConfig`
+- `IapConfig`
 - `ConnectivityConfig`
 - `SaveSchemaConfig`
 - `SaveSecurityConfig`
@@ -103,7 +105,7 @@ Example `Packages/manifest.json`:
 - By default backend services run in safe null mode (`NullBackendService`, `NullRemoteConfigService`, `NullCloudFunctionService`).
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
-- Runtime tests now include core modules (`Environment`, `Economy`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
+- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` and can optionally generate a test stub plus integration sample installer into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project` (scene wiring + release-gate checks).
 - Starter environment presets menu: `Tools/Vareiko/Foundation/Create Starter Environment Config`.
@@ -161,6 +163,23 @@ Example `Packages/manifest.json`:
   - `PullAsync(slot, key)` - cloud backend player data -> local save.
   - `SyncAsync(slot, key)` - conflict-aware two-way sync using `ISaveConflictResolver`.
 - Cloud save keys are mapped as `foundation.save.{slot}.{key}` in backend player data.
+
+## IAP Baseline
+- `IInAppPurchaseService` exposes:
+  - `InitializeAsync()`
+  - `GetCatalogAsync()`
+  - `PurchaseAsync(productId)`
+  - `RestorePurchasesAsync()`
+- `IapConfig.Provider` supports:
+  - `None` (safe fallback to `NullInAppPurchaseService`)
+  - `Simulated` (`SimulatedInAppPurchaseService` for development flows)
+  - `UnityIap` (reserved provider id for production adapter wiring)
+- Signals:
+  - `IapInitializedSignal`
+  - `IapPurchaseSucceededSignal`
+  - `IapPurchaseFailedSignal`
+  - `IapRestoreCompletedSignal`
+  - `IapRestoreFailedSignal`
 
 ## Structured Logging Sinks
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.
