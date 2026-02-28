@@ -28,6 +28,10 @@ namespace Vareiko.Foundation.Save
             container.DeclareSignal<SaveLoadFailedSignal>();
             container.DeclareSignal<SaveBackupWrittenSignal>();
             container.DeclareSignal<SaveRestoredFromBackupSignal>();
+            container.DeclareSignal<SaveCloudPushedSignal>();
+            container.DeclareSignal<SaveCloudPulledSignal>();
+            container.DeclareSignal<SaveCloudConflictResolvedSignal>();
+            container.DeclareSignal<SaveCloudSyncFailedSignal>();
             container.DeclareSignal<AutosaveTriggeredSignal>();
             container.DeclareSignal<AutosaveCompletedSignal>();
             container.DeclareSignal<AutosaveFailedSignal>();
@@ -58,6 +62,7 @@ namespace Vareiko.Foundation.Save
             container.Bind<ISaveMigrationService>().To<SaveMigrationService>().AsSingle();
             container.Bind<ISaveConflictResolver>().To<PreferLocalSaveConflictResolver>().AsSingle();
             container.Bind<ISaveService>().To<SaveService>().AsSingle();
+            container.Bind<ICloudSaveSyncService>().To<CloudSaveSyncService>().AsSingle();
             container.BindInterfacesAndSelfTo<AutosaveService>().AsSingle().NonLazy();
         }
     }

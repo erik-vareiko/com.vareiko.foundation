@@ -56,3 +56,4 @@
 - Startup validation includes baseline production-safety rules for save security, backend config and observability config.
 - Backend remote-config layer supports explicit cache invalidation and forced refresh control via `IRemoteConfigCacheService`.
 - Backend auth/data result models include normalized error mapping (`BackendErrorCode`) and retryability metadata.
+- Save layer includes cloud sync orchestration (`ICloudSaveSyncService`) with resolver-based conflict choices (`KeepLocal` / `UseCloud` / `Merge`).

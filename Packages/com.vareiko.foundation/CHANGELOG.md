@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.29
+- Added cloud save sync baseline on top of Save + Backend abstractions:
+  - `ICloudSaveSyncService`
+  - `CloudSaveSyncService`
+  - `CloudSaveSyncResult` / `CloudSaveSyncAction`
+- Added cloud save observability signals:
+  - `SaveCloudPushedSignal`
+  - `SaveCloudPulledSignal`
+  - `SaveCloudConflictResolvedSignal`
+  - `SaveCloudSyncFailedSignal`
+- Updated `FoundationSaveInstaller`:
+  - registers cloud save signals
+  - binds `ICloudSaveSyncService`
+- Added runtime coverage:
+  - `CloudSaveSyncServiceTests`
+
 ## 0.3.28
 - Added New Input System baseline with persistent rebind support:
   - `NewInputSystemAdapter`

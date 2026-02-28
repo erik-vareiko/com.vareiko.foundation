@@ -19,6 +19,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Loading state orchestration (`ILoadingService`) with scene-signal integration.
 - UI loading presenter (`LoadingOverlayPresenter`).
 - Save system (`ISaveService`, atomic file storage, JSON serializer, rolling backups, autosave scheduler).
+- Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
@@ -143,6 +144,13 @@ Example `Packages/manifest.json`:
   - `ErrorCode` (`BackendErrorCode`)
   - `IsRetryable`
 - `NullBackendService` and PlayFab adapters now return consistent mapped backend errors.
+
+## Cloud Save Sync Baseline
+- `ICloudSaveSyncService` provides:
+  - `PushAsync(slot, key)` - local save -> cloud backend player data.
+  - `PullAsync(slot, key)` - cloud backend player data -> local save.
+  - `SyncAsync(slot, key)` - conflict-aware two-way sync using `ISaveConflictResolver`.
+- Cloud save keys are mapped as `foundation.save.{slot}.{key}` in backend player data.
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:

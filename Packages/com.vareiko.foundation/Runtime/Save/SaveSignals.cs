@@ -81,4 +81,56 @@ namespace Vareiko.Foundation.Save
             BackupIndex = backupIndex;
         }
     }
+
+    public readonly struct SaveCloudPushedSignal
+    {
+        public readonly string Slot;
+        public readonly string Key;
+
+        public SaveCloudPushedSignal(string slot, string key)
+        {
+            Slot = slot;
+            Key = key;
+        }
+    }
+
+    public readonly struct SaveCloudPulledSignal
+    {
+        public readonly string Slot;
+        public readonly string Key;
+
+        public SaveCloudPulledSignal(string slot, string key)
+        {
+            Slot = slot;
+            Key = key;
+        }
+    }
+
+    public readonly struct SaveCloudConflictResolvedSignal
+    {
+        public readonly string Slot;
+        public readonly string Key;
+        public readonly SaveConflictChoice Choice;
+
+        public SaveCloudConflictResolvedSignal(string slot, string key, SaveConflictChoice choice)
+        {
+            Slot = slot;
+            Key = key;
+            Choice = choice;
+        }
+    }
+
+    public readonly struct SaveCloudSyncFailedSignal
+    {
+        public readonly string Slot;
+        public readonly string Key;
+        public readonly string Error;
+
+        public SaveCloudSyncFailedSignal(string slot, string key, string error)
+        {
+            Slot = slot;
+            Key = key;
+            Error = error;
+        }
+    }
 }

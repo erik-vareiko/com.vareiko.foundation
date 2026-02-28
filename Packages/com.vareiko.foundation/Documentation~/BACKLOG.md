@@ -53,6 +53,7 @@ Production-ready "new project starter" package:
 - Startup validation expansion baseline: built-in rules for save security, backend config and observability config.
 - Remote config cache hardening: explicit cache invalidation + forced refresh path in cached remote-config service.
 - PlayFab backend hardening baseline: stricter config/input validation, auth-state normalization and backend error-code mapping.
+- Cloud save sync baseline: push/pull/sync orchestration with resolver-based conflict handling over backend player data.
 
 ## v0.4 Scope
 ### P0 (must have)
