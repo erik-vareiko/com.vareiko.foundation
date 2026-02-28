@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.45
+- Added attribution abstraction baseline:
+  - `IAttributionService`
+  - `AttributionConfig`
+  - `AttributionProviderType`
+  - attribution track/revenue result models and signals
+- Added external attribution bridge adapter path:
+  - `ExternalAttributionBridge` (host callbacks for initialize/event/revenue/user-id)
+  - `ExternalAttributionBridgeService` (`AttributionProviderType.ExternalBridge`)
+- Integrated attribution module into runtime install pipeline:
+  - `FoundationRuntimeInstaller`
+  - `FoundationProjectInstaller` (`AttributionConfig` reference)
+- Added runtime coverage:
+  - `ExternalAttributionBridgeServiceTests`
+- Updated docs for attribution module onboarding and starter flow.
+
 ## 0.3.44
 - Added external ads bridge adapter baseline (Unity Ads independent):
   - `ExternalAdsBridge` (host-registered initialize/load/show handlers)

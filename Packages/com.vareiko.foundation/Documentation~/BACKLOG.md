@@ -33,6 +33,7 @@ Production-ready "new project starter" package:
 - Monetization policy hardening baseline (`IMonetizationPolicyService`). [DONE in 0.3.41]
 - Revenue/comms observability baseline (`IMonetizationObservabilityService`). [DONE in 0.3.42]
 - External ads bridge adapter path (`ExternalAdsBridgeService`). [DONE in 0.3.44]
+- Attribution abstraction + external bridge baseline (`IAttributionService`). [DONE in 0.3.45]
 
 ## Progress
 1. Completed in `0.3.5` (Milestone A baseline):
@@ -90,6 +91,8 @@ Production-ready "new project starter" package:
 - Release docs closure baseline: practical startup flow doc (`STARTER_FLOW.md`) plus updated README/architecture onboarding guidance.
 22. Completed in `0.3.44` (ads integration increment):
 - External ads bridge baseline: host-handler bridge (`ExternalAdsBridge`) and provider wiring (`ExternalAdsBridgeService`) for non-Unity mediation SDKs.
+23. Completed in `0.3.45` (attribution increment):
+- Attribution abstraction baseline with external bridge provider path (`ExternalAttributionBridgeService`) and runtime coverage.
 
 ## v0.4 Scope
 ### P0 (must have)

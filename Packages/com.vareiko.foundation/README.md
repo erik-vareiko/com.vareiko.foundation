@@ -25,6 +25,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating, including an external bridge provider path for non-Unity ad SDKs.
 - Push notifications abstraction (`IPushNotificationService`) with simulated/null providers and Unity adapter path.
 - Monetization policy service (`IMonetizationPolicyService`) with cooldown/session-cap guards for ad shows and IAP flow.
+- Attribution abstraction (`IAttributionService`) with external bridge provider path for host SDKs (AppsFlyer/Adjust/etc.).
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
@@ -47,6 +48,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 4. Attach `FoundationSceneInstaller` to `SceneContext`.
 5. Optionally assign:
 - `AnalyticsConfig`
+- `AttributionConfig`
 - `BackendConfig`
 - `BackendReliabilityConfig`
 - `AssetServiceConfig`
@@ -86,6 +88,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - IAP -> `None` or `Simulated`
 - ads -> `None` or `Simulated`
 - push -> `None` or `Simulated`
+- attribution -> `None`
 6. Enter Play Mode and verify:
 - boot reaches your expected app state
 - no startup validation errors
@@ -295,6 +298,28 @@ Example `Packages/manifest.json`:
   - `PushOperationTelemetrySignal`
 - Diagnostics integration:
   - `DiagnosticsSnapshot` now includes monetization/comms metrics for QA/support export and runtime overlay consumers.
+
+## Attribution Baseline
+- `IAttributionService` exposes:
+  - `InitializeAsync()`
+  - `SetUserId(userId)`
+  - `TrackEventAsync(eventName, properties)`
+  - `TrackRevenueAsync(revenueData)`
+- `AttributionConfig.Provider` supports:
+  - `None` (safe fallback to `NullAttributionService`)
+  - `ExternalBridge` (`ExternalAttributionBridgeService` + `ExternalAttributionBridge` host callbacks)
+- `ExternalAttributionBridgeService` expects host runtime callbacks:
+  - `ExternalAttributionBridge.SetInitializeHandler(...)` (optional)
+  - `ExternalAttributionBridge.SetUserIdHandler(...)` (optional)
+  - `ExternalAttributionBridge.SetTrackEventHandler(...)` (required)
+  - `ExternalAttributionBridge.SetTrackRevenueHandler(...)` (required)
+  - `ExternalAttributionBridge.ClearHandlers()` on shutdown/domain reload
+- Signals:
+  - `AttributionInitializedSignal`
+  - `AttributionEventTrackedSignal`
+  - `AttributionEventTrackFailedSignal`
+  - `AttributionRevenueTrackedSignal`
+  - `AttributionRevenueTrackFailedSignal`
 
 ## Structured Logging Sinks
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.

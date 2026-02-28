@@ -1,6 +1,7 @@
 using Vareiko.Foundation.Analytics;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.AssetManagement;
+using Vareiko.Foundation.Attribution;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Economy;
@@ -20,6 +21,7 @@ namespace Vareiko.Foundation.Installers
     public sealed class FoundationProjectInstaller : MonoInstaller
     {
         [SerializeField] private AnalyticsConfig _analyticsConfig;
+        [SerializeField] private AttributionConfig _attributionConfig;
         [SerializeField] private BackendConfig _backendConfig;
         [SerializeField] private AssetServiceConfig _assetConfig;
         [SerializeField] private EconomyConfig _economyConfig;
@@ -43,6 +45,7 @@ namespace Vareiko.Foundation.Installers
             FoundationRuntimeInstaller.InstallProjectServices(
                 Container,
                 _analyticsConfig,
+                _attributionConfig,
                 _backendConfig,
                 _assetConfig,
                 _economyConfig,

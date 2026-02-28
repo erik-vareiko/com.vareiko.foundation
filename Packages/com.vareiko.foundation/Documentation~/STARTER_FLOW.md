@@ -39,6 +39,7 @@ Keep provider-backed modules in safe mode for first launch:
 2. IAP provider -> `None` or `Simulated`
 3. ads provider -> `None` or `Simulated`
 4. push provider -> `None` or `Simulated`
+5. attribution provider -> `None`
 
 ## 4) First-Run Validation Checklist
 1. Enter Play Mode.
@@ -53,9 +54,10 @@ Keep provider-backed modules in safe mode for first launch:
 After first clean run:
 1. Enable real backend (`PlayFab`) only when host SDK + defines are ready.
 2. Enable real IAP/push adapters only when corresponding SDKs/defines are present.
-3. Add feature modules via scaffolder:
+3. Enable attribution bridge handlers only after host attribution SDK initialization.
+4. Add feature modules via scaffolder:
 - menu `Tools/Vareiko/Foundation/Create Runtime Module`
-4. Add runtime tests for each newly enabled provider path.
+5. Add runtime tests for each newly enabled provider path.
 
 ## 6) Release Gate Before Tagging
 1. Run `Tools/Vareiko/Foundation/Validate Project`.

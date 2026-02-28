@@ -2,6 +2,7 @@ using Vareiko.Foundation.Analytics;
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.AssetManagement;
+using Vareiko.Foundation.Attribution;
 using Vareiko.Foundation.Audio;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Bootstrap;
@@ -33,6 +34,7 @@ namespace Vareiko.Foundation
         public static void InstallProjectServices(
             DiContainer container,
             AnalyticsConfig analyticsConfig = null,
+            AttributionConfig attributionConfig = null,
             BackendConfig backendConfig = null,
             AssetServiceConfig assetConfig = null,
             EconomyConfig economyConfig = null,
@@ -73,6 +75,7 @@ namespace Vareiko.Foundation
             FoundationMonetizationInstaller.Install(container, monetizationPolicyConfig);
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);
+            FoundationAttributionInstaller.Install(container, attributionConfig);
             FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, remoteConfigCacheConfig);
             FoundationFeatureFlagsInstaller.Install(container, featureFlagsConfig);
             FoundationValidationInstaller.Install(container);
