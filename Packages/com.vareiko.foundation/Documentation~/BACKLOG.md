@@ -7,6 +7,28 @@ Production-ready "new project starter" package:
 - testable and template-friendly architecture;
 - minimum host-project wiring.
 
+## Roadmap (`v0.4 -> v1.0`)
+1. P0 - Core completion (`v0.4`):
+- New Input System adapter + persistent rebind storage.
+- Release docs closure (`README`, `ARCHITECTURE`, sample flow).
+- Startup validation expansion for production baseline checks.
+2. P0 - Backend production readiness (`v0.5` target):
+- PlayFab adapter hardening (auth/session/error mapping).
+- Cloud save sync with conflict strategies.
+- Remote config cache invalidation + forced refresh paths.
+3. P1 - Observability and operations (`v0.6` target):
+- Structured logging sink abstraction (console/file/http).
+- Optional crash-reporting adapter integration.
+- Diagnostics snapshot export path for QA/support.
+4. P1 - Developer experience and template (`v0.7` target):
+- Scaffolder upgrades (module + tests + integration sample).
+- Project validator release gate checks.
+- Starter template profile presets (`dev/stage/prod`).
+5. P2 - Monetization/comms layer (`v1.0` target):
+- IAP abstraction + provider baseline.
+- Ads abstraction (`rewarded/interstitial`) behind consent.
+- Push notification abstraction baseline.
+
 ## Progress
 1. Completed in `0.3.5` (Milestone A baseline):
 - Environment profile module (`EnvironmentConfig`, `IEnvironmentService`, installer + signals).
@@ -26,6 +48,11 @@ Production-ready "new project starter" package:
 - Unified `UI` naming across primary runtime contracts (`IUIService`, `IUINavigationService`, installers/signals).
 - Added shared UI primitives (`UIElement`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`) and `UIRegistry`.
 - Added queue-based window orchestration layer (`IUIWindowManager` / `UIWindowManager`) with runtime tests.
+6. Completed in `0.3.28` (v0.4 closure progress):
+- New Input System baseline with persistent rebind storage (`NewInputSystemAdapter`, `IInputRebindService`, `IInputRebindStorage`) + runtime tests.
+- Startup validation expansion baseline: built-in rules for save security, backend config and observability config.
+- Remote config cache hardening: explicit cache invalidation + forced refresh path in cached remote-config service.
+- PlayFab backend hardening baseline: stricter config/input validation, auth-state normalization and backend error-code mapping.
 
 ## v0.4 Scope
 ### P0 (must have)
@@ -115,7 +142,7 @@ File targets:
 `Runtime/Localization/LocalizationService.cs` (new)
 `Runtime/Localization/LocalizationConfig.cs` (new)
 `Runtime/Localization/FoundationLocalizationInstaller.cs` (new)
-3. Input System adapter (P1). [NEXT]
+3. Input System adapter (P1). [DONE in 0.3.28]
 File targets:
 `Runtime/Input/NewInputSystemAdapter.cs` (new)
 `Runtime/Input/InputRebindStorage.cs` (new)

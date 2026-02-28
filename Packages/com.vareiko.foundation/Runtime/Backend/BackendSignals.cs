@@ -87,4 +87,16 @@ namespace Vareiko.Foundation.Backend
             Error = error;
         }
     }
+
+    public readonly struct RemoteConfigCacheInvalidatedSignal
+    {
+        public readonly int ClearedValueCount;
+        public readonly string Reason;
+
+        public RemoteConfigCacheInvalidatedSignal(int clearedValueCount, string reason)
+        {
+            ClearedValueCount = clearedValueCount;
+            Reason = reason;
+        }
+    }
 }

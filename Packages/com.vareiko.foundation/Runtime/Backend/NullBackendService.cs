@@ -13,13 +13,13 @@ namespace Vareiko.Foundation.Backend
         public UniTask<BackendAuthResult> LoginAnonymousAsync(string customId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return UniTask.FromResult(new BackendAuthResult(false, string.Empty, "Backend provider is not configured."));
+            return UniTask.FromResult(BackendAuthResult.Fail("Backend provider is not configured.", BackendErrorCode.ConfigurationInvalid));
         }
 
         public UniTask<BackendPlayerDataResult> GetPlayerDataAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return UniTask.FromResult(new BackendPlayerDataResult(false, null, "Backend provider is not configured."));
+            return UniTask.FromResult(BackendPlayerDataResult.Fail("Backend provider is not configured.", BackendErrorCode.ConfigurationInvalid));
         }
 
         public UniTask<bool> SetPlayerDataAsync(IReadOnlyDictionary<string, string> data, CancellationToken cancellationToken = default)

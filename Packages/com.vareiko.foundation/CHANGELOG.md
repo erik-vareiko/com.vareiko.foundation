@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.3.28
+- Added New Input System baseline with persistent rebind support:
+  - `NewInputSystemAdapter`
+  - `IInputRebindService` / `InputRebindService`
+  - `IInputRebindStorage` / `PlayerPrefsInputRebindStorage`
+  - runtime tests: `InputRebindServiceTests`, `InputRebindStorageTests`
+  - docs updates (`README`, `ARCHITECTURE`, `BACKLOG`)
+- Fixed New Input System compile setup for `NewInputSystemAdapter`:
+  - added `Unity.InputSystem` reference to `Vareiko.Foundation.asmdef`
+  - added `com.unity.inputsystem` package dependency in `package.json`
+- Expanded startup validation baseline:
+  - added built-in rules:
+    - `SaveSecurityStartupValidationRule`
+    - `BackendStartupValidationRule`
+    - `ObservabilityStartupValidationRule`
+  - added runtime coverage: `FoundationStartupValidationRulesTests`
+- Remote config cache hardening:
+  - added `IRemoteConfigCacheService` (`ForceRefreshAsync`, `InvalidateCache`)
+  - updated `CachedRemoteConfigService` with refresh source tracking and cache invalidation signal
+  - added runtime coverage: `CachedRemoteConfigServiceTests`
+- PlayFab integration hardening:
+  - added mapped backend error model (`BackendErrorCode`, `ErrorCode`, `IsRetryable`)
+  - updated `PlayFabBackendService` with strict config/custom-id validation and normalized auth-state signaling
+  - updated `PlayFabCloudFunctionService` with function-name and PlayFab-config validation
+  - updated `PlayFabRemoteConfigService` with explicit readiness handling and guarded refresh behavior
+  - expanded PlayFab smoke coverage for validation and auth-state transition scenarios
+
 ## 0.3.27
 - Fixed runtime test compile compatibility in `SettingsServiceTests`:
   - removed invalid null-coalescing usage between `GameSettings` and generic `T` in fake `ISaveService.LoadAsync<T>` implementation.

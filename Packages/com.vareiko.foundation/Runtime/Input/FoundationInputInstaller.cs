@@ -17,6 +17,13 @@ namespace Vareiko.Foundation.Input
             }
 
             container.DeclareSignal<InputSchemeChangedSignal>();
+
+#if ENABLE_INPUT_SYSTEM
+            container.Bind<IInputRebindStorage>().To<PlayerPrefsInputRebindStorage>().AsSingle().IfNotBound();
+            container.BindInterfacesAndSelfTo<NewInputSystemAdapter>().AsSingle();
+#endif
+
+            container.Bind<IInputRebindService>().To<InputRebindService>().AsSingle().IfNotBound();
             container.Bind<IInputAdapter>().To<LegacyKeyboardInputAdapter>().AsSingle();
             container.Bind<IInputAdapter>().To<NullInputAdapter>().AsSingle();
             container.Bind<IInputService>().To<InputService>().AsSingle();

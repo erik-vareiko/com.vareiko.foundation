@@ -3,7 +3,8 @@
   "rootNamespace": "Vareiko.Foundation",
   "references": [
     "Zenject",
-    "UniTask"
+    "UniTask",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -8,6 +8,11 @@
   - `FoundationUIInstaller` (`IUIService`, `IUIWindowManager`)
   - `FoundationUINavigationInstaller` (`IUINavigationService`)
   - shared registry contract: `UIRegistry` (legacy bridge: `UIScreenRegistry`)
+- Input layer:
+  - `FoundationInputInstaller` binds adapters in priority order.
+  - `NewInputSystemAdapter` is preferred when `ENABLE_INPUT_SYSTEM` is defined.
+  - `LegacyKeyboardInputAdapter` + `NullInputAdapter` remain fallback.
+  - `IInputRebindService` persists binding overrides through `IInputRebindStorage`.
 
 ## Runtime Bootstrap Order
 1. `FoundationTimeInstaller`
@@ -47,3 +52,7 @@
 - Asset lifecycle baseline with reference tracking and leak diagnostics signals.
 - Localization lookup fallback chain (`current language -> fallback language -> key/default`).
 - Unified UI primitives for screens/windows/panels/items/buttons with queue-based window sequencing.
+- Input abstraction supports runtime adapter fallback and persisted binding overrides.
+- Startup validation includes baseline production-safety rules for save security, backend config and observability config.
+- Backend remote-config layer supports explicit cache invalidation and forced refresh control via `IRemoteConfigCacheService`.
+- Backend auth/data result models include normalized error mapping (`BackendErrorCode`) and retryability metadata.

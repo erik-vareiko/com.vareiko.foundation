@@ -20,6 +20,9 @@ namespace Vareiko.Foundation.Validation
             container.DeclareSignal<StartupValidationFailedSignal>();
             container.DeclareSignal<StartupValidationWarningSignal>();
             container.DeclareSignal<StartupValidationCompletedSignal>();
+            container.Bind<IStartupValidationRule>().To<SaveSecurityStartupValidationRule>().AsSingle();
+            container.Bind<IStartupValidationRule>().To<BackendStartupValidationRule>().AsSingle();
+            container.Bind<IStartupValidationRule>().To<ObservabilityStartupValidationRule>().AsSingle();
             container.BindInterfacesAndSelfTo<StartupValidationRunner>().AsSingle().NonLazy();
         }
     }

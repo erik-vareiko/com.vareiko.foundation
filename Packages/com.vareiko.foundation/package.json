@@ -1,6 +1,6 @@
 {
   "name": "com.vareiko.foundation",
-  "version": "0.3.27",
+  "version": "0.3.28",
   "displayName": "Vareiko Foundation",
   "description": "Zenject-first foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
   "unity": "2022.3",
@@ -18,6 +18,7 @@
   ],
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
+    "com.unity.inputsystem": "1.7.0",
     "net.bobbo.extenject": "9.3.2"
   }
 }

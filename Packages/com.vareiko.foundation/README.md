@@ -14,7 +14,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Connectivity monitoring (`IConnectivityService`) with focus-regained refresh policy.
 - Feature flags (`IFeatureFlagService`) with remote-config fallback and local overrides.
 - Localization baseline (`ILocalizationService`, language switching and fallback lookups).
-- Input service (`IInputService`, adapter-based architecture).
+- Input service (`IInputService`, adapter-based architecture) with New Input System adapter and rebind API (`IInputRebindService`).
 - Scene flow (`ISceneFlowService`).
 - Loading state orchestration (`ILoadingService`) with scene-signal integration.
 - UI loading presenter (`LoadingOverlayPresenter`).
@@ -62,6 +62,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Zenject (`Zenject` asmdef, OpenUPM package `net.bobbo.extenject`)
 - UniTask (`UniTask` asmdef, OpenUPM package `com.cysharp.unitask`)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
+- Unity Input System (`Unity.InputSystem` asmdef / package `com.unity.inputsystem`)
 
 `com.vareiko.foundation` declares Zenject/UniTask as package dependencies.
 Host project must have OpenUPM scoped registry configured.
@@ -106,6 +107,42 @@ Example `Packages/manifest.json`:
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project`.
 - CI workflow is available at `.github/workflows/ci.yml`; set `UNITY_LICENSE` secret to enable Unity EditMode + PlayMode tests in GitHub Actions.
 - Sample `Basic Setup` now includes a ready scene (`FoundationSampleScene`) and bootstrap helper (`FoundationSampleSceneBootstrap`).
+
+## Input Rebinds (New Input System)
+- `FoundationInputInstaller` binds `NewInputSystemAdapter` first when `ENABLE_INPUT_SYSTEM` is available.
+- `LegacyKeyboardInputAdapter` and `NullInputAdapter` remain as fallback adapters.
+- Use `IInputRebindService` to:
+  - `TryApplyBindingOverride(actionName, bindingIndex, overridePath)`
+  - `TryRemoveBindingOverride(actionName, bindingIndex)`
+  - `ResetAllBindingOverrides()`
+  - `ExportOverridesJson()` / `ImportOverridesJson(json)`
+- Rebind overrides are persisted through `IInputRebindStorage` (`PlayerPrefsInputRebindStorage` by default).
+
+## Startup Validation Baseline
+- `FoundationValidationInstaller` now registers baseline runtime rules:
+  - `SaveSecurityStartupValidationRule`
+  - `BackendStartupValidationRule`
+  - `ObservabilityStartupValidationRule`
+- Typical findings:
+  - save encryption enabled with default/empty secret key -> `Error`
+  - PlayFab backend selected with empty `TitleId` -> `Error`
+  - missing configs / disabled safety toggles -> `Warning`
+
+## Remote Config Cache Control
+- `CachedRemoteConfigService` now implements `IRemoteConfigCacheService`.
+- New control API:
+  - `ForceRefreshAsync()` - bypass passive cadence and refresh immediately.
+  - `InvalidateCache(reason)` - clear cached values and schedule next auto-refresh.
+- Signals:
+  - `RemoteConfigRefreshedSignal` now includes source (`initialize`, `auto`, `manual`, `forced`).
+  - `RemoteConfigCacheInvalidatedSignal` notifies cache clear events.
+
+## PlayFab Hardening Baseline
+- `PlayFabBackendService` now validates provider/title/custom-id and normalizes auth-state transitions.
+- `BackendAuthResult` and `BackendPlayerDataResult` now expose:
+  - `ErrorCode` (`BackendErrorCode`)
+  - `IsRetryable`
+- `NullBackendService` and PlayFab adapters now return consistent mapped backend errors.
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:

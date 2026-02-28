@@ -27,6 +27,7 @@ namespace Vareiko.Foundation.Backend
             container.DeclareSignal<CloudFunctionQueueRestoredSignal>();
             container.DeclareSignal<RemoteConfigRefreshedSignal>();
             container.DeclareSignal<RemoteConfigRefreshFailedSignal>();
+            container.DeclareSignal<RemoteConfigCacheInvalidatedSignal>();
 
             if (config != null)
             {

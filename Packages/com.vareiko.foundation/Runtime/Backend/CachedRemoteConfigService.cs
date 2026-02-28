@@ -6,7 +6,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class CachedRemoteConfigService : IRemoteConfigService, IInitializable, ITickable
+    public sealed class CachedRemoteConfigService : IRemoteConfigService, IRemoteConfigCacheService, IInitializable, ITickable
     {
         private readonly IRemoteConfigService _inner;
         private readonly IFoundationTimeProvider _timeProvider;
@@ -31,12 +31,13 @@ namespace Vareiko.Foundation.Backend
         }
 
         public bool IsReady => _inner != null && _inner.IsReady;
+        public int CachedValueCount => _cache.Count;
 
         public void Initialize()
         {
             if (_config == null || _config.RefreshOnInitialize)
             {
-                RefreshSafeAsync().Forget();
+                RefreshSafeAsync("initialize").Forget();
             }
 
             _nextRefreshAt = _timeProvider.Time + GetRefreshIntervalSeconds();
@@ -59,21 +60,54 @@ namespace Vareiko.Foundation.Backend
                 return;
             }
 
-            RefreshSafeAsync().Forget();
+            RefreshSafeAsync("auto").Forget();
         }
 
         public async UniTask RefreshAsync(CancellationToken cancellationToken = default)
         {
-            if (_inner == null)
+            await RefreshCoreAsync("manual", cancellationToken);
+        }
+
+        public async UniTask ForceRefreshAsync(CancellationToken cancellationToken = default)
+        {
+            await RefreshCoreAsync("forced", cancellationToken);
+        }
+
+        public void InvalidateCache(string reason = "manual")
+        {
+            int cleared = _cache.Count;
+            _cache.Clear();
+            _nextRefreshAt = _timeProvider.Time;
+            _signalBus?.Fire(new RemoteConfigCacheInvalidatedSignal(cleared, reason ?? string.Empty));
+        }
+
+        private async UniTask RefreshCoreAsync(string source, CancellationToken cancellationToken)
+        {
+            if (_isRefreshing)
             {
-                _cache.Clear();
                 return;
             }
 
-            await _inner.RefreshAsync(cancellationToken);
-            CopySnapshot(_inner.Snapshot());
-            _nextRefreshAt = _timeProvider.Time + GetRefreshIntervalSeconds();
-            _signalBus?.Fire(new RemoteConfigRefreshedSignal(_cache.Count, string.Empty));
+            _isRefreshing = true;
+            try
+            {
+                if (_inner == null)
+                {
+                    CopySnapshot(null);
+                    _nextRefreshAt = _timeProvider.Time + GetRefreshIntervalSeconds();
+                    _signalBus?.Fire(new RemoteConfigRefreshedSignal(0, source ?? string.Empty));
+                    return;
+                }
+
+                await _inner.RefreshAsync(cancellationToken);
+                CopySnapshot(_inner.Snapshot());
+                _nextRefreshAt = _timeProvider.Time + GetRefreshIntervalSeconds();
+                _signalBus?.Fire(new RemoteConfigRefreshedSignal(_cache.Count, source ?? string.Empty));
+            }
+            finally
+            {
+                _isRefreshing = false;
+            }
         }
 
         public bool TryGetString(string key, out string value)
@@ -116,17 +150,11 @@ namespace Vareiko.Foundation.Backend
             return _cache;
         }
 
-        private async UniTaskVoid RefreshSafeAsync()
+        private async UniTaskVoid RefreshSafeAsync(string source)
         {
-            if (_isRefreshing)
-            {
-                return;
-            }
-
-            _isRefreshing = true;
             try
             {
-                await RefreshAsync();
+                await RefreshCoreAsync(source, default);
             }
             catch (System.OperationCanceledException)
             {
@@ -134,10 +162,6 @@ namespace Vareiko.Foundation.Backend
             catch (System.Exception exception)
             {
                 _signalBus?.Fire(new RemoteConfigRefreshFailedSignal(exception.Message));
-            }
-            finally
-            {
-                _isRefreshing = false;
             }
         }
 
