@@ -33,12 +33,13 @@
 16. `FoundationEconomyInstaller`
 17. `FoundationIapInstaller`
 18. `FoundationAdsInstaller`
-19. `FoundationAudioInstaller`
-20. `FoundationAnalyticsInstaller`
-21. `FoundationBackendInstaller`
-22. `FoundationFeatureFlagsInstaller`
-23. `FoundationValidationInstaller`
-24. `FoundationObservabilityInstaller`
+19. `FoundationPushNotificationInstaller`
+20. `FoundationAudioInstaller`
+21. `FoundationAnalyticsInstaller`
+22. `FoundationBackendInstaller`
+23. `FoundationFeatureFlagsInstaller`
+24. `FoundationValidationInstaller`
+25. `FoundationObservabilityInstaller`
 
 ## Core Principles
 - Fail-fast dependency resolution.
@@ -67,3 +68,4 @@
 - Environment module includes starter profile presets (`dev`, `stage`, `prod`) for quick project bootstrap.
 - IAP module provides provider abstraction with a simulated baseline and safe null fallback.
 - Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers.
+- Push notifications module provides consent-aware permission/topic abstraction with simulated/null providers.

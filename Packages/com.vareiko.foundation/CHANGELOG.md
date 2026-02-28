@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.38
+- Added push notifications abstraction baseline with consent-aware permission/topic flow:
+  - `IPushNotificationService`
+  - `PushNotificationConfig`
+  - `PushNotificationProviderType`
+  - `PushNotificationPermissionStatus`
+  - `PushNotificationErrorCode`
+  - `PushInitializeResult` / `PushPermissionResult` / `PushDeviceTokenResult` / `PushTopicResult`
+- Added push notifications runtime providers:
+  - `SimulatedPushNotificationService`
+  - `NullPushNotificationService`
+- Added installer/signal layer:
+  - `FoundationPushNotificationInstaller`
+  - `PushInitializedSignal`
+  - `PushPermissionChangedSignal`
+  - `PushTokenUpdatedSignal`
+  - `PushTopicSubscribedSignal`
+  - `PushTopicSubscriptionFailedSignal`
+  - `PushTopicUnsubscribedSignal`
+  - `PushTopicUnsubscriptionFailedSignal`
+- Integrated push notifications module into runtime install pipeline:
+  - `FoundationRuntimeInstaller`
+  - `FoundationProjectInstaller` (`PushNotificationConfig` reference)
+- Added runtime coverage:
+  - `SimulatedPushNotificationServiceTests`
+
 ## 0.3.37
 - Added ads abstraction baseline (rewarded/interstitial) with consent gating:
   - `IAdsService`

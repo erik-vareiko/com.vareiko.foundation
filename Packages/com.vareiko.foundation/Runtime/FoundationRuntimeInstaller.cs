@@ -17,6 +17,7 @@ using Vareiko.Foundation.Input;
 using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Loading;
 using Vareiko.Foundation.Observability;
+using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Save;
 using Vareiko.Foundation.SceneFlow;
 using Vareiko.Foundation.Settings;
@@ -36,6 +37,7 @@ namespace Vareiko.Foundation
             EconomyConfig economyConfig = null,
             IapConfig iapConfig = null,
             AdsConfig adsConfig = null,
+            PushNotificationConfig pushNotificationConfig = null,
             ConnectivityConfig connectivityConfig = null,
             SaveSchemaConfig saveSchemaConfig = null,
             SaveSecurityConfig saveSecurityConfig = null,
@@ -65,6 +67,7 @@ namespace Vareiko.Foundation
             FoundationEconomyInstaller.Install(container, economyConfig);
             FoundationIapInstaller.Install(container, iapConfig);
             FoundationAdsInstaller.Install(container, adsConfig);
+            FoundationPushNotificationInstaller.Install(container, pushNotificationConfig);
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);
             FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, remoteConfigCacheConfig);

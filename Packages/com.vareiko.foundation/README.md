@@ -23,6 +23,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
 - Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating.
+- Push notifications abstraction (`IPushNotificationService`) with simulated and null providers baseline.
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
@@ -50,6 +51,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `EconomyConfig`
 - `IapConfig`
 - `AdsConfig`
+- `PushNotificationConfig`
 - `ConnectivityConfig`
 - `SaveSchemaConfig`
 - `SaveSecurityConfig`
@@ -107,7 +109,7 @@ Example `Packages/manifest.json`:
 - By default backend services run in safe null mode (`NullBackendService`, `NullRemoteConfigService`, `NullCloudFunctionService`).
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
-- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Ads`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
+- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Ads`, `Push`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` and can optionally generate a test stub plus integration sample installer into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project` (scene wiring + release-gate checks).
 - Starter environment presets menu: `Tools/Vareiko/Foundation/Create Starter Environment Config`.
@@ -201,6 +203,28 @@ Example `Packages/manifest.json`:
   - `AdShownSignal`
   - `AdShowFailedSignal`
   - `AdRewardGrantedSignal`
+
+## Push Notifications Baseline
+- `IPushNotificationService` exposes:
+  - `InitializeAsync()`
+  - `RequestPermissionAsync()`
+  - `GetDeviceTokenAsync()`
+  - `SubscribeAsync(topic)`
+  - `UnsubscribeAsync(topic)`
+  - `GetSubscribedTopicsAsync()`
+- `PushNotificationConfig.Provider` supports:
+  - `None` (safe fallback to `NullPushNotificationService`)
+  - `Simulated` (`SimulatedPushNotificationService` for development flows)
+  - `UnityNotifications` (reserved provider id for production adapter wiring)
+- `SimulatedPushNotificationService` supports consent-aware permission gate (`ConsentScope.PushNotifications`), topic subscription flow, and simulated token delivery.
+- Signals:
+  - `PushInitializedSignal`
+  - `PushPermissionChangedSignal`
+  - `PushTokenUpdatedSignal`
+  - `PushTopicSubscribedSignal`
+  - `PushTopicSubscriptionFailedSignal`
+  - `PushTopicUnsubscribedSignal`
+  - `PushTopicUnsubscriptionFailedSignal`
 
 ## Structured Logging Sinks
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.

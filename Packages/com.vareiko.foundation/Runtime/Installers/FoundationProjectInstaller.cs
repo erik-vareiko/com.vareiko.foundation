@@ -9,6 +9,7 @@ using Vareiko.Foundation.Features;
 using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Observability;
+using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Save;
 using UnityEngine;
 using Zenject;
@@ -23,6 +24,7 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private EconomyConfig _economyConfig;
         [SerializeField] private IapConfig _iapConfig;
         [SerializeField] private AdsConfig _adsConfig;
+        [SerializeField] private PushNotificationConfig _pushNotificationConfig;
         [SerializeField] private ConnectivityConfig _connectivityConfig;
         [SerializeField] private SaveSchemaConfig _saveSchemaConfig;
         [SerializeField] private SaveSecurityConfig _saveSecurityConfig;
@@ -44,6 +46,7 @@ namespace Vareiko.Foundation.Installers
                 _economyConfig,
                 _iapConfig,
                 _adsConfig,
+                _pushNotificationConfig,
                 _connectivityConfig,
                 _saveSchemaConfig,
                 _saveSecurityConfig,
