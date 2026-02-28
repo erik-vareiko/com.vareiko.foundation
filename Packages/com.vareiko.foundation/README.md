@@ -25,7 +25,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
 - Audio service (`IAudioService`).
-- Observability (`IFoundationLogger`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
+- Observability (`IFoundationLogger`, `IFoundationLogSink`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`) with summary signal (`StartupValidationCompletedSignal`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
@@ -151,6 +151,11 @@ Example `Packages/manifest.json`:
   - `PullAsync(slot, key)` - cloud backend player data -> local save.
   - `SyncAsync(slot, key)` - conflict-aware two-way sync using `ISaveConflictResolver`.
 - Cloud save keys are mapped as `foundation.save.{slot}.{key}` in backend player data.
+
+## Structured Logging Sinks
+- `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.
+- Default binding is `UnityConsoleLogSink` (enabled when `ObservabilityConfig.LogToUnityConsole` is `true`).
+- You can add custom sinks (for example file/http adapters) by binding additional `IFoundationLogSink` implementations.
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:

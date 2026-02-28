@@ -25,6 +25,11 @@ namespace Vareiko.Foundation.Observability
             container.DeclareSignal<DiagnosticsSnapshotUpdatedSignal>();
             container.DeclareSignal<UnhandledExceptionCapturedSignal>();
 
+            if (config == null || config.LogToUnityConsole)
+            {
+                container.Bind<IFoundationLogSink>().To<UnityConsoleLogSink>().AsSingle().IfNotBound();
+            }
+
             container.Bind<IFoundationLogger>().To<UnityFoundationLogger>().AsSingle();
             container.BindInterfacesAndSelfTo<FoundationDiagnosticsService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<GlobalExceptionHandler>().AsSingle().NonLazy();

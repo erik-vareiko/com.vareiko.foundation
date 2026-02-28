@@ -1,4 +1,5 @@
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 using Zenject;
 
 namespace Vareiko.Foundation.Observability
@@ -7,12 +8,17 @@ namespace Vareiko.Foundation.Observability
     {
         private readonly ObservabilityConfig _config;
         private readonly SignalBus _signalBus;
+        private readonly List<IFoundationLogSink> _sinks;
 
         [Inject]
-        public UnityFoundationLogger([InjectOptional] ObservabilityConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public UnityFoundationLogger(
+            [InjectOptional] ObservabilityConfig config = null,
+            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] List<IFoundationLogSink> sinks = null)
         {
             _config = config;
             _signalBus = signalBus;
+            _sinks = sinks ?? new List<IFoundationLogSink>(0);
         }
 
         public FoundationLogLevel MinimumLevel => _config != null ? _config.MinimumLogLevel : FoundationLogLevel.Info;
@@ -25,25 +31,25 @@ namespace Vareiko.Foundation.Observability
             }
 
             string scope = string.IsNullOrWhiteSpace(category) ? "Foundation" : category;
-            string formatted = $"[{scope}] {message}";
-            if (_config == null || _config.LogToUnityConsole)
+            string safeMessage = message ?? string.Empty;
+            FoundationLogEntry entry = new FoundationLogEntry(level, safeMessage, scope, DateTime.UtcNow);
+
+            bool hasSink = _sinks.Count > 0;
+            if (hasSink)
             {
-                switch (level)
+                for (int i = 0; i < _sinks.Count; i++)
                 {
-                    case FoundationLogLevel.Debug:
-                    case FoundationLogLevel.Info:
-                        UnityEngine.Debug.Log(formatted);
-                        break;
-                    case FoundationLogLevel.Warning:
-                        UnityEngine.Debug.LogWarning(formatted);
-                        break;
-                    case FoundationLogLevel.Error:
-                        UnityEngine.Debug.LogError(formatted);
-                        break;
+                    IFoundationLogSink sink = _sinks[i];
+                    sink?.Write(entry);
                 }
             }
+            else if (_config == null || _config.LogToUnityConsole)
+            {
+                // Backward-compatible fallback when installer bindings are customized.
+                WriteToUnityConsole(entry);
+            }
 
-            _signalBus?.Fire(new LogMessageEmittedSignal(level, message ?? string.Empty, scope));
+            _signalBus?.Fire(new LogMessageEmittedSignal(level, safeMessage, scope));
         }
 
         public void Debug(string message, string category = null)
@@ -64,6 +70,24 @@ namespace Vareiko.Foundation.Observability
         public void Error(string message, string category = null)
         {
             Log(FoundationLogLevel.Error, message, category);
+        }
+
+        private static void WriteToUnityConsole(FoundationLogEntry entry)
+        {
+            string formatted = $"[{entry.Category}] {entry.Message}";
+            switch (entry.Level)
+            {
+                case FoundationLogLevel.Debug:
+                case FoundationLogLevel.Info:
+                    UnityEngine.Debug.Log(formatted);
+                    break;
+                case FoundationLogLevel.Warning:
+                    UnityEngine.Debug.LogWarning(formatted);
+                    break;
+                case FoundationLogLevel.Error:
+                    UnityEngine.Debug.LogError(formatted);
+                    break;
+            }
         }
     }
 }

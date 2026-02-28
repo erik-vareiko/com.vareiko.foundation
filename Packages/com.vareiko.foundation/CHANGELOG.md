@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.30
+- Added structured logging sink abstraction:
+  - `FoundationLogEntry`
+  - `IFoundationLogSink`
+  - `UnityConsoleLogSink`
+- Updated `UnityFoundationLogger`:
+  - routes logs through configured sink bindings
+  - keeps fallback Unity-console behavior when no sinks are bound
+  - preserves `LogMessageEmittedSignal` emission flow
+- Updated `FoundationObservabilityInstaller`:
+  - binds default `UnityConsoleLogSink` when console logging is enabled
+- Added runtime coverage:
+  - `UnityFoundationLoggerTests`
+
 ## 0.3.29
 - Added cloud save sync baseline on top of Save + Backend abstractions:
   - `ICloudSaveSyncService`

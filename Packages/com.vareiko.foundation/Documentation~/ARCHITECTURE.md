@@ -57,3 +57,4 @@
 - Backend remote-config layer supports explicit cache invalidation and forced refresh control via `IRemoteConfigCacheService`.
 - Backend auth/data result models include normalized error mapping (`BackendErrorCode`) and retryability metadata.
 - Save layer includes cloud sync orchestration (`ICloudSaveSyncService`) with resolver-based conflict choices (`KeepLocal` / `UseCloud` / `Merge`).
+- Observability logger supports structured sink fan-out via `IFoundationLogSink` and `FoundationLogEntry`.
