@@ -57,6 +57,8 @@ Production-ready "new project starter" package:
 - Cloud save sync baseline: push/pull/sync orchestration with resolver-based conflict handling over backend player data.
 8. Completed in `0.3.30` (observability increment):
 - Structured logging sink baseline: `FoundationLogEntry`, `IFoundationLogSink`, default `UnityConsoleLogSink` binding and logger sink fan-out.
+9. Completed in `0.3.31` (observability increment):
+- Optional crash-reporting integration baseline: `ICrashReportingService`, `FoundationCrashReport`, crash-report submission/failure signals and unhandled-exception forwarding gate.
 
 ## v0.4 Scope
 ### P0 (must have)

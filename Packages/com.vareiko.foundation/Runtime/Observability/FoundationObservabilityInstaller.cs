@@ -24,6 +24,8 @@ namespace Vareiko.Foundation.Observability
             container.DeclareSignal<LogMessageEmittedSignal>();
             container.DeclareSignal<DiagnosticsSnapshotUpdatedSignal>();
             container.DeclareSignal<UnhandledExceptionCapturedSignal>();
+            container.DeclareSignal<CrashReportSubmittedSignal>();
+            container.DeclareSignal<CrashReportSubmissionFailedSignal>();
 
             if (config == null || config.LogToUnityConsole)
             {

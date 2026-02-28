@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.31
+- Added optional crash-reporting adapter contracts:
+  - `FoundationCrashReport`
+  - `ICrashReportingService`
+- Updated global unhandled-exception flow:
+  - `GlobalExceptionHandler` now forwards unhandled exceptions to optional crash-reporting service
+  - forwarding is configurable via `ObservabilityConfig.ForwardUnhandledExceptionsToCrashReporting`
+- Added crash-reporting observability signals:
+  - `CrashReportSubmittedSignal`
+  - `CrashReportSubmissionFailedSignal`
+- Updated `FoundationObservabilityInstaller` signal registration for new crash-reporting signals.
+- Expanded runtime coverage:
+  - `GlobalExceptionHandlerTests` now includes crash-report submission/failure/config-disable scenarios.
+
 ## 0.3.30
 - Added structured logging sink abstraction:
   - `FoundationLogEntry`

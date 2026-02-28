@@ -12,6 +12,7 @@ namespace Vareiko.Foundation.Observability
         private readonly IFoundationLogger _logger;
         private readonly IAppStateMachine _appStateMachine;
         private readonly ObservabilityConfig _config;
+        private readonly ICrashReportingService _crashReportingService;
         private bool _subscribed;
 
         [Inject]
@@ -19,12 +20,14 @@ namespace Vareiko.Foundation.Observability
             [InjectOptional] IFoundationLogger logger = null,
             [InjectOptional] IAppStateMachine appStateMachine = null,
             [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] ICrashReportingService crashReportingService = null)
         {
             _signalBus = signalBus;
             _logger = logger;
             _appStateMachine = appStateMachine;
             _config = config;
+            _crashReportingService = crashReportingService;
         }
 
         public void Initialize()
@@ -98,9 +101,11 @@ namespace Vareiko.Foundation.Observability
                 : (exception != null ? exception.Message : "Unhandled exception");
             string details = exception != null ? exception.ToString() : message;
             string safeStackTrace = stackTrace ?? string.Empty;
+            FoundationCrashReport crashReport = new FoundationCrashReport(DateTime.UtcNow, source, message, safeStackTrace, details);
 
             _signalBus?.Fire(new UnhandledExceptionCapturedSignal(source, message, safeStackTrace));
             _logger?.Error($"Unhandled exception from {source}: {details}", "UnhandledException");
+            TrySubmitCrashReport(crashReport);
 
             bool shouldTransition = _config == null || _config.TransitionToErrorStateOnUnhandledException;
             if (!shouldTransition ||
@@ -112,6 +117,27 @@ namespace Vareiko.Foundation.Observability
             }
 
             _appStateMachine.TryEnter(AppState.Error);
+        }
+
+        private void TrySubmitCrashReport(FoundationCrashReport report)
+        {
+            bool shouldForward = _config == null || _config.ForwardUnhandledExceptionsToCrashReporting;
+            if (!shouldForward || _crashReportingService == null || !_crashReportingService.IsEnabled)
+            {
+                return;
+            }
+
+            try
+            {
+                _crashReportingService.Report(report);
+                _signalBus?.Fire(new CrashReportSubmittedSignal(report.Source));
+            }
+            catch (Exception exception)
+            {
+                string error = exception != null ? exception.Message : "Crash report submission failed.";
+                _signalBus?.Fire(new CrashReportSubmissionFailedSignal(report.Source, error));
+                _logger?.Warn($"Crash report submission failed: {error}", "CrashReporting");
+            }
         }
     }
 }

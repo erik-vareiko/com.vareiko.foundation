@@ -37,4 +37,26 @@ namespace Vareiko.Foundation.Observability
             StackTrace = stackTrace ?? string.Empty;
         }
     }
+
+    public readonly struct CrashReportSubmittedSignal
+    {
+        public readonly string Source;
+
+        public CrashReportSubmittedSignal(string source)
+        {
+            Source = source ?? string.Empty;
+        }
+    }
+
+    public readonly struct CrashReportSubmissionFailedSignal
+    {
+        public readonly string Source;
+        public readonly string Error;
+
+        public CrashReportSubmissionFailedSignal(string source, string error)
+        {
+            Source = source ?? string.Empty;
+            Error = error ?? string.Empty;
+        }
+    }
 }

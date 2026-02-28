@@ -112,11 +112,73 @@ namespace Vareiko.Foundation.Tests.Observability
             Assert.That(appState.Current, Is.EqualTo(AppState.Error));
         }
 
+        [Test]
+        public void ReportUnhandledException_WithCrashReporter_EmitsSubmittedSignal()
+        {
+            SignalBus signalBus = CreateSignalBus();
+            bool submitted = false;
+            signalBus.Subscribe<CrashReportSubmittedSignal>(_ => submitted = true);
+
+            SpyCrashReportingService crashReporting = new SpyCrashReportingService(true);
+            GlobalExceptionHandler handler = new GlobalExceptionHandler(null, null, null, signalBus, crashReporting);
+
+            InvokeReport(handler, "TestSource", new InvalidOperationException("boom"), "stack", null);
+
+            Assert.That(crashReporting.Reports.Count, Is.EqualTo(1));
+            Assert.That(crashReporting.Reports[0].Source, Is.EqualTo("TestSource"));
+            Assert.That(crashReporting.Reports[0].Message, Is.EqualTo("boom"));
+            Assert.That(submitted, Is.True);
+        }
+
+        [Test]
+        public void ReportUnhandledException_WhenCrashReporterThrows_EmitsFailedSignal()
+        {
+            SignalBus signalBus = CreateSignalBus();
+            CrashReportSubmissionFailedSignal failed = default;
+            bool hasFailedSignal = false;
+            signalBus.Subscribe<CrashReportSubmissionFailedSignal>(signal =>
+            {
+                failed = signal;
+                hasFailedSignal = true;
+            });
+
+            SpyCrashReportingService crashReporting = new SpyCrashReportingService(true) { ThrowOnReport = true };
+            GlobalExceptionHandler handler = new GlobalExceptionHandler(null, null, null, signalBus, crashReporting);
+
+            InvokeReport(handler, "TaskScheduler", new InvalidOperationException("boom"), "stack", null);
+
+            Assert.That(hasFailedSignal, Is.True);
+            Assert.That(failed.Source, Is.EqualTo("TaskScheduler"));
+            Assert.That(failed.Error, Does.Contain("submit fail"));
+        }
+
+        [Test]
+        public void ReportUnhandledException_WhenCrashReportingForwardingDisabled_DoesNotSubmit()
+        {
+            ObservabilityConfig config = ScriptableObject.CreateInstance<ObservabilityConfig>();
+            try
+            {
+                ReflectionTestUtil.SetPrivateField(config, "_forwardUnhandledExceptionsToCrashReporting", false);
+                SpyCrashReportingService crashReporting = new SpyCrashReportingService(true);
+                GlobalExceptionHandler handler = new GlobalExceptionHandler(null, null, config, null, crashReporting);
+
+                InvokeReport(handler, "UnityLog", new InvalidOperationException("boom"), "stack", null);
+
+                Assert.That(crashReporting.Reports.Count, Is.EqualTo(0));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
         private static SignalBus CreateSignalBus()
         {
             DiContainer container = new DiContainer();
             SignalBusInstaller.Install(container);
             container.DeclareSignal<UnhandledExceptionCapturedSignal>();
+            container.DeclareSignal<CrashReportSubmittedSignal>();
+            container.DeclareSignal<CrashReportSubmissionFailedSignal>();
             return container.Resolve<SignalBus>();
         }
 
@@ -202,6 +264,28 @@ namespace Vareiko.Foundation.Tests.Observability
             {
                 Message = message;
                 Category = category;
+            }
+        }
+
+        private sealed class SpyCrashReportingService : ICrashReportingService
+        {
+            public readonly List<FoundationCrashReport> Reports = new List<FoundationCrashReport>(2);
+            public bool IsEnabled { get; }
+            public bool ThrowOnReport { get; set; }
+
+            public SpyCrashReportingService(bool isEnabled)
+            {
+                IsEnabled = isEnabled;
+            }
+
+            public void Report(FoundationCrashReport report)
+            {
+                if (ThrowOnReport)
+                {
+                    throw new InvalidOperationException("submit fail");
+                }
+
+                Reports.Add(report);
             }
         }
     }

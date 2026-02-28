@@ -25,7 +25,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
 - Audio service (`IAudioService`).
-- Observability (`IFoundationLogger`, `IFoundationLogSink`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
+- Observability (`IFoundationLogger`, `IFoundationLogSink`, `ICrashReportingService`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`) with summary signal (`StartupValidationCompletedSignal`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
@@ -156,6 +156,16 @@ Example `Packages/manifest.json`:
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.
 - Default binding is `UnityConsoleLogSink` (enabled when `ObservabilityConfig.LogToUnityConsole` is `true`).
 - You can add custom sinks (for example file/http adapters) by binding additional `IFoundationLogSink` implementations.
+
+## Optional Crash Reporting Adapter
+- Implement and bind `ICrashReportingService` to route unhandled exceptions into your crash provider (for example Firebase/Sentry/Backtrace adapters).
+- `GlobalExceptionHandler` sends `FoundationCrashReport` payloads when:
+  - `ObservabilityConfig.CaptureUnhandledExceptions` is `true`
+  - `ObservabilityConfig.ForwardUnhandledExceptionsToCrashReporting` is `true`
+  - bound `ICrashReportingService.IsEnabled` is `true`
+- Signals:
+  - `CrashReportSubmittedSignal`
+  - `CrashReportSubmissionFailedSignal`
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:
