@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.32
+- Added diagnostics snapshot export baseline for QA/support:
+  - `IDiagnosticsSnapshotExportService`
+  - `DiagnosticsSnapshotExportService`
+  - `DiagnosticsSnapshotExportResult`
+- Added diagnostics export observability signals:
+  - `DiagnosticsSnapshotExportedSignal`
+  - `DiagnosticsSnapshotExportFailedSignal`
+- Updated `FoundationObservabilityInstaller`:
+  - registers diagnostics export signals
+  - binds default diagnostics export path (`Application.persistentDataPath/foundation-diagnostics`)
+  - binds `IDiagnosticsSnapshotExportService`
+- Added runtime coverage:
+  - `DiagnosticsSnapshotExportServiceTests`
+
 ## 0.3.31
 - Added optional crash-reporting adapter contracts:
   - `FoundationCrashReport`

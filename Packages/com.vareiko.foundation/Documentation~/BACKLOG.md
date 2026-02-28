@@ -59,6 +59,8 @@ Production-ready "new project starter" package:
 - Structured logging sink baseline: `FoundationLogEntry`, `IFoundationLogSink`, default `UnityConsoleLogSink` binding and logger sink fan-out.
 9. Completed in `0.3.31` (observability increment):
 - Optional crash-reporting integration baseline: `ICrashReportingService`, `FoundationCrashReport`, crash-report submission/failure signals and unhandled-exception forwarding gate.
+10. Completed in `0.3.32` (observability increment):
+- Diagnostics snapshot export baseline: `IDiagnosticsSnapshotExportService`, local file export path, and export success/failure signals.
 
 ## v0.4 Scope
 ### P0 (must have)

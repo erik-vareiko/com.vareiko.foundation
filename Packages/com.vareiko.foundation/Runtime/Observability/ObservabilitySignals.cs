@@ -24,6 +24,26 @@ namespace Vareiko.Foundation.Observability
         }
     }
 
+    public readonly struct DiagnosticsSnapshotExportedSignal
+    {
+        public readonly string FilePath;
+
+        public DiagnosticsSnapshotExportedSignal(string filePath)
+        {
+            FilePath = filePath ?? string.Empty;
+        }
+    }
+
+    public readonly struct DiagnosticsSnapshotExportFailedSignal
+    {
+        public readonly string Error;
+
+        public DiagnosticsSnapshotExportFailedSignal(string error)
+        {
+            Error = error ?? string.Empty;
+        }
+    }
+
     public readonly struct UnhandledExceptionCapturedSignal
     {
         public readonly string Source;

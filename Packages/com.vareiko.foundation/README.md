@@ -25,7 +25,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
 - Audio service (`IAudioService`).
-- Observability (`IFoundationLogger`, `IFoundationLogSink`, `ICrashReportingService`, diagnostics snapshot service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
+- Observability (`IFoundationLogger`, `IFoundationLogSink`, `ICrashReportingService`, diagnostics snapshot service, diagnostics snapshot export service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`) with summary signal (`StartupValidationCompletedSignal`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
@@ -166,6 +166,13 @@ Example `Packages/manifest.json`:
 - Signals:
   - `CrashReportSubmittedSignal`
   - `CrashReportSubmissionFailedSignal`
+
+## Diagnostics Snapshot Export
+- `IDiagnosticsSnapshotExportService.ExportAsync(label)` writes a JSON snapshot for QA/support.
+- Default export directory is `Application.persistentDataPath/foundation-diagnostics`.
+- Signals:
+  - `DiagnosticsSnapshotExportedSignal`
+  - `DiagnosticsSnapshotExportFailedSignal`
 
 ## Event-Driven UI Template
 - Publish values from domain/services through `IUIValueEventService`:

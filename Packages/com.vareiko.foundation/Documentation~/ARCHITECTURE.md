@@ -59,3 +59,4 @@
 - Save layer includes cloud sync orchestration (`ICloudSaveSyncService`) with resolver-based conflict choices (`KeepLocal` / `UseCloud` / `Merge`).
 - Observability logger supports structured sink fan-out via `IFoundationLogSink` and `FoundationLogEntry`.
 - Unhandled-exception boundary supports optional crash-provider forwarding via `ICrashReportingService` and `FoundationCrashReport`.
+- Diagnostics service supports snapshot export to a local QA/support file path via `IDiagnosticsSnapshotExportService`.
