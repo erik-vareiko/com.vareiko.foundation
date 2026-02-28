@@ -7,6 +7,9 @@ Production-ready "new project starter" package:
 - testable and template-friendly architecture;
 - minimum host-project wiring.
 
+## v1.0 Status
+- Closed in `1.0.0`.
+
 ## Roadmap (`v0.4 -> v1.0`)
 1. P0 - Core completion (`v0.4`):
 - New Input System adapter + persistent rebind storage.
@@ -24,7 +27,7 @@ Production-ready "new project starter" package:
 - Scaffolder upgrades (module + tests + integration sample).
 - Project validator release gate checks.
 - Starter template profile presets (`dev/stage/prod`).
-5. P2 - Monetization/comms layer (`v1.0` target):
+5. P2 - Monetization/comms layer (`v1.0` target, closed in `1.0.0`):
 - IAP abstraction + provider baseline. [DONE in 0.3.36]
 - Ads abstraction (`rewarded/interstitial`) behind consent. [DONE in 0.3.37]
 - Push notification abstraction baseline. [DONE in 0.3.38]
@@ -93,6 +96,8 @@ Production-ready "new project starter" package:
 - External ads bridge baseline: host-handler bridge (`ExternalAdsBridge`) and provider wiring (`ExternalAdsBridgeService`) for non-Unity mediation SDKs.
 23. Completed in `0.3.45` (attribution increment):
 - Attribution abstraction baseline with external bridge provider path (`ExternalAttributionBridgeService`) and runtime coverage.
+24. Completed in `1.0.0` (release closure):
+- Stable `1.0.0` package release published with closed roadmap scope.
 
 ## v0.4 Scope
 ### P0 (must have)

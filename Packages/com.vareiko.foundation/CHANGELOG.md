@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0
+- First stable release of `com.vareiko.foundation`.
+- Closed `v1.0` monetization/comms roadmap:
+  - IAP abstraction + Unity IAP adapter path
+  - ads abstraction + external ads bridge path
+  - push notifications abstraction + Unity push adapter path
+  - monetization policy hardening
+  - revenue/comms observability metrics
+  - attribution abstraction + external bridge path
+- Includes release hardening from `0.3.46` (telemetry compile fix in IAP/push services).
+
 ## 0.3.46
 - Fixed compile regression in telemetry timing for IAP and push services:
   - replaced ambiguous `Time.realtimeSinceStartup` usages with `UnityEngine.Time.realtimeSinceStartup`
