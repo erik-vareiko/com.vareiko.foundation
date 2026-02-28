@@ -62,7 +62,7 @@ namespace Vareiko.Foundation.Iap
         public async UniTask<InAppPurchaseInitializeResult> InitializeAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            float startedAt = Time.realtimeSinceStartup;
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
 
             InAppPurchaseInitializeResult FinalizeResult(InAppPurchaseInitializeResult result)
             {
@@ -148,7 +148,7 @@ namespace Vareiko.Foundation.Iap
         public async UniTask<InAppPurchaseResult> PurchaseAsync(string productId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            float startedAt = Time.realtimeSinceStartup;
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
 
             InAppPurchaseResult FinalizeResult(InAppPurchaseResult result)
             {
@@ -212,7 +212,7 @@ namespace Vareiko.Foundation.Iap
         public async UniTask<InAppPurchaseRestoreResult> RestorePurchasesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            float startedAt = Time.realtimeSinceStartup;
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
 
             InAppPurchaseRestoreResult FinalizeResult(InAppPurchaseRestoreResult result)
             {
@@ -507,7 +507,7 @@ namespace Vareiko.Foundation.Iap
 
         private void EmitTelemetry(string operation, bool success, InAppPurchaseErrorCode errorCode, float startedAt)
         {
-            float elapsedMs = Mathf.Max(0f, (Time.realtimeSinceStartup - startedAt) * 1000f);
+            float elapsedMs = Mathf.Max(0f, (UnityEngine.Time.realtimeSinceStartup - startedAt) * 1000f);
             _signalBus?.Fire(new IapOperationTelemetrySignal(operation, success, elapsedMs, errorCode));
         }
     }

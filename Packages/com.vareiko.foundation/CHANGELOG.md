@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.46
+- Fixed compile regression in telemetry timing for IAP and push services:
+  - replaced ambiguous `Time.realtimeSinceStartup` usages with `UnityEngine.Time.realtimeSinceStartup`
+  - affected services:
+    - `UnityInAppPurchaseService`
+    - `UnityPushNotificationService`
+
 ## 0.3.45
 - Added attribution abstraction baseline:
   - `IAttributionService`

@@ -52,7 +52,7 @@ namespace Vareiko.Foundation.Push
         public async UniTask<PushInitializeResult> InitializeAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            float startedAt = Time.realtimeSinceStartup;
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
 
             PushInitializeResult FinalizeResult(PushInitializeResult result)
             {
@@ -103,7 +103,7 @@ namespace Vareiko.Foundation.Push
         public async UniTask<PushPermissionResult> RequestPermissionAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            float startedAt = Time.realtimeSinceStartup;
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
 
             PushPermissionResult FinalizeResult(PushPermissionResult result)
             {
@@ -391,7 +391,7 @@ namespace Vareiko.Foundation.Push
 
         private void EmitTelemetry(string operation, bool success, PushNotificationErrorCode errorCode, float startedAt)
         {
-            float elapsedMs = Mathf.Max(0f, (Time.realtimeSinceStartup - startedAt) * 1000f);
+            float elapsedMs = Mathf.Max(0f, (UnityEngine.Time.realtimeSinceStartup - startedAt) * 1000f);
             _signalBus?.Fire(new PushOperationTelemetrySignal(operation, success, elapsedMs, errorCode));
         }
     }
