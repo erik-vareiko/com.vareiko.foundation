@@ -96,6 +96,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 
 Detailed flow with checklist: `Documentation~/STARTER_FLOW.md`.
 Full practical guide: `Documentation~/USAGE_GUIDE.md`.
+Printable PDF guide: `Documentation~/USAGE_GUIDE.pdf`.
 
 ## Dependencies
 - Zenject (`Zenject` asmdef, OpenUPM package `net.bobbo.extenject`)

@@ -100,6 +100,8 @@ Production-ready "new project starter" package:
 - Stable `1.0.0` package release published with closed roadmap scope.
 25. Completed in `1.0.1` (docs increment):
 - Added detailed package usage guide (`USAGE_GUIDE.md`) with practical integration patterns and bridge examples.
+26. Completed in `1.0.2` (docs packaging increment):
+- Added printable PDF guide (`USAGE_GUIDE.pdf`) and reproducible PDF build script (`Tools/docs/build_usage_guide_pdf.py`).
 
 ## v0.4 Scope
 ### P0 (must have)

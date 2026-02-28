@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+- Added printable PDF guide artifact:
+  - `Documentation~/USAGE_GUIDE.pdf`
+- Added reproducible PDF generator script:
+  - `Tools/docs/build_usage_guide_pdf.py`
+- Updated `README.md` with direct PDF guide link.
+
 ## 1.0.1
 - Added detailed usage guide:
   - `Documentation~/USAGE_GUIDE.md`
