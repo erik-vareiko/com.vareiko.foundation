@@ -34,12 +34,13 @@
 17. `FoundationIapInstaller`
 18. `FoundationAdsInstaller`
 19. `FoundationPushNotificationInstaller`
-20. `FoundationAudioInstaller`
-21. `FoundationAnalyticsInstaller`
-22. `FoundationBackendInstaller`
-23. `FoundationFeatureFlagsInstaller`
-24. `FoundationValidationInstaller`
-25. `FoundationObservabilityInstaller`
+20. `FoundationMonetizationInstaller`
+21. `FoundationAudioInstaller`
+22. `FoundationAnalyticsInstaller`
+23. `FoundationBackendInstaller`
+24. `FoundationFeatureFlagsInstaller`
+25. `FoundationValidationInstaller`
+26. `FoundationObservabilityInstaller`
 
 ## Core Principles
 - Fail-fast dependency resolution.
@@ -71,3 +72,4 @@
 - Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers.
 - Push notifications module provides consent-aware permission/topic abstraction with simulated/null providers.
 - Push notifications module includes Unity adapter path (`UnityPushNotificationService`) guarded by `FOUNDATION_UNITY_NOTIFICATIONS`.
+- Monetization module provides centralized cooldown/session-cap policy for ad and IAP operations via `IMonetizationPolicyService`.

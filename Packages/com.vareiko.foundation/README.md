@@ -24,6 +24,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
 - Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating.
 - Push notifications abstraction (`IPushNotificationService`) with simulated/null providers and Unity adapter path.
+- Monetization policy service (`IMonetizationPolicyService`) with cooldown/session-cap guards for ad shows and IAP flow.
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
@@ -52,6 +53,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `IapConfig`
 - `AdsConfig`
 - `PushNotificationConfig`
+- `MonetizationPolicyConfig`
 - `ConnectivityConfig`
 - `SaveSchemaConfig`
 - `SaveSecurityConfig`
@@ -111,7 +113,7 @@ Example `Packages/manifest.json`:
 - By default backend services run in safe null mode (`NullBackendService`, `NullRemoteConfigService`, `NullCloudFunctionService`).
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
-- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Ads`, `Push`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
+- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Ads`, `Push`, `Monetization`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` and can optionally generate a test stub plus integration sample installer into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project` (scene wiring + release-gate checks).
 - Starter environment presets menu: `Tools/Vareiko/Foundation/Create Starter Environment Config`.
@@ -230,6 +232,24 @@ Example `Packages/manifest.json`:
   - `PushTopicSubscriptionFailedSignal`
   - `PushTopicUnsubscribedSignal`
   - `PushTopicUnsubscriptionFailedSignal`
+
+## Monetization Policy Baseline
+- `IMonetizationPolicyService` exposes:
+  - `CanShowAdAsync(placementId, placementType)`
+  - `RecordAdShownAsync(placementId, placementType)`
+  - `CanStartPurchaseAsync(productId)`
+  - `RecordPurchaseAsync(productId)`
+  - `ResetSessionAsync()`
+- `MonetizationPolicyConfig` supports:
+  - default cooldown/session-cap rules for interstitial/rewarded placements and IAP products
+  - explicit policy mode (`RequireExplicitPlacementPolicy`, `RequireExplicitProductPolicy`)
+  - per-placement and per-product overrides
+- Signals:
+  - `MonetizationAdBlockedSignal`
+  - `MonetizationAdRecordedSignal`
+  - `MonetizationIapBlockedSignal`
+  - `MonetizationIapRecordedSignal`
+  - `MonetizationSessionResetSignal`
 
 ## Structured Logging Sinks
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.

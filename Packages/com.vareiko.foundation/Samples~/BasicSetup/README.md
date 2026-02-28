@@ -15,5 +15,5 @@ Usage:
 
 After that you can add project-specific modules:
 - bootstrap tasks implementing `IBootstrapTask`
-- optional configs (`AnalyticsConfig`, `BackendConfig`, `BackendReliabilityConfig`, `RemoteConfigCacheConfig`, `AssetServiceConfig`, `ConnectivityConfig`, `SaveSchemaConfig`, `SaveSecurityConfig`, `AutosaveConfig`, `FeatureFlagsConfig`, `EnvironmentConfig`, `LocalizationConfig`, `ObservabilityConfig`, `EconomyConfig`, `IapConfig`, `AdsConfig`, `PushNotificationConfig`)
+- optional configs (`AnalyticsConfig`, `BackendConfig`, `BackendReliabilityConfig`, `RemoteConfigCacheConfig`, `AssetServiceConfig`, `ConnectivityConfig`, `SaveSchemaConfig`, `SaveSecurityConfig`, `AutosaveConfig`, `FeatureFlagsConfig`, `EnvironmentConfig`, `LocalizationConfig`, `ObservabilityConfig`, `EconomyConfig`, `IapConfig`, `AdsConfig`, `PushNotificationConfig`, `MonetizationPolicyConfig`)
 - project installers derived from `FoundationDomainInstaller`

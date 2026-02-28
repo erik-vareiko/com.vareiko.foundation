@@ -8,6 +8,7 @@ using Vareiko.Foundation.Environment;
 using Vareiko.Foundation.Features;
 using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Localization;
+using Vareiko.Foundation.Monetization;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Save;
@@ -25,6 +26,7 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private IapConfig _iapConfig;
         [SerializeField] private AdsConfig _adsConfig;
         [SerializeField] private PushNotificationConfig _pushNotificationConfig;
+        [SerializeField] private MonetizationPolicyConfig _monetizationPolicyConfig;
         [SerializeField] private ConnectivityConfig _connectivityConfig;
         [SerializeField] private SaveSchemaConfig _saveSchemaConfig;
         [SerializeField] private SaveSecurityConfig _saveSecurityConfig;
@@ -47,6 +49,7 @@ namespace Vareiko.Foundation.Installers
                 _iapConfig,
                 _adsConfig,
                 _pushNotificationConfig,
+                _monetizationPolicyConfig,
                 _connectivityConfig,
                 _saveSchemaConfig,
                 _saveSecurityConfig,

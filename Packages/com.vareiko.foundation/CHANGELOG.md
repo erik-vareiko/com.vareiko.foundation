@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.41
+- Added monetization policy hardening baseline:
+  - `IMonetizationPolicyService`
+  - `MonetizationPolicyService`
+  - `MonetizationPolicyConfig`
+  - `MonetizationAdDecision` / `MonetizationIapDecision`
+  - `MonetizationPolicyBlockReason`
+- Added policy signals:
+  - `MonetizationAdBlockedSignal`
+  - `MonetizationAdRecordedSignal`
+  - `MonetizationIapBlockedSignal`
+  - `MonetizationIapRecordedSignal`
+  - `MonetizationSessionResetSignal`
+- Integrated monetization policy module into runtime install pipeline:
+  - `FoundationRuntimeInstaller`
+  - `FoundationProjectInstaller` (`MonetizationPolicyConfig` reference)
+- Added runtime coverage:
+  - `MonetizationPolicyServiceTests`
+
 ## 0.3.40
 - Added Unity push notifications provider adapter path:
   - `UnityPushNotificationService`

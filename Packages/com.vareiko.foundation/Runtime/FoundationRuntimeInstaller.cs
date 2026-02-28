@@ -16,6 +16,7 @@ using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Input;
 using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Loading;
+using Vareiko.Foundation.Monetization;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Save;
@@ -38,6 +39,7 @@ namespace Vareiko.Foundation
             IapConfig iapConfig = null,
             AdsConfig adsConfig = null,
             PushNotificationConfig pushNotificationConfig = null,
+            MonetizationPolicyConfig monetizationPolicyConfig = null,
             ConnectivityConfig connectivityConfig = null,
             SaveSchemaConfig saveSchemaConfig = null,
             SaveSecurityConfig saveSecurityConfig = null,
@@ -68,6 +70,7 @@ namespace Vareiko.Foundation
             FoundationIapInstaller.Install(container, iapConfig);
             FoundationAdsInstaller.Install(container, adsConfig);
             FoundationPushNotificationInstaller.Install(container, pushNotificationConfig);
+            FoundationMonetizationInstaller.Install(container, monetizationPolicyConfig);
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);
             FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, remoteConfigCacheConfig);
