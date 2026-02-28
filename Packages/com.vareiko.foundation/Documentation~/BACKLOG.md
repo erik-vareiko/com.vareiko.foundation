@@ -26,7 +26,7 @@ Production-ready "new project starter" package:
 - Starter template profile presets (`dev/stage/prod`).
 5. P2 - Monetization/comms layer (`v1.0` target):
 - IAP abstraction + provider baseline. [DONE in 0.3.36]
-- Ads abstraction (`rewarded/interstitial`) behind consent.
+- Ads abstraction (`rewarded/interstitial`) behind consent. [DONE in 0.3.37]
 - Push notification abstraction baseline.
 
 ## Progress
@@ -69,6 +69,8 @@ Production-ready "new project starter" package:
 - Starter template profile presets baseline (`dev` / `stage` / `prod`) with editor creation/apply tooling.
 14. Completed in `0.3.36` (monetization increment):
 - IAP abstraction baseline: `IInAppPurchaseService`, `IapConfig`, simulated/null providers and purchase/restore signals.
+15. Completed in `0.3.37` (monetization increment):
+- Ads abstraction baseline: `IAdsService`, `AdsConfig`, simulated/null providers and consent-aware rewarded/interstitial flow.
 
 ## v0.4 Scope
 ### P0 (must have)

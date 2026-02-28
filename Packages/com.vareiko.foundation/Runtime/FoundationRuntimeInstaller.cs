@@ -1,5 +1,6 @@
 using Vareiko.Foundation.Analytics;
 using Vareiko.Foundation.App;
+using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.AssetManagement;
 using Vareiko.Foundation.Audio;
 using Vareiko.Foundation.Backend;
@@ -34,6 +35,7 @@ namespace Vareiko.Foundation
             AssetServiceConfig assetConfig = null,
             EconomyConfig economyConfig = null,
             IapConfig iapConfig = null,
+            AdsConfig adsConfig = null,
             ConnectivityConfig connectivityConfig = null,
             SaveSchemaConfig saveSchemaConfig = null,
             SaveSecurityConfig saveSecurityConfig = null,
@@ -62,6 +64,7 @@ namespace Vareiko.Foundation
             FoundationLocalizationInstaller.Install(container, localizationConfig);
             FoundationEconomyInstaller.Install(container, economyConfig);
             FoundationIapInstaller.Install(container, iapConfig);
+            FoundationAdsInstaller.Install(container, adsConfig);
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);
             FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, remoteConfigCacheConfig);

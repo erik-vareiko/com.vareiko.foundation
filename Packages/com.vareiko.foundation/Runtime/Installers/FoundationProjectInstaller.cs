@@ -1,4 +1,5 @@
 using Vareiko.Foundation.Analytics;
+using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.AssetManagement;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Connectivity;
@@ -21,6 +22,7 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private AssetServiceConfig _assetConfig;
         [SerializeField] private EconomyConfig _economyConfig;
         [SerializeField] private IapConfig _iapConfig;
+        [SerializeField] private AdsConfig _adsConfig;
         [SerializeField] private ConnectivityConfig _connectivityConfig;
         [SerializeField] private SaveSchemaConfig _saveSchemaConfig;
         [SerializeField] private SaveSecurityConfig _saveSecurityConfig;
@@ -41,6 +43,7 @@ namespace Vareiko.Foundation.Installers
                 _assetConfig,
                 _economyConfig,
                 _iapConfig,
+                _adsConfig,
                 _connectivityConfig,
                 _saveSchemaConfig,
                 _saveSecurityConfig,

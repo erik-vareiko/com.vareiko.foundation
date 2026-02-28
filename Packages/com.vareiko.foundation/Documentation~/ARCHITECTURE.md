@@ -32,12 +32,13 @@
 15. `FoundationLocalizationInstaller`
 16. `FoundationEconomyInstaller`
 17. `FoundationIapInstaller`
-18. `FoundationAudioInstaller`
-19. `FoundationAnalyticsInstaller`
-20. `FoundationBackendInstaller`
-21. `FoundationFeatureFlagsInstaller`
-22. `FoundationValidationInstaller`
-23. `FoundationObservabilityInstaller`
+18. `FoundationAdsInstaller`
+19. `FoundationAudioInstaller`
+20. `FoundationAnalyticsInstaller`
+21. `FoundationBackendInstaller`
+22. `FoundationFeatureFlagsInstaller`
+23. `FoundationValidationInstaller`
+24. `FoundationObservabilityInstaller`
 
 ## Core Principles
 - Fail-fast dependency resolution.
@@ -65,3 +66,4 @@
 - Editor project validator includes release-gate checks (package version/dependencies, script `.meta` completeness, merge markers and Unity version parse).
 - Environment module includes starter profile presets (`dev`, `stage`, `prod`) for quick project bootstrap.
 - IAP module provides provider abstraction with a simulated baseline and safe null fallback.
+- Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers.

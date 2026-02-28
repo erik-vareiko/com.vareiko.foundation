@@ -22,6 +22,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
+- Ads abstraction (`IAdsService`) for rewarded/interstitial placements with consent-aware gating.
 - Privacy and consent (`IConsentService`).
 - Settings system (`ISettingsService`).
 - Economy service (`IEconomyService`, in-memory baseline).
@@ -48,6 +49,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `AssetServiceConfig`
 - `EconomyConfig`
 - `IapConfig`
+- `AdsConfig`
 - `ConnectivityConfig`
 - `SaveSchemaConfig`
 - `SaveSecurityConfig`
@@ -105,7 +107,7 @@ Example `Packages/manifest.json`:
 - By default backend services run in safe null mode (`NullBackendService`, `NullRemoteConfigService`, `NullCloudFunctionService`).
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
-- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
+- Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Ads`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` and can optionally generate a test stub plus integration sample installer into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project` (scene wiring + release-gate checks).
 - Starter environment presets menu: `Tools/Vareiko/Foundation/Create Starter Environment Config`.
@@ -180,6 +182,25 @@ Example `Packages/manifest.json`:
   - `IapPurchaseFailedSignal`
   - `IapRestoreCompletedSignal`
   - `IapRestoreFailedSignal`
+
+## Ads Baseline
+- `IAdsService` exposes:
+  - `InitializeAsync()`
+  - `GetPlacementIdsAsync()`
+  - `LoadAsync(placementId)`
+  - `ShowAsync(placementId)`
+- `AdsConfig.Provider` supports:
+  - `None` (safe fallback to `NullAdsService`)
+  - `Simulated` (`SimulatedAdsService` for development flows)
+  - `UnityAds` (reserved provider id for production adapter wiring)
+- `SimulatedAdsService` supports rewarded/interstitial placement simulation and respects advertising consent gate (`ConsentScope.Advertising`) when enabled in config.
+- Signals:
+  - `AdsInitializedSignal`
+  - `AdLoadedSignal`
+  - `AdLoadFailedSignal`
+  - `AdShownSignal`
+  - `AdShowFailedSignal`
+  - `AdRewardGrantedSignal`
 
 ## Structured Logging Sinks
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.

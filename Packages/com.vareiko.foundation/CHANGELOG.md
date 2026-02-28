@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.3.37
+- Added ads abstraction baseline (rewarded/interstitial) with consent gating:
+  - `IAdsService`
+  - `AdsConfig`
+  - `AdsProviderType`
+  - `AdPlacementType`
+  - `AdsErrorCode`
+  - `AdLoadResult` / `AdShowResult` / `AdsInitializeResult`
+- Added ads runtime providers:
+  - `SimulatedAdsService`
+  - `NullAdsService`
+- Added installer/signal layer:
+  - `FoundationAdsInstaller`
+  - `AdsInitializedSignal`
+  - `AdLoadedSignal`
+  - `AdLoadFailedSignal`
+  - `AdShownSignal`
+  - `AdShowFailedSignal`
+  - `AdRewardGrantedSignal`
+- Integrated ads module into runtime install pipeline:
+  - `FoundationRuntimeInstaller`
+  - `FoundationProjectInstaller` (`AdsConfig` reference)
+- Added runtime coverage:
+  - `SimulatedAdsServiceTests`
+
 ## 0.3.36
 - Added IAP abstraction + provider baseline:
   - `IInAppPurchaseService`
