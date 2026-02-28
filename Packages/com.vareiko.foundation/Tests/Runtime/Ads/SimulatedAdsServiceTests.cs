@@ -127,6 +127,7 @@ namespace Vareiko.Foundation.Tests.Ads
             container.DeclareSignal<AdShownSignal>();
             container.DeclareSignal<AdShowFailedSignal>();
             container.DeclareSignal<AdRewardGrantedSignal>();
+            container.DeclareSignal<AdsOperationTelemetrySignal>();
             return container.Resolve<SignalBus>();
         }
 

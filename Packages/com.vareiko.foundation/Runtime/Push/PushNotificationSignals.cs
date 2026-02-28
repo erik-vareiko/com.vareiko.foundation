@@ -79,4 +79,20 @@ namespace Vareiko.Foundation.Push
             ErrorCode = errorCode;
         }
     }
+
+    public readonly struct PushOperationTelemetrySignal
+    {
+        public readonly string Operation;
+        public readonly bool Success;
+        public readonly float DurationMs;
+        public readonly PushNotificationErrorCode ErrorCode;
+
+        public PushOperationTelemetrySignal(string operation, bool success, float durationMs, PushNotificationErrorCode errorCode)
+        {
+            Operation = operation ?? string.Empty;
+            Success = success;
+            DurationMs = durationMs < 0f ? 0f : durationMs;
+            ErrorCode = errorCode;
+        }
+    }
 }

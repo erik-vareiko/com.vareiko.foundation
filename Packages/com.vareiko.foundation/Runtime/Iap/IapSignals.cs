@@ -61,4 +61,20 @@ namespace Vareiko.Foundation.Iap
             ErrorCode = errorCode;
         }
     }
+
+    public readonly struct IapOperationTelemetrySignal
+    {
+        public readonly string Operation;
+        public readonly bool Success;
+        public readonly float DurationMs;
+        public readonly InAppPurchaseErrorCode ErrorCode;
+
+        public IapOperationTelemetrySignal(string operation, bool success, float durationMs, InAppPurchaseErrorCode errorCode)
+        {
+            Operation = operation ?? string.Empty;
+            Success = success;
+            DurationMs = durationMs < 0f ? 0f : durationMs;
+            ErrorCode = errorCode;
+        }
+    }
 }

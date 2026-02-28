@@ -19,6 +19,7 @@ namespace Vareiko.Foundation.Observability
         private readonly IBackendService _backendService;
         private readonly IRemoteConfigService _remoteConfigService;
         private readonly IAssetService _assetService;
+        private readonly IMonetizationObservabilityService _monetizationObservabilityService;
         private readonly SignalBus _signalBus;
         private readonly DiagnosticsSnapshot _snapshot = new DiagnosticsSnapshot();
 
@@ -33,7 +34,8 @@ namespace Vareiko.Foundation.Observability
             [InjectOptional] IBackendService backendService = null,
             [InjectOptional] IRemoteConfigService remoteConfigService = null,
             [InjectOptional] IAssetService assetService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IMonetizationObservabilityService monetizationObservabilityService = null)
         {
             _timeProvider = timeProvider;
             _config = config;
@@ -43,6 +45,7 @@ namespace Vareiko.Foundation.Observability
             _remoteConfigService = remoteConfigService;
             _assetService = assetService;
             _signalBus = signalBus;
+            _monetizationObservabilityService = monetizationObservabilityService;
         }
 
         public DiagnosticsSnapshot Snapshot => _snapshot;
@@ -86,6 +89,24 @@ namespace Vareiko.Foundation.Observability
             _snapshot.RemoteConfigValues = remoteValues != null ? remoteValues.Count : 0;
             _snapshot.TrackedAssets = _assetService != null ? _assetService.TrackedAssetCount : 0;
             _snapshot.AssetReferences = _assetService != null ? _assetService.TotalReferenceCount : 0;
+            if (_monetizationObservabilityService != null && _monetizationObservabilityService.Snapshot != null)
+            {
+                MonetizationObservabilitySnapshot m = _monetizationObservabilityService.Snapshot;
+                _snapshot.IapPurchaseSuccessCount = m.IapPurchaseSuccessCount;
+                _snapshot.IapPurchaseFailureCount = m.IapPurchaseFailureCount;
+                _snapshot.IapPurchaseLastLatencyMs = m.IapPurchaseLastLatencyMs;
+                _snapshot.IapPurchaseAvgLatencyMs = m.IapPurchaseAvgLatencyMs;
+                _snapshot.AdShowSuccessCount = m.AdShowSuccessCount;
+                _snapshot.AdShowFailureCount = m.AdShowFailureCount;
+                _snapshot.AdShowLastLatencyMs = m.AdShowLastLatencyMs;
+                _snapshot.AdShowAvgLatencyMs = m.AdShowAvgLatencyMs;
+                _snapshot.PushPermissionGrantedCount = m.PushPermissionGrantedCount;
+                _snapshot.PushPermissionDeniedCount = m.PushPermissionDeniedCount;
+                _snapshot.PushPermissionLastLatencyMs = m.PushPermissionLastLatencyMs;
+                _snapshot.PushPermissionAvgLatencyMs = m.PushPermissionAvgLatencyMs;
+                _snapshot.PushTopicSubscribeSuccessCount = m.PushTopicSubscribeSuccessCount;
+                _snapshot.PushTopicSubscribeFailureCount = m.PushTopicSubscribeFailureCount;
+            }
             _snapshot.LastUpdatedAt = _timeProvider.Time;
 
             _nextUpdateAt = _timeProvider.Time + GetRefreshInterval();

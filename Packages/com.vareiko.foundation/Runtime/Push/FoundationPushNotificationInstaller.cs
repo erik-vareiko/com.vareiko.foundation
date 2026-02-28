@@ -23,6 +23,7 @@ namespace Vareiko.Foundation.Push
             container.DeclareSignal<PushTopicSubscriptionFailedSignal>();
             container.DeclareSignal<PushTopicUnsubscribedSignal>();
             container.DeclareSignal<PushTopicUnsubscriptionFailedSignal>();
+            container.DeclareSignal<PushOperationTelemetrySignal>();
 
             if (config != null)
             {

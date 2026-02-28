@@ -22,6 +22,7 @@ namespace Vareiko.Foundation.Ads
             container.DeclareSignal<AdShownSignal>();
             container.DeclareSignal<AdShowFailedSignal>();
             container.DeclareSignal<AdRewardGrantedSignal>();
+            container.DeclareSignal<AdsOperationTelemetrySignal>();
 
             if (config != null)
             {

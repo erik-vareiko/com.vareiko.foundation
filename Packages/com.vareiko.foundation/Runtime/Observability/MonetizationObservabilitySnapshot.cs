@@ -1,32 +1,23 @@
 namespace Vareiko.Foundation.Observability
 {
-    public sealed class DiagnosticsSnapshot
+    public sealed class MonetizationObservabilitySnapshot
     {
-        public bool IsBootCompleted;
-        public bool IsBootFailed;
-        public string LastBootError = string.Empty;
-        public bool IsOnline;
-        public bool IsLoading;
-        public float LoadingProgress;
-        public bool IsBackendConfigured;
-        public bool IsBackendAuthenticated;
-        public int RemoteConfigValues;
-        public int TrackedAssets;
-        public int AssetReferences;
         public int IapPurchaseSuccessCount;
         public int IapPurchaseFailureCount;
         public float IapPurchaseLastLatencyMs;
         public float IapPurchaseAvgLatencyMs;
+
         public int AdShowSuccessCount;
         public int AdShowFailureCount;
         public float AdShowLastLatencyMs;
         public float AdShowAvgLatencyMs;
+
         public int PushPermissionGrantedCount;
         public int PushPermissionDeniedCount;
         public float PushPermissionLastLatencyMs;
         public float PushPermissionAvgLatencyMs;
+
         public int PushTopicSubscribeSuccessCount;
         public int PushTopicSubscribeFailureCount;
-        public float LastUpdatedAt;
     }
 }

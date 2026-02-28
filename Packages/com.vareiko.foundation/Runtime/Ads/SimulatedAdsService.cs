@@ -98,60 +98,76 @@ namespace Vareiko.Foundation.Ads
         public UniTask<AdLoadResult> LoadAsync(string placementId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
+
+            AdLoadResult FinalizeResult(AdLoadResult result)
+            {
+                EmitTelemetry("load", result.PlacementId, result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
+
             if (!_initialized)
             {
-                return UniTask.FromResult(FailLoad(placementId, AdPlacementType.Interstitial, "Ads service is not initialized.", AdsErrorCode.NotInitialized));
+                return UniTask.FromResult(FinalizeResult(FailLoad(placementId, AdPlacementType.Interstitial, "Ads service is not initialized.", AdsErrorCode.NotInitialized)));
             }
 
             AdsConfig.Placement placement;
             if (!TryGetPlacement(placementId, out placement, out AdLoadResult placementError))
             {
-                return UniTask.FromResult(placementError);
+                return UniTask.FromResult(FinalizeResult(placementError));
             }
 
             if (!HasAdvertisingConsent())
             {
-                return UniTask.FromResult(FailLoad(placement.PlacementId, placement.PlacementType, "Advertising consent is required.", AdsErrorCode.ConsentDenied));
+                return UniTask.FromResult(FinalizeResult(FailLoad(placement.PlacementId, placement.PlacementType, "Advertising consent is required.", AdsErrorCode.ConsentDenied)));
             }
 
             if (placement.SimulateLoadFailure)
             {
-                return UniTask.FromResult(FailLoad(placement.PlacementId, placement.PlacementType, "Simulated ad load failure.", AdsErrorCode.LoadFailed));
+                return UniTask.FromResult(FinalizeResult(FailLoad(placement.PlacementId, placement.PlacementType, "Simulated ad load failure.", AdsErrorCode.LoadFailed)));
             }
 
             _loadedPlacements.Add(placement.PlacementId);
             AdLoadResult success = AdLoadResult.Succeed(placement.PlacementId, placement.PlacementType);
             _signalBus?.Fire(new AdLoadedSignal(success.PlacementId, success.PlacementType));
-            return UniTask.FromResult(success);
+            return UniTask.FromResult(FinalizeResult(success));
         }
 
         public UniTask<AdShowResult> ShowAsync(string placementId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = UnityEngine.Time.realtimeSinceStartup;
+
+            AdShowResult FinalizeResult(AdShowResult result)
+            {
+                EmitTelemetry("show", result.PlacementId, result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
+
             if (!_initialized)
             {
-                return UniTask.FromResult(FailShow(placementId, AdPlacementType.Interstitial, "Ads service is not initialized.", AdsErrorCode.NotInitialized));
+                return UniTask.FromResult(FinalizeResult(FailShow(placementId, AdPlacementType.Interstitial, "Ads service is not initialized.", AdsErrorCode.NotInitialized)));
             }
 
             AdsConfig.Placement placement;
             if (!TryGetPlacement(placementId, out placement, out AdShowResult placementError))
             {
-                return UniTask.FromResult(placementError);
+                return UniTask.FromResult(FinalizeResult(placementError));
             }
 
             if (!HasAdvertisingConsent())
             {
-                return UniTask.FromResult(FailShow(placement.PlacementId, placement.PlacementType, "Advertising consent is required.", AdsErrorCode.ConsentDenied));
+                return UniTask.FromResult(FinalizeResult(FailShow(placement.PlacementId, placement.PlacementType, "Advertising consent is required.", AdsErrorCode.ConsentDenied)));
             }
 
             if (!_loadedPlacements.Contains(placement.PlacementId))
             {
-                return UniTask.FromResult(FailShow(placement.PlacementId, placement.PlacementType, "Ads placement is not loaded.", AdsErrorCode.PlacementNotLoaded));
+                return UniTask.FromResult(FinalizeResult(FailShow(placement.PlacementId, placement.PlacementType, "Ads placement is not loaded.", AdsErrorCode.PlacementNotLoaded)));
             }
 
             if (placement.SimulateShowFailure)
             {
-                return UniTask.FromResult(FailShow(placement.PlacementId, placement.PlacementType, "Simulated ad show failure.", AdsErrorCode.ShowFailed));
+                return UniTask.FromResult(FinalizeResult(FailShow(placement.PlacementId, placement.PlacementType, "Simulated ad show failure.", AdsErrorCode.ShowFailed)));
             }
 
             _loadedPlacements.Remove(placement.PlacementId);
@@ -167,7 +183,7 @@ namespace Vareiko.Foundation.Ads
             }
 
             _signalBus?.Fire(new AdShownSignal(success.PlacementId, success.PlacementType, success.RewardGranted));
-            return UniTask.FromResult(success);
+            return UniTask.FromResult(FinalizeResult(success));
         }
 
         private bool HasAdvertisingConsent()
@@ -247,6 +263,12 @@ namespace Vareiko.Foundation.Ads
             AdShowResult result = AdShowResult.Fail(placementId, placementType, error, errorCode);
             _signalBus?.Fire(new AdShowFailedSignal(result.PlacementId, result.PlacementType, result.Error, result.ErrorCode));
             return result;
+        }
+
+        private void EmitTelemetry(string operation, string placementId, bool success, AdsErrorCode errorCode, float startedAt)
+        {
+            float elapsedMs = UnityEngine.Mathf.Max(0f, (UnityEngine.Time.realtimeSinceStartup - startedAt) * 1000f);
+            _signalBus?.Fire(new AdsOperationTelemetrySignal(operation, placementId, success, elapsedMs, errorCode));
         }
     }
 }

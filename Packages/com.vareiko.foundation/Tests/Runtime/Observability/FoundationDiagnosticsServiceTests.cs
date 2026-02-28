@@ -112,6 +112,62 @@ namespace Vareiko.Foundation.Tests.Observability
             service.Dispose();
         }
 
+        [Test]
+        public void Tick_WhenMonetizationObservabilityBound_CopiesRevenueAndCommsMetrics()
+        {
+            FakeTimeProvider timeProvider = new FakeTimeProvider { Time = 2f };
+            FakeMonetizationObservabilityService monetization = new FakeMonetizationObservabilityService
+            {
+                Snapshot = new MonetizationObservabilitySnapshot
+                {
+                    IapPurchaseSuccessCount = 3,
+                    IapPurchaseFailureCount = 1,
+                    IapPurchaseLastLatencyMs = 120f,
+                    IapPurchaseAvgLatencyMs = 80f,
+                    AdShowSuccessCount = 4,
+                    AdShowFailureCount = 2,
+                    AdShowLastLatencyMs = 90f,
+                    AdShowAvgLatencyMs = 70f,
+                    PushPermissionGrantedCount = 2,
+                    PushPermissionDeniedCount = 1,
+                    PushPermissionLastLatencyMs = 45f,
+                    PushPermissionAvgLatencyMs = 40f,
+                    PushTopicSubscribeSuccessCount = 5,
+                    PushTopicSubscribeFailureCount = 2
+                }
+            };
+
+            FoundationDiagnosticsService service = new FoundationDiagnosticsService(
+                timeProvider,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                monetization);
+
+            service.Initialize();
+
+            Assert.That(service.Snapshot.IapPurchaseSuccessCount, Is.EqualTo(3));
+            Assert.That(service.Snapshot.IapPurchaseFailureCount, Is.EqualTo(1));
+            Assert.That(service.Snapshot.IapPurchaseLastLatencyMs, Is.EqualTo(120f).Within(0.001f));
+            Assert.That(service.Snapshot.IapPurchaseAvgLatencyMs, Is.EqualTo(80f).Within(0.001f));
+            Assert.That(service.Snapshot.AdShowSuccessCount, Is.EqualTo(4));
+            Assert.That(service.Snapshot.AdShowFailureCount, Is.EqualTo(2));
+            Assert.That(service.Snapshot.AdShowLastLatencyMs, Is.EqualTo(90f).Within(0.001f));
+            Assert.That(service.Snapshot.AdShowAvgLatencyMs, Is.EqualTo(70f).Within(0.001f));
+            Assert.That(service.Snapshot.PushPermissionGrantedCount, Is.EqualTo(2));
+            Assert.That(service.Snapshot.PushPermissionDeniedCount, Is.EqualTo(1));
+            Assert.That(service.Snapshot.PushPermissionLastLatencyMs, Is.EqualTo(45f).Within(0.001f));
+            Assert.That(service.Snapshot.PushPermissionAvgLatencyMs, Is.EqualTo(40f).Within(0.001f));
+            Assert.That(service.Snapshot.PushTopicSubscribeSuccessCount, Is.EqualTo(5));
+            Assert.That(service.Snapshot.PushTopicSubscribeFailureCount, Is.EqualTo(2));
+
+            service.Dispose();
+        }
+
         private static SignalBus CreateSignalBus()
         {
             DiContainer container = new DiContainer();
@@ -196,6 +252,11 @@ namespace Vareiko.Foundation.Tests.Observability
                 cancellationToken.ThrowIfCancellationRequested();
                 return UniTask.CompletedTask;
             }
+        }
+
+        private sealed class FakeMonetizationObservabilityService : IMonetizationObservabilityService
+        {
+            public MonetizationObservabilitySnapshot Snapshot { get; set; }
         }
     }
 }

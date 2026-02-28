@@ -62,25 +62,32 @@ namespace Vareiko.Foundation.Iap
         public async UniTask<InAppPurchaseInitializeResult> InitializeAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = Time.realtimeSinceStartup;
+
+            InAppPurchaseInitializeResult FinalizeResult(InAppPurchaseInitializeResult result)
+            {
+                EmitTelemetry("initialize", result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
 
             if (_initialized)
             {
-                return InAppPurchaseInitializeResult.Succeed();
+                return FinalizeResult(InAppPurchaseInitializeResult.Succeed());
             }
 
             if (_config == null)
             {
-                return FailInitialize("IAP config is not assigned.", InAppPurchaseErrorCode.ConfigurationInvalid);
+                return FinalizeResult(FailInitialize("IAP config is not assigned.", InAppPurchaseErrorCode.ConfigurationInvalid));
             }
 
             if (_config.Provider != InAppPurchaseProviderType.UnityIap)
             {
-                return FailInitialize("IAP provider is not set to UnityIap.", InAppPurchaseErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailInitialize("IAP provider is not set to UnityIap.", InAppPurchaseErrorCode.ProviderUnavailable));
             }
 
             if (!BuildCatalogFromConfig(out InAppPurchaseInitializeResult validationFailure))
             {
-                return validationFailure;
+                return FinalizeResult(validationFailure);
             }
 
 #if UNITY_PURCHASING
@@ -88,7 +95,8 @@ namespace Vareiko.Foundation.Iap
             {
                 try
                 {
-                    return await _initializeCompletion.Task.AttachExternalCancellation(cancellationToken);
+                    InAppPurchaseInitializeResult pendingResult = await _initializeCompletion.Task.AttachExternalCancellation(cancellationToken);
+                    return FinalizeResult(pendingResult);
                 }
                 catch (OperationCanceledException)
                 {
@@ -110,7 +118,7 @@ namespace Vareiko.Foundation.Iap
                 UnityPurchasing.Initialize(this, builder);
 
                 InAppPurchaseInitializeResult result = await _initializeCompletion.Task.AttachExternalCancellation(cancellationToken);
-                return result;
+                return FinalizeResult(result);
             }
             catch (OperationCanceledException)
             {
@@ -119,7 +127,7 @@ namespace Vareiko.Foundation.Iap
             catch (Exception exception)
             {
                 Debug.LogException(exception);
-                return FailInitialize("Unity IAP initialization failed unexpectedly.", InAppPurchaseErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailInitialize("Unity IAP initialization failed unexpectedly.", InAppPurchaseErrorCode.ProviderUnavailable));
             }
             finally
             {
@@ -127,7 +135,7 @@ namespace Vareiko.Foundation.Iap
             }
 #else
             await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
-            return FailInitialize("UNITY_PURCHASING is not enabled. Install Unity IAP package.", InAppPurchaseErrorCode.ProviderUnavailable);
+            return FinalizeResult(FailInitialize("UNITY_PURCHASING is not enabled. Install Unity IAP package.", InAppPurchaseErrorCode.ProviderUnavailable));
 #endif
         }
 
@@ -140,31 +148,39 @@ namespace Vareiko.Foundation.Iap
         public async UniTask<InAppPurchaseResult> PurchaseAsync(string productId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = Time.realtimeSinceStartup;
+
+            InAppPurchaseResult FinalizeResult(InAppPurchaseResult result)
+            {
+                EmitTelemetry("purchase", result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
+
             if (!_initialized)
             {
-                return FailPurchase(productId, "IAP service is not initialized.", InAppPurchaseErrorCode.NotInitialized);
+                return FinalizeResult(FailPurchase(productId, "IAP service is not initialized.", InAppPurchaseErrorCode.NotInitialized));
             }
 
             if (string.IsNullOrWhiteSpace(productId))
             {
-                return FailPurchase(string.Empty, "IAP product id is empty.", InAppPurchaseErrorCode.ValidationFailed);
+                return FinalizeResult(FailPurchase(string.Empty, "IAP product id is empty.", InAppPurchaseErrorCode.ValidationFailed));
             }
 
             string trimmedId = productId.Trim();
             if (!_productsById.ContainsKey(trimmedId))
             {
-                return FailPurchase(trimmedId, "IAP product not found in catalog.", InAppPurchaseErrorCode.ProductNotFound);
+                return FinalizeResult(FailPurchase(trimmedId, "IAP product not found in catalog.", InAppPurchaseErrorCode.ProductNotFound));
             }
 
 #if UNITY_PURCHASING
             if (_storeController == null)
             {
-                return FailPurchase(trimmedId, "Unity IAP store controller is not ready.", InAppPurchaseErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailPurchase(trimmedId, "Unity IAP store controller is not ready.", InAppPurchaseErrorCode.ProviderUnavailable));
             }
 
             if (_purchaseCompletion != null)
             {
-                return FailPurchase(trimmedId, "IAP purchase flow is already in progress.", InAppPurchaseErrorCode.PurchaseFailed);
+                return FinalizeResult(FailPurchase(trimmedId, "IAP purchase flow is already in progress.", InAppPurchaseErrorCode.PurchaseFailed));
             }
 
             _activePurchaseProductId = trimmedId;
@@ -173,7 +189,8 @@ namespace Vareiko.Foundation.Iap
             try
             {
                 _storeController.InitiatePurchase(trimmedId);
-                return await _purchaseCompletion.Task.AttachExternalCancellation(cancellationToken);
+                InAppPurchaseResult result = await _purchaseCompletion.Task.AttachExternalCancellation(cancellationToken);
+                return FinalizeResult(result);
             }
             catch (OperationCanceledException)
             {
@@ -184,38 +201,46 @@ namespace Vareiko.Foundation.Iap
                 Debug.LogException(exception);
                 _purchaseCompletion = null;
                 _activePurchaseProductId = string.Empty;
-                return FailPurchase(trimmedId, "Unity IAP purchase failed unexpectedly.", InAppPurchaseErrorCode.PurchaseFailed);
+                return FinalizeResult(FailPurchase(trimmedId, "Unity IAP purchase failed unexpectedly.", InAppPurchaseErrorCode.PurchaseFailed));
             }
 #else
             await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
-            return FailPurchase(trimmedId, "UNITY_PURCHASING is not enabled. Install Unity IAP package.", InAppPurchaseErrorCode.ProviderUnavailable);
+            return FinalizeResult(FailPurchase(trimmedId, "UNITY_PURCHASING is not enabled. Install Unity IAP package.", InAppPurchaseErrorCode.ProviderUnavailable));
 #endif
         }
 
         public async UniTask<InAppPurchaseRestoreResult> RestorePurchasesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = Time.realtimeSinceStartup;
+
+            InAppPurchaseRestoreResult FinalizeResult(InAppPurchaseRestoreResult result)
+            {
+                EmitTelemetry("restore", result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
+
             if (!_initialized)
             {
-                return FailRestore("IAP service is not initialized.", InAppPurchaseErrorCode.NotInitialized);
+                return FinalizeResult(FailRestore("IAP service is not initialized.", InAppPurchaseErrorCode.NotInitialized));
             }
 
 #if UNITY_PURCHASING
             if (_restoreCompletion != null)
             {
-                return FailRestore("IAP restore flow is already in progress.", InAppPurchaseErrorCode.RestoreFailed);
+                return FinalizeResult(FailRestore("IAP restore flow is already in progress.", InAppPurchaseErrorCode.RestoreFailed));
             }
 
 #if UNITY_IOS || UNITY_TVOS || UNITY_STANDALONE_OSX
             if (_extensionProvider == null)
             {
-                return FailRestore("Unity IAP extension provider is not ready.", InAppPurchaseErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailRestore("Unity IAP extension provider is not ready.", InAppPurchaseErrorCode.ProviderUnavailable));
             }
 
             IAppleExtensions appleExtensions = _extensionProvider.GetExtension<IAppleExtensions>();
             if (appleExtensions == null)
             {
-                return FailRestore("Unity IAP Apple restore extension is unavailable.", InAppPurchaseErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailRestore("Unity IAP Apple restore extension is unavailable.", InAppPurchaseErrorCode.ProviderUnavailable));
             }
 
             _restoreInProgress = true;
@@ -225,7 +250,8 @@ namespace Vareiko.Foundation.Iap
             try
             {
                 appleExtensions.RestoreTransactions(OnAppleRestoreFinished);
-                return await _restoreCompletion.Task.AttachExternalCancellation(cancellationToken);
+                InAppPurchaseRestoreResult result = await _restoreCompletion.Task.AttachExternalCancellation(cancellationToken);
+                return FinalizeResult(result);
             }
             catch (OperationCanceledException)
             {
@@ -236,17 +262,17 @@ namespace Vareiko.Foundation.Iap
                 Debug.LogException(exception);
                 _restoreCompletion = null;
                 _restoreInProgress = false;
-                return FailRestore("Unity IAP restore failed unexpectedly.", InAppPurchaseErrorCode.RestoreFailed);
+                return FinalizeResult(FailRestore("Unity IAP restore failed unexpectedly.", InAppPurchaseErrorCode.RestoreFailed));
             }
 #else
             await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
             InAppPurchaseRestoreResult result = InAppPurchaseRestoreResult.Succeed(0);
             _signalBus?.Fire(new IapRestoreCompletedSignal(result.RestoredCount));
-            return result;
+            return FinalizeResult(result);
 #endif
 #else
             await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
-            return FailRestore("UNITY_PURCHASING is not enabled. Install Unity IAP package.", InAppPurchaseErrorCode.ProviderUnavailable);
+            return FinalizeResult(FailRestore("UNITY_PURCHASING is not enabled. Install Unity IAP package.", InAppPurchaseErrorCode.ProviderUnavailable));
 #endif
         }
 
@@ -477,6 +503,12 @@ namespace Vareiko.Foundation.Iap
             InAppPurchaseRestoreResult failed = InAppPurchaseRestoreResult.Fail(error, errorCode);
             _signalBus?.Fire(new IapRestoreFailedSignal(failed.Error, failed.ErrorCode));
             return failed;
+        }
+
+        private void EmitTelemetry(string operation, bool success, InAppPurchaseErrorCode errorCode, float startedAt)
+        {
+            float elapsedMs = Mathf.Max(0f, (Time.realtimeSinceStartup - startedAt) * 1000f);
+            _signalBus?.Fire(new IapOperationTelemetrySignal(operation, success, elapsedMs, errorCode));
         }
     }
 }

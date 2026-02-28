@@ -21,6 +21,7 @@ namespace Vareiko.Foundation.Iap
             container.DeclareSignal<IapPurchaseFailedSignal>();
             container.DeclareSignal<IapRestoreCompletedSignal>();
             container.DeclareSignal<IapRestoreFailedSignal>();
+            container.DeclareSignal<IapOperationTelemetrySignal>();
 
             if (config != null)
             {

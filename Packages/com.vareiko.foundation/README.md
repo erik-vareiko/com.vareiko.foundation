@@ -30,6 +30,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Economy service (`IEconomyService`, in-memory baseline).
 - Audio service (`IAudioService`).
 - Observability (`IFoundationLogger`, `IFoundationLogSink`, `ICrashReportingService`, diagnostics snapshot service, diagnostics snapshot export service, diagnostics overlay view, global exception boundary, asset/save diagnostics signals).
+- Revenue/comms observability (`IMonetizationObservabilityService`) with counters and latency metrics for IAP/Ads/Push operations.
 - Startup validation (`IStartupValidationRule`, `StartupValidationRunner`) with summary signal (`StartupValidationCompletedSignal`).
 - UI base and navigation (`UIElement`, `UIScreen`, `UIWindow`, `UIPanel`, `UIItemView`, `UIButtonView`, `IUIService`, `IUINavigationService`, `IUIWindowManager`).
 - UI button actions (`UIWindowOpenButtonAction`, `UIWindowCloseButtonAction`) and button-state binding (`UIBoolButtonInteractableBinder`).
@@ -250,6 +251,19 @@ Example `Packages/manifest.json`:
   - `MonetizationIapBlockedSignal`
   - `MonetizationIapRecordedSignal`
   - `MonetizationSessionResetSignal`
+
+## Revenue/Comms Observability Baseline
+- `IMonetizationObservabilityService` aggregates:
+  - IAP purchase success/failure counters and purchase latency (`last/avg`)
+  - ad show success/failure counters and show latency (`last/avg`)
+  - push permission granted/denied counters and permission latency (`last/avg`)
+  - push topic subscription success/failure counters
+- Telemetry signals:
+  - `IapOperationTelemetrySignal`
+  - `AdsOperationTelemetrySignal`
+  - `PushOperationTelemetrySignal`
+- Diagnostics integration:
+  - `DiagnosticsSnapshot` now includes monetization/comms metrics for QA/support export and runtime overlay consumers.
 
 ## Structured Logging Sinks
 - `UnityFoundationLogger` now writes through `IFoundationLogSink` bindings using structured `FoundationLogEntry`.

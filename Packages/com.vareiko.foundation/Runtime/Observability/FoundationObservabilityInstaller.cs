@@ -43,6 +43,7 @@ namespace Vareiko.Foundation.Observability
                 .IfNotBound();
 
             container.Bind<IFoundationLogger>().To<UnityFoundationLogger>().AsSingle();
+            container.BindInterfacesAndSelfTo<MonetizationObservabilityService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<FoundationDiagnosticsService>().AsSingle().NonLazy();
             container.Bind<IDiagnosticsSnapshotExportService>().To<DiagnosticsSnapshotExportService>().AsSingle();
             container.BindInterfacesAndSelfTo<GlobalExceptionHandler>().AsSingle().NonLazy();

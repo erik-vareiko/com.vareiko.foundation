@@ -73,3 +73,4 @@
 - Push notifications module provides consent-aware permission/topic abstraction with simulated/null providers.
 - Push notifications module includes Unity adapter path (`UnityPushNotificationService`) guarded by `FOUNDATION_UNITY_NOTIFICATIONS`.
 - Monetization module provides centralized cooldown/session-cap policy for ad and IAP operations via `IMonetizationPolicyService`.
+- Observability diagnostics snapshot includes revenue/comms counters and latency metrics sourced from monetization telemetry signals.

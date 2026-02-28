@@ -52,26 +52,33 @@ namespace Vareiko.Foundation.Push
         public async UniTask<PushInitializeResult> InitializeAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = Time.realtimeSinceStartup;
+
+            PushInitializeResult FinalizeResult(PushInitializeResult result)
+            {
+                EmitTelemetry("initialize", result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
 
             if (_config == null)
             {
-                return FailInitialize("Push notifications config is not assigned.", PushNotificationErrorCode.ConfigurationInvalid);
+                return FinalizeResult(FailInitialize("Push notifications config is not assigned.", PushNotificationErrorCode.ConfigurationInvalid));
             }
 
             if (_config.Provider != PushNotificationProviderType.UnityNotifications)
             {
-                return FailInitialize("Push notifications provider is not set to UnityNotifications.", PushNotificationErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailInitialize("Push notifications provider is not set to UnityNotifications.", PushNotificationErrorCode.ProviderUnavailable));
             }
 
             if (!ValidateDefaultTopics(out PushInitializeResult validationFailure))
             {
-                return validationFailure;
+                return FinalizeResult(validationFailure);
             }
 
             if (!IsDependencyAvailable)
             {
                 await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
-                return FailInitialize("Push notifications dependency is unavailable. Define FOUNDATION_UNITY_NOTIFICATIONS and install mobile notifications/push SDK.", PushNotificationErrorCode.ProviderUnavailable);
+                return FinalizeResult(FailInitialize("Push notifications dependency is unavailable. Define FOUNDATION_UNITY_NOTIFICATIONS and install mobile notifications/push SDK.", PushNotificationErrorCode.ProviderUnavailable));
             }
 
             _topics.Clear();
@@ -90,30 +97,37 @@ namespace Vareiko.Foundation.Push
                 }
             }
 
-            return PushInitializeResult.Succeed();
+            return FinalizeResult(PushInitializeResult.Succeed());
         }
 
         public async UniTask<PushPermissionResult> RequestPermissionAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            float startedAt = Time.realtimeSinceStartup;
+
+            PushPermissionResult FinalizeResult(PushPermissionResult result)
+            {
+                EmitTelemetry("request_permission", result.Success, result.ErrorCode, startedAt);
+                return result;
+            }
 
             if (!_initialized)
             {
-                return PushPermissionResult.Fail(PushNotificationPermissionStatus.Unknown, "Push notifications service is not initialized.", PushNotificationErrorCode.NotInitialized);
+                return FinalizeResult(PushPermissionResult.Fail(PushNotificationPermissionStatus.Unknown, "Push notifications service is not initialized.", PushNotificationErrorCode.NotInitialized));
             }
 
             if (!HasPushConsent())
             {
                 _permissionStatus = PushNotificationPermissionStatus.Denied;
                 _signalBus?.Fire(new PushPermissionChangedSignal(_permissionStatus));
-                return PushPermissionResult.Fail(_permissionStatus, "Push notifications consent is required.", PushNotificationErrorCode.ConsentDenied);
+                return FinalizeResult(PushPermissionResult.Fail(_permissionStatus, "Push notifications consent is required.", PushNotificationErrorCode.ConsentDenied));
             }
 
             if (!IsDependencyAvailable)
             {
                 _permissionStatus = PushNotificationPermissionStatus.Denied;
                 _signalBus?.Fire(new PushPermissionChangedSignal(_permissionStatus));
-                return PushPermissionResult.Fail(_permissionStatus, "Push notifications dependency is unavailable.", PushNotificationErrorCode.ProviderUnavailable);
+                return FinalizeResult(PushPermissionResult.Fail(_permissionStatus, "Push notifications dependency is unavailable.", PushNotificationErrorCode.ProviderUnavailable));
             }
 
             bool granted = await RequestPlatformPermissionAsync(cancellationToken);
@@ -121,7 +135,7 @@ namespace Vareiko.Foundation.Push
             {
                 _permissionStatus = PushNotificationPermissionStatus.Denied;
                 _signalBus?.Fire(new PushPermissionChangedSignal(_permissionStatus));
-                return PushPermissionResult.Fail(_permissionStatus, "Push notifications permission denied.", PushNotificationErrorCode.PermissionDenied);
+                return FinalizeResult(PushPermissionResult.Fail(_permissionStatus, "Push notifications permission denied.", PushNotificationErrorCode.PermissionDenied));
             }
 
             _permissionStatus = PushNotificationPermissionStatus.Granted;
@@ -133,7 +147,7 @@ namespace Vareiko.Foundation.Push
             }
 
             _signalBus?.Fire(new PushTokenUpdatedSignal(_deviceToken));
-            return PushPermissionResult.Succeed();
+            return FinalizeResult(PushPermissionResult.Succeed());
         }
 
         public UniTask<PushDeviceTokenResult> GetDeviceTokenAsync(CancellationToken cancellationToken = default)
@@ -373,6 +387,12 @@ namespace Vareiko.Foundation.Push
             PushTopicResult result = PushTopicResult.Fail(topic, error, errorCode);
             _signalBus?.Fire(new PushTopicUnsubscriptionFailedSignal(result.Topic, result.Error, result.ErrorCode));
             return result;
+        }
+
+        private void EmitTelemetry(string operation, bool success, PushNotificationErrorCode errorCode, float startedAt)
+        {
+            float elapsedMs = Mathf.Max(0f, (Time.realtimeSinceStartup - startedAt) * 1000f);
+            _signalBus?.Fire(new PushOperationTelemetrySignal(operation, success, elapsedMs, errorCode));
         }
     }
 }

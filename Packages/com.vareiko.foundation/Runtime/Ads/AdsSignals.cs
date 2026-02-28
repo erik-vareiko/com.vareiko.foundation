@@ -83,4 +83,22 @@ namespace Vareiko.Foundation.Ads
             RewardAmount = rewardAmount < 0 ? 0 : rewardAmount;
         }
     }
+
+    public readonly struct AdsOperationTelemetrySignal
+    {
+        public readonly string Operation;
+        public readonly string PlacementId;
+        public readonly bool Success;
+        public readonly float DurationMs;
+        public readonly AdsErrorCode ErrorCode;
+
+        public AdsOperationTelemetrySignal(string operation, string placementId, bool success, float durationMs, AdsErrorCode errorCode)
+        {
+            Operation = operation ?? string.Empty;
+            PlacementId = placementId ?? string.Empty;
+            Success = success;
+            DurationMs = durationMs < 0f ? 0f : durationMs;
+            ErrorCode = errorCode;
+        }
+    }
 }

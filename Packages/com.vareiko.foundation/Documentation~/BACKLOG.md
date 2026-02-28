@@ -31,6 +31,7 @@ Production-ready "new project starter" package:
 - Unity IAP production adapter path (`UnityInAppPurchaseService`). [DONE in 0.3.39]
 - Unity push notifications adapter path (`UnityPushNotificationService`). [DONE in 0.3.40]
 - Monetization policy hardening baseline (`IMonetizationPolicyService`). [DONE in 0.3.41]
+- Revenue/comms observability baseline (`IMonetizationObservabilityService`). [DONE in 0.3.42]
 
 ## Progress
 1. Completed in `0.3.5` (Milestone A baseline):
@@ -82,6 +83,8 @@ Production-ready "new project starter" package:
 - Unity push notifications adapter baseline: `UnityPushNotificationService` wired through `FoundationPushNotificationInstaller` for `PushNotificationProviderType.UnityNotifications`, with dependency guard + bridge token entry point and runtime tests.
 19. Completed in `0.3.41` (monetization hardening increment):
 - Monetization policy baseline: `IMonetizationPolicyService`, `MonetizationPolicyConfig`, cooldown/session-cap decisions for ad and IAP flows, installer integration and runtime tests.
+20. Completed in `0.3.42` (operations increment):
+- Revenue/comms observability baseline: monetization counters and latency metrics (`IAP`/`Ads`/`Push`) in diagnostics snapshot via `IMonetizationObservabilityService`.
 
 ## v0.4 Scope
 ### P0 (must have)

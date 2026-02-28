@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.42
+- Added revenue/comms observability baseline:
+  - `IMonetizationObservabilityService`
+  - `MonetizationObservabilityService`
+  - `MonetizationObservabilitySnapshot`
+- Extended diagnostics snapshot with monetization counters and latency fields:
+  - IAP purchase success/failure + latency
+  - ad show success/failure + latency
+  - push permission/topic subscription counters + latency
+- Added telemetry signals for monetization operations:
+  - `IapOperationTelemetrySignal`
+  - `AdsOperationTelemetrySignal`
+  - `PushOperationTelemetrySignal`
+- Wired telemetry emission in production/runtime services:
+  - `UnityInAppPurchaseService`
+  - `UnityPushNotificationService`
+  - `SimulatedAdsService`
+- Added runtime coverage:
+  - `MonetizationObservabilityServiceTests`
+  - expanded `FoundationDiagnosticsServiceTests`
+
 ## 0.3.41
 - Added monetization policy hardening baseline:
   - `IMonetizationPolicyService`
