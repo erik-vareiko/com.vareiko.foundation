@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.35
+- Added starter environment profile presets baseline (`dev/stage/prod`):
+  - `EnvironmentConfig.ApplyStarterPresets()`
+  - built-in preset constants:
+    - `EnvironmentConfig.StarterProfileDev`
+    - `EnvironmentConfig.StarterProfileStage`
+    - `EnvironmentConfig.StarterProfileProd`
+- Added editor tooling for starter presets:
+  - menu: `Tools/Vareiko/Foundation/Create Starter Environment Config`
+  - context action: `Apply Starter Presets (dev/stage/prod)` on `EnvironmentConfig`
+- Added runtime coverage:
+  - `EnvironmentConfigStarterPresetsTests`
+
 ## 0.3.34
 - Upgraded editor project validator with release-gate checks (`Tools/Vareiko/Foundation/Validate Project`):
   - package/changelog version alignment validation

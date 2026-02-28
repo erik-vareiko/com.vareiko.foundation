@@ -10,7 +10,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Application lifecycle service (`IApplicationLifecycleService`) with pause/focus/quit events.
 - Asset management (`IAssetService`, Resources/Addressables providers, reference tracking).
 - Config registry (`IConfigService`, `ConfigRegistry` bootstrap task).
-- Runtime environments (`IEnvironmentService`, profile-based key/value access).
+- Runtime environments (`IEnvironmentService`, profile-based key/value access, starter presets for `dev/stage/prod`).
 - Connectivity monitoring (`IConnectivityService`) with focus-regained refresh policy.
 - Feature flags (`IFeatureFlagService`) with remote-config fallback and local overrides.
 - Localization baseline (`ILocalizationService`, language switching and fallback lookups).
@@ -106,8 +106,18 @@ Example `Packages/manifest.json`:
 - Runtime tests now include core modules (`Environment`, `Economy`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
 - Runtime module scaffolder generates `IService/Service/Config/Signals/Installer` and can optionally generate a test stub plus integration sample installer into your `Assets` folder.
 - Project validator menu: `Tools/Vareiko/Foundation/Validate Project` (scene wiring + release-gate checks).
+- Starter environment presets menu: `Tools/Vareiko/Foundation/Create Starter Environment Config`.
 - CI workflow is available at `.github/workflows/ci.yml`; set `UNITY_LICENSE` secret to enable Unity EditMode + PlayMode tests in GitHub Actions.
 - Sample `Basic Setup` now includes a ready scene (`FoundationSampleScene`) and bootstrap helper (`FoundationSampleSceneBootstrap`).
+
+## Starter Environment Presets
+- `EnvironmentConfig.ApplyStarterPresets()` fills baseline profiles:
+  - `dev`
+  - `stage`
+  - `prod`
+- Editor helpers:
+  - create preset asset: `Tools/Vareiko/Foundation/Create Starter Environment Config`
+  - apply presets to existing asset via context menu on `EnvironmentConfig`
 
 ## Input Rebinds (New Input System)
 - `FoundationInputInstaller` binds `NewInputSystemAdapter` first when `ENABLE_INPUT_SYSTEM` is available.

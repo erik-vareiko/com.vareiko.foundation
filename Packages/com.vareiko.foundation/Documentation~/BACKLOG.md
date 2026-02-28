@@ -65,6 +65,8 @@ Production-ready "new project starter" package:
 - Scaffolder upgrade baseline: optional test stub and integration sample installer generation.
 12. Completed in `0.3.34` (developer experience increment):
 - Project validator release-gate baseline: version/dependency/meta/merge-marker/Unity-version checks in editor validation flow.
+13. Completed in `0.3.35` (developer experience increment):
+- Starter template profile presets baseline (`dev` / `stage` / `prod`) with editor creation/apply tooling.
 
 ## v0.4 Scope
 ### P0 (must have)

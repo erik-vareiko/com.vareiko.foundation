@@ -1,6 +1,6 @@
 {
   "name": "com.vareiko.foundation",
-  "version": "0.3.34",
+  "version": "0.3.35",
   "displayName": "Vareiko Foundation",
   "description": "Zenject-first foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
   "unity": "2022.3",
