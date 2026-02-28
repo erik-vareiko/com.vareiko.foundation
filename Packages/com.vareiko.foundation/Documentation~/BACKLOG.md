@@ -98,6 +98,8 @@ Production-ready "new project starter" package:
 - Attribution abstraction baseline with external bridge provider path (`ExternalAttributionBridgeService`) and runtime coverage.
 24. Completed in `1.0.0` (release closure):
 - Stable `1.0.0` package release published with closed roadmap scope.
+25. Completed in `1.0.1` (docs increment):
+- Added detailed package usage guide (`USAGE_GUIDE.md`) with practical integration patterns and bridge examples.
 
 ## v0.4 Scope
 ### P0 (must have)

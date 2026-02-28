@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+- Added detailed usage guide:
+  - `Documentation~/USAGE_GUIDE.md`
+  - step-by-step setup flow, module usage patterns, bridge integration examples, testing and release checklists
+- Updated `README.md` with direct link to the full usage guide.
+
 ## 1.0.0
 - First stable release of `com.vareiko.foundation`.
 - Closed `v1.0` monetization/comms roadmap:

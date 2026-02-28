@@ -95,6 +95,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - diagnostics snapshot is available from `IFoundationDiagnosticsService`
 
 Detailed flow with checklist: `Documentation~/STARTER_FLOW.md`.
+Full practical guide: `Documentation~/USAGE_GUIDE.md`.
 
 ## Dependencies
 - Zenject (`Zenject` asmdef, OpenUPM package `net.bobbo.extenject`)
