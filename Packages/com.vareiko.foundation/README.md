@@ -68,6 +68,31 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `ConfigRegistry[]` (optional, auto-registered as bootstrap tasks)
 - `IBootstrapTask` MonoBehaviours
 
+## Quick Start (First 15 Minutes)
+1. Create one bootstrap scene and one gameplay scene.
+2. In bootstrap scene add:
+- `ProjectContext` + `FoundationProjectInstaller`.
+- `EnvironmentConfig` asset with `ApplyStarterPresets()` (`dev/stage/prod`).
+3. In gameplay scene add:
+- `SceneContext` + `FoundationSceneInstaller`.
+- UI canvas with loading overlay presenter (optional but recommended).
+4. In `FoundationProjectInstaller` assign only minimum configs first:
+- `EnvironmentConfig`
+- `ObservabilityConfig`
+- `SaveSecurityConfig`
+- `AutosaveConfig`
+5. Leave provider-heavy modules in safe fallback mode for first run:
+- backend -> `None`
+- IAP -> `None` or `Simulated`
+- ads -> `None` or `Simulated`
+- push -> `None` or `Simulated`
+6. Enter Play Mode and verify:
+- boot reaches your expected app state
+- no startup validation errors
+- diagnostics snapshot is available from `IFoundationDiagnosticsService`
+
+Detailed flow with checklist: `Documentation~/STARTER_FLOW.md`.
+
 ## Dependencies
 - Zenject (`Zenject` asmdef, OpenUPM package `net.bobbo.extenject`)
 - UniTask (`UniTask` asmdef, OpenUPM package `com.cysharp.unitask`)

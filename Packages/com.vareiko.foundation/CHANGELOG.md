@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.43
+- Closed release docs baseline for package onboarding:
+  - added starter flow guide (`Documentation~/STARTER_FLOW.md`) with clean-project wiring and first-run checklist
+  - expanded `README.md` with a practical "first 15 minutes" setup path and config profile guidance
+  - updated architecture docs with direct starter-flow reference and runtime startup sequence summary
+- Updated backlog release-docs milestone status to done.
+
 ## 0.3.42
 - Added revenue/comms observability baseline:
   - `IMonetizationObservabilityService`

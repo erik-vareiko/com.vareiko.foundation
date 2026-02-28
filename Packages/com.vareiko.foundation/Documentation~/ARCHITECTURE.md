@@ -13,6 +13,15 @@
   - `NewInputSystemAdapter` is preferred when `ENABLE_INPUT_SYSTEM` is defined.
   - `LegacyKeyboardInputAdapter` + `NullInputAdapter` remain fallback.
   - `IInputRebindService` persists binding overrides through `IInputRebindStorage`.
+- Practical onboarding flow for a fresh host project is documented in `Documentation~/STARTER_FLOW.md`.
+
+## Starter Runtime Flow
+1. Boot scene creates `ProjectContext` and installs global services.
+2. `FoundationRuntimeInstaller` installs core modules in deterministic order.
+3. Bootstrap tasks run through `BootstrapRunner`.
+4. Startup validation emits `StartupValidationCompletedSignal`.
+5. App transitions into initial state or safe `AppState.Error` fallback on fatal boot failure.
+6. Gameplay scenes provide `SceneContext` with scene-local UI/navigation bindings.
 
 ## Runtime Bootstrap Order
 1. `FoundationTimeInstaller`

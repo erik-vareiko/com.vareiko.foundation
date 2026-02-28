@@ -85,6 +85,8 @@ Production-ready "new project starter" package:
 - Monetization policy baseline: `IMonetizationPolicyService`, `MonetizationPolicyConfig`, cooldown/session-cap decisions for ad and IAP flows, installer integration and runtime tests.
 20. Completed in `0.3.42` (operations increment):
 - Revenue/comms observability baseline: monetization counters and latency metrics (`IAP`/`Ads`/`Push`) in diagnostics snapshot via `IMonetizationObservabilityService`.
+21. Completed in `0.3.43` (release docs increment):
+- Release docs closure baseline: practical startup flow doc (`STARTER_FLOW.md`) plus updated README/architecture onboarding guidance.
 
 ## v0.4 Scope
 ### P0 (must have)
@@ -179,10 +181,11 @@ File targets:
 `Runtime/Input/NewInputSystemAdapter.cs` (new)
 `Runtime/Input/InputRebindStorage.cs` (new)
 `Runtime/Input/FoundationInputInstaller.cs`
-4. Release docs update. [IN PROGRESS]
+4. Release docs update. [DONE in 0.3.43]
 File targets:
 `README.md`
 `Documentation~/ARCHITECTURE.md`
+`Documentation~/STARTER_FLOW.md`
 `Documentation~/BACKLOG.md`
 `CHANGELOG.md`
 
