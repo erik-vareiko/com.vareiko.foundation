@@ -67,5 +67,6 @@
 - Editor project validator includes release-gate checks (package version/dependencies, script `.meta` completeness, merge markers and Unity version parse).
 - Environment module includes starter profile presets (`dev`, `stage`, `prod`) for quick project bootstrap.
 - IAP module provides provider abstraction with a simulated baseline and safe null fallback.
+- IAP module includes Unity IAP adapter path (`UnityInAppPurchaseService`) with dependency guard when `UNITY_PURCHASING` is unavailable.
 - Ads module provides rewarded/interstitial abstraction with consent-aware gate and simulated/null providers.
 - Push notifications module provides consent-aware permission/topic abstraction with simulated/null providers.

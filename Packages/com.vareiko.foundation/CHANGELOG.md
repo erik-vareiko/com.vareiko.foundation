@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.39
+- Added Unity IAP provider adapter path:
+  - `UnityInAppPurchaseService`
+  - integrated into `FoundationIapInstaller` for `InAppPurchaseProviderType.UnityIap`
+- Added dependency-safe fallback behavior:
+  - when `UNITY_PURCHASING` is unavailable, initialization/purchase/restore return provider-unavailable failures with explicit diagnostics
+- Added runtime coverage:
+  - `UnityInAppPurchaseServiceTests`
+
 ## 0.3.38
 - Added push notifications abstraction baseline with consent-aware permission/topic flow:
   - `IPushNotificationService`

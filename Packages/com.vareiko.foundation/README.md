@@ -70,6 +70,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - UniTask (`UniTask` asmdef, OpenUPM package `com.cysharp.unitask`)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 - Unity Input System (`Unity.InputSystem` asmdef / package `com.unity.inputsystem`)
+- Optional: Unity IAP (`UNITY_PURCHASING` define from package `com.unity.purchasing`)
 
 `com.vareiko.foundation` declares Zenject/UniTask as package dependencies.
 Host project must have OpenUPM scoped registry configured.
@@ -177,7 +178,8 @@ Example `Packages/manifest.json`:
 - `IapConfig.Provider` supports:
   - `None` (safe fallback to `NullInAppPurchaseService`)
   - `Simulated` (`SimulatedInAppPurchaseService` for development flows)
-  - `UnityIap` (reserved provider id for production adapter wiring)
+  - `UnityIap` (`UnityInAppPurchaseService` adapter; requires Unity IAP package)
+- `UnityInAppPurchaseService` maps Unity Purchasing initialize/purchase/restore callbacks into `InAppPurchase*` models and IAP signals.
 - Signals:
   - `IapInitializedSignal`
   - `IapPurchaseSucceededSignal`

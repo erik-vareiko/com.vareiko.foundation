@@ -31,6 +31,10 @@ namespace Vareiko.Foundation.Iap
             {
                 container.BindInterfacesAndSelfTo<SimulatedInAppPurchaseService>().AsSingle().NonLazy();
             }
+            else if (config != null && config.Provider == InAppPurchaseProviderType.UnityIap)
+            {
+                container.BindInterfacesAndSelfTo<UnityInAppPurchaseService>().AsSingle().NonLazy();
+            }
             else
             {
                 container.Bind<IInAppPurchaseService>().To<NullInAppPurchaseService>().AsSingle();

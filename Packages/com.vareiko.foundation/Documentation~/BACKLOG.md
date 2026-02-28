@@ -28,6 +28,7 @@ Production-ready "new project starter" package:
 - IAP abstraction + provider baseline. [DONE in 0.3.36]
 - Ads abstraction (`rewarded/interstitial`) behind consent. [DONE in 0.3.37]
 - Push notification abstraction baseline. [DONE in 0.3.38]
+- Unity IAP production adapter path (`UnityInAppPurchaseService`). [DONE in 0.3.39]
 
 ## Progress
 1. Completed in `0.3.5` (Milestone A baseline):
@@ -73,6 +74,8 @@ Production-ready "new project starter" package:
 - Ads abstraction baseline: `IAdsService`, `AdsConfig`, simulated/null providers and consent-aware rewarded/interstitial flow.
 16. Completed in `0.3.38` (monetization increment):
 - Push notification abstraction baseline: `IPushNotificationService`, `PushNotificationConfig`, simulated/null providers and consent-aware permission/topic flow.
+17. Completed in `0.3.39` (monetization production increment):
+- Unity IAP adapter baseline: `UnityInAppPurchaseService` wired through `FoundationIapInstaller` for `InAppPurchaseProviderType.UnityIap`, with dependency guard fallback and runtime tests.
 
 ## v0.4 Scope
 ### P0 (must have)
