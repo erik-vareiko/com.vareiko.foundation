@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.1.0
+- Added typed cloud-command contracts and service:
+  - `CloudCommandRequest`
+  - `CloudCommandResponse`
+  - `ICloudCommandService`
+  - `CloudCommandService`
+  - `BackendCommandConfig`
+  - `ICloudCommandRetryClassifier` / `CloudCommandRetryClassifier`
+- Added command reliability queue v2 with legacy migration:
+  - `CloudCommandQueueItem`
+  - `ICloudCommandQueueStore`
+  - `PlayerPrefsCloudCommandQueueStore`
+  - queue metadata persistence (`AttemptCount`, `FirstQueuedUnixMs`, `LastAttemptUnixMs`)
+  - loss-tolerant legacy queue migration from `cloud_function_queue` format
+  - queue TTL enforcement via `BackendCommandConfig.QueueTtlHours`
+- Added deterministic RNG module:
+  - `IDeterministicRngService`
+  - `IDeterministicRngStream`
+  - `RngStreamState`
+  - `DeterministicRngService` (`PCG32` stream generator)
+  - `DeterministicRngConfig`
+  - `FoundationRngInstaller`
+- Updated runtime composition and installers:
+  - `FoundationRuntimeInstaller` now installs RNG module
+  - `FoundationProjectInstaller` now exposes:
+    - `BackendCommandConfig`
+    - `DeterministicRngConfig`
+  - `FoundationBackendInstaller` now binds command service and command queue store
+- Added runtime coverage:
+  - `CloudCommandServiceTests`
+  - `CloudCommandRetryClassifierTests`
+  - `PlayerPrefsCloudCommandQueueStoreTests`
+  - `DeterministicRngServiceTests`
+
 ## 1.0.2
 - Added printable PDF guide artifact:
   - `Documentation~/USAGE_GUIDE.pdf`

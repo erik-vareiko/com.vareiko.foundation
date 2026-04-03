@@ -8,6 +8,7 @@ namespace Vareiko.Foundation.Backend
             DiContainer container,
             BackendConfig config = null,
             BackendReliabilityConfig reliabilityConfig = null,
+            BackendCommandConfig commandConfig = null,
             RemoteConfigCacheConfig remoteConfigCacheConfig = null)
         {
             if (container.HasBinding<IBackendService>())
@@ -37,6 +38,11 @@ namespace Vareiko.Foundation.Backend
             if (reliabilityConfig != null)
             {
                 container.BindInstance(reliabilityConfig).IfNotBound();
+            }
+
+            if (commandConfig != null)
+            {
+                container.BindInstance(commandConfig).IfNotBound();
             }
 
             if (remoteConfigCacheConfig != null)
@@ -73,8 +79,11 @@ namespace Vareiko.Foundation.Backend
 
             container.Bind<IBackendService>().To<RetryingBackendService>().AsSingle();
             container.Bind<ICloudFunctionQueueStore>().To<PlayerPrefsCloudFunctionQueueStore>().AsSingle().IfNotBound();
+            container.Bind<ICloudCommandQueueStore>().To<PlayerPrefsCloudCommandQueueStore>().AsSingle().IfNotBound();
+            container.Bind<ICloudCommandRetryClassifier>().To<CloudCommandRetryClassifier>().AsSingle().IfNotBound();
             container.BindInterfacesAndSelfTo<CachedRemoteConfigService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<ReliableCloudFunctionService>().AsSingle().NonLazy();
+            container.BindInterfacesAndSelfTo<CloudCommandService>().AsSingle().NonLazy();
         }
     }
 }

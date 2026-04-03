@@ -12,6 +12,7 @@ using Vareiko.Foundation.Localization;
 using Vareiko.Foundation.Monetization;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Push;
+using Vareiko.Foundation.Rng;
 using Vareiko.Foundation.Save;
 using UnityEngine;
 using Zenject;
@@ -34,11 +35,13 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private SaveSecurityConfig _saveSecurityConfig;
         [SerializeField] private AutosaveConfig _autosaveConfig;
         [SerializeField] private BackendReliabilityConfig _backendReliabilityConfig;
+        [SerializeField] private BackendCommandConfig _backendCommandConfig;
         [SerializeField] private RemoteConfigCacheConfig _remoteConfigCacheConfig;
         [SerializeField] private FeatureFlagsConfig _featureFlagsConfig;
         [SerializeField] private EnvironmentConfig _environmentConfig;
         [SerializeField] private LocalizationConfig _localizationConfig;
         [SerializeField] private ObservabilityConfig _observabilityConfig;
+        [SerializeField] private DeterministicRngConfig _deterministicRngConfig;
 
         public override void InstallBindings()
         {
@@ -58,11 +61,13 @@ namespace Vareiko.Foundation.Installers
                 _saveSecurityConfig,
                 _autosaveConfig,
                 _backendReliabilityConfig,
+                _backendCommandConfig,
                 _remoteConfigCacheConfig,
                 _featureFlagsConfig,
                 _environmentConfig,
                 _localizationConfig,
-                _observabilityConfig);
+                _observabilityConfig,
+                _deterministicRngConfig);
         }
     }
 }

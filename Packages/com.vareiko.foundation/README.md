@@ -39,6 +39,8 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Confirm dialog template (`IUIConfirmDialogService`, `UIConfirmDialogPresenter`, `UIConfirmDialogRequest`) for reusable modal confirmation flows.
 - Analytics abstraction (`IAnalyticsService`).
 - Backend abstraction (`IBackendService`, `IRemoteConfigService`, `ICloudFunctionService`) with PlayFab entry adapter, retry and persistent cloud-function queue.
+- Typed backend command abstraction (`ICloudCommandService`) with idempotency metadata, retry classification and persistent queue migration.
+- Deterministic RNG module (`IDeterministicRngService`, `IDeterministicRngStream`) for seed/scoped reproducible streams.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
 
 ## Installation
@@ -51,6 +53,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `AttributionConfig`
 - `BackendConfig`
 - `BackendReliabilityConfig`
+- `BackendCommandConfig`
 - `AssetServiceConfig`
 - `EconomyConfig`
 - `IapConfig`
@@ -66,6 +69,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `EnvironmentConfig`
 - `LocalizationConfig`
 - `ObservabilityConfig`
+- `DeterministicRngConfig`
 - `UIRegistry` (or legacy `UIScreenRegistry`)
 - `ConfigRegistry[]` (optional, auto-registered as bootstrap tasks)
 - `IBootstrapTask` MonoBehaviours
@@ -142,6 +146,7 @@ Example `Packages/manifest.json`:
 - `PlayFabCloudFunctionService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.
 - `PlayFabRemoteConfigService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.
 - By default backend services run in safe null mode (`NullBackendService`, `NullRemoteConfigService`, `NullCloudFunctionService`).
+- `CloudCommandService` sends typed command envelopes through `ICloudFunctionService` transport using a gateway function (`CommandGateway` by default).
 - Analytics is privacy-first by default: events are blocked until consent is explicitly collected and granted.
 - Runtime smoke tests are included in `Tests/Runtime` (`Vareiko.Foundation.Tests` assembly).
 - Runtime tests now include core modules (`Environment`, `Economy`, `Iap`, `Ads`, `Push`, `Monetization`, `Settings`, `Analytics`, `Config`, `Input`, `Common`, `Observability`, `Audio`) and infrastructure guards (`ConfigRegistry`, `GlobalExceptionHandler`) in addition to previously covered areas.
@@ -195,6 +200,45 @@ Example `Packages/manifest.json`:
   - `ErrorCode` (`BackendErrorCode`)
   - `IsRetryable`
 - `NullBackendService` and PlayFab adapters now return consistent mapped backend errors.
+
+## Cloud Command Baseline
+- `ICloudCommandService` exposes:
+  - `ExecuteAsync(CloudCommandRequest, CancellationToken)`
+- Request contract includes:
+  - `CommandName`
+  - `IdempotencyKey` (UUIDv7)
+  - `CorrelationId`
+  - `RequestVersion`
+  - `PayloadJson`
+  - `PlayerId`
+  - `ClientUnixMs`
+  - `Meta`
+- Response contract includes:
+  - `Success`
+  - `IsRetryable`
+  - `ErrorCode`
+  - `ErrorMessage`
+  - `ResponseJson`
+  - `ProcessedIdempotencyKey`
+  - `ServerUnixMs`
+- Reliability baseline:
+  - retryability classifier (`ICloudCommandRetryClassifier`)
+  - persistent queue v2 (`ICloudCommandQueueStore`)
+  - legacy queue migration from old cloud-function format
+  - queue TTL via `BackendCommandConfig.QueueTtlHours`
+
+## Deterministic RNG Baseline
+- `IDeterministicRngService` exposes:
+  - `Initialize(rootSeed)`
+  - `CreateStream(scope)`
+  - `RestoreStream(scope, state)`
+- `IDeterministicRngStream` exposes:
+  - `NextInt(minInclusive, maxExclusive)`
+  - `NextFloat01()`
+  - `NextChance(probability01)`
+  - `PickWeightedIndex(weights)`
+  - `CaptureState()`
+- RNG implementation uses fixed `PCG32` algorithm to keep cross-platform deterministic behavior.
 
 ## Cloud Save Sync Baseline
 - `ICloudSaveSyncService` provides:

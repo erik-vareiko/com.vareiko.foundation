@@ -20,6 +20,7 @@ using Vareiko.Foundation.Loading;
 using Vareiko.Foundation.Monetization;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Push;
+using Vareiko.Foundation.Rng;
 using Vareiko.Foundation.Save;
 using Vareiko.Foundation.SceneFlow;
 using Vareiko.Foundation.Settings;
@@ -47,14 +48,17 @@ namespace Vareiko.Foundation
             SaveSecurityConfig saveSecurityConfig = null,
             AutosaveConfig autosaveConfig = null,
             BackendReliabilityConfig backendReliabilityConfig = null,
+            BackendCommandConfig backendCommandConfig = null,
             RemoteConfigCacheConfig remoteConfigCacheConfig = null,
             FeatureFlagsConfig featureFlagsConfig = null,
             EnvironmentConfig environmentConfig = null,
             LocalizationConfig localizationConfig = null,
-            ObservabilityConfig observabilityConfig = null)
+            ObservabilityConfig observabilityConfig = null,
+            DeterministicRngConfig deterministicRngConfig = null)
         {
             FoundationTimeInstaller.Install(container);
             FoundationCommonInstaller.Install(container);
+            FoundationRngInstaller.Install(container, deterministicRngConfig);
             FoundationEnvironmentInstaller.Install(container, environmentConfig);
             FoundationAppInstaller.Install(container);
             FoundationBootstrapInstaller.Install(container);
@@ -76,7 +80,7 @@ namespace Vareiko.Foundation
             FoundationAudioInstaller.Install(container);
             FoundationAnalyticsInstaller.Install(container, analyticsConfig);
             FoundationAttributionInstaller.Install(container, attributionConfig);
-            FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, remoteConfigCacheConfig);
+            FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, backendCommandConfig, remoteConfigCacheConfig);
             FoundationFeatureFlagsInstaller.Install(container, featureFlagsConfig);
             FoundationValidationInstaller.Install(container);
             FoundationObservabilityInstaller.Install(container, observabilityConfig);

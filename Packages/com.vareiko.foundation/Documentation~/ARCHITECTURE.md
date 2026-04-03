@@ -26,31 +26,32 @@
 ## Runtime Bootstrap Order
 1. `FoundationTimeInstaller`
 2. `FoundationCommonInstaller`
-3. `FoundationEnvironmentInstaller`
-4. `FoundationAppInstaller`
-5. `FoundationBootstrapInstaller`
-6. `FoundationConfigInstaller`
-7. `FoundationAssetInstaller`
-8. `FoundationConnectivityInstaller`
-9. `FoundationInputInstaller`
-10. `FoundationSceneFlowInstaller`
-11. `FoundationLoadingInstaller`
-12. `FoundationSaveInstaller`
-13. `FoundationConsentInstaller`
-14. `FoundationSettingsInstaller`
-15. `FoundationLocalizationInstaller`
-16. `FoundationEconomyInstaller`
-17. `FoundationIapInstaller`
-18. `FoundationAdsInstaller`
-19. `FoundationPushNotificationInstaller`
-20. `FoundationMonetizationInstaller`
-21. `FoundationAudioInstaller`
-22. `FoundationAnalyticsInstaller`
-23. `FoundationAttributionInstaller`
-24. `FoundationBackendInstaller`
-25. `FoundationFeatureFlagsInstaller`
-26. `FoundationValidationInstaller`
-27. `FoundationObservabilityInstaller`
+3. `FoundationRngInstaller`
+4. `FoundationEnvironmentInstaller`
+5. `FoundationAppInstaller`
+6. `FoundationBootstrapInstaller`
+7. `FoundationConfigInstaller`
+8. `FoundationAssetInstaller`
+9. `FoundationConnectivityInstaller`
+10. `FoundationInputInstaller`
+11. `FoundationSceneFlowInstaller`
+12. `FoundationLoadingInstaller`
+13. `FoundationSaveInstaller`
+14. `FoundationConsentInstaller`
+15. `FoundationSettingsInstaller`
+16. `FoundationLocalizationInstaller`
+17. `FoundationEconomyInstaller`
+18. `FoundationIapInstaller`
+19. `FoundationAdsInstaller`
+20. `FoundationPushNotificationInstaller`
+21. `FoundationMonetizationInstaller`
+22. `FoundationAudioInstaller`
+23. `FoundationAnalyticsInstaller`
+24. `FoundationAttributionInstaller`
+25. `FoundationBackendInstaller`
+26. `FoundationFeatureFlagsInstaller`
+27. `FoundationValidationInstaller`
+28. `FoundationObservabilityInstaller`
 
 ## Core Principles
 - Fail-fast dependency resolution.
@@ -70,6 +71,8 @@
 - Startup validation includes baseline production-safety rules for save security, backend config and observability config.
 - Backend remote-config layer supports explicit cache invalidation and forced refresh control via `IRemoteConfigCacheService`.
 - Backend auth/data result models include normalized error mapping (`BackendErrorCode`) and retryability metadata.
+- Backend command layer provides typed idempotent envelopes (`ICloudCommandService`) with retry classification and queue migration support.
+- RNG layer provides deterministic scoped streams (`IDeterministicRngService`, `IDeterministicRngStream`) with serializable stream state.
 - Save layer includes cloud sync orchestration (`ICloudSaveSyncService`) with resolver-based conflict choices (`KeepLocal` / `UseCloud` / `Merge`).
 - Observability logger supports structured sink fan-out via `IFoundationLogSink` and `FoundationLogEntry`.
 - Unhandled-exception boundary supports optional crash-provider forwarding via `ICrashReportingService` and `FoundationCrashReport`.

@@ -1,4 +1,4 @@
-# Foundation Usage Guide (`1.0+`)
+# Foundation Usage Guide (`1.1+`)
 
 This is a practical, end-to-end guide for using `com.vareiko.foundation` as a starter architecture in Unity.
 
@@ -7,6 +7,8 @@ The package provides:
 - deterministic bootstrap and service composition (`ProjectContext` + `FoundationProjectInstaller`);
 - scene-local composition (`SceneContext` + `FoundationSceneInstaller`);
 - modular runtime services (save/settings, analytics, backend, monetization, push, attribution, UI, observability);
+- typed cloud command service with idempotency/retry queue contracts;
+- deterministic RNG streams with snapshot/restore support;
 - adapter-oriented integrations (safe null/simulated providers + bridge entry points);
 - built-in runtime tests and validation tooling.
 
@@ -22,6 +24,8 @@ Use it as your baseline layer, then add game-specific domain modules above it.
 - `ObservabilityConfig`
 - `SaveSecurityConfig`
 - `AutosaveConfig`
+- `BackendCommandConfig` (if you use `ICloudCommandService`)
+- `DeterministicRngConfig` (if you use deterministic run seeds)
 
 For the first run keep optional providers in fallback mode:
 - backend: `None`
@@ -42,7 +46,7 @@ Optional production dependencies:
 - PlayFab SDK + `PLAYFAB_SDK`
 
 ## 4. How Runtime Is Composed
-At project startup, `FoundationRuntimeInstaller.InstallProjectServices(...)` installs modules in a strict order (time/common/env/app/bootstrap/config/.../observability).  
+At project startup, `FoundationRuntimeInstaller.InstallProjectServices(...)` installs modules in a strict order (time/common/rng/env/app/bootstrap/config/.../observability).  
 The order is documented in `Documentation~/ARCHITECTURE.md`.
 
 `FoundationProjectInstaller` exposes serialized config slots and forwards them to the runtime installer.
@@ -152,6 +156,72 @@ public sealed class FeatureGate
     {
         await _flags.RefreshAsync();
         return _flags.IsEnabled("economy.v2", false);
+    }
+}
+```
+
+### Cloud Commands
+```csharp
+using System;
+using Cysharp.Threading.Tasks;
+using Vareiko.Foundation.Backend;
+using Zenject;
+
+public sealed class RunBackendFacade
+{
+    private readonly ICloudCommandService _commands;
+
+    [Inject]
+    public RunBackendFacade(ICloudCommandService commands)
+    {
+        _commands = commands;
+    }
+
+    public UniTask<CloudCommandResponse> StartRunAsync(string payloadJson)
+    {
+        CloudCommandRequest request = new CloudCommandRequest(
+            commandName: "StartRun",
+            idempotencyKey: GenerateUuidV7(),
+            correlationId: Guid.NewGuid().ToString(),
+            requestVersion: "1",
+            payloadJson: payloadJson ?? "{}",
+            playerId: "player-1",
+            clientUnixMs: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+
+        return _commands.ExecuteAsync(request);
+    }
+
+    private static string GenerateUuidV7()
+    {
+        return "01890f2e-5c5b-7b2f-a4ab-2f5bdcf18a22";
+    }
+}
+```
+
+### Deterministic RNG
+```csharp
+using Vareiko.Foundation.Rng;
+using Zenject;
+
+public sealed class RunRngFacade
+{
+    private readonly IDeterministicRngService _rng;
+
+    [Inject]
+    public RunRngFacade(IDeterministicRngService rng)
+    {
+        _rng = rng;
+    }
+
+    public void InitializeRun(int rootSeed)
+    {
+        _rng.Initialize(rootSeed);
+    }
+
+    public int RollNodeIndex(int maxExclusive)
+    {
+        IDeterministicRngStream stream = _rng.CreateStream("run.nodes");
+        return stream.NextInt(0, maxExclusive);
     }
 }
 ```
