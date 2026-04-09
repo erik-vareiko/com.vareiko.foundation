@@ -142,6 +142,8 @@ Example `Packages/manifest.json`:
 ```
 
 ## Notes
+- Package fixes should be made in the source repository and released as a new package version.
+- Avoid maintaining long-lived local edits in embedded/host-project copies of `com.vareiko.foundation`; treat those only as temporary sync state until the next imported package version.
 - `PlayFabBackendService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.
 - `PlayFabCloudFunctionService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.
 - `PlayFabRemoteConfigService` is an integration point and expects `PLAYFAB_SDK` define when real PlayFab SDK is installed.

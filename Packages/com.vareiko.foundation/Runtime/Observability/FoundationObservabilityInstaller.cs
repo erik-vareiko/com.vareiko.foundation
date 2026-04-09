@@ -36,10 +36,8 @@ namespace Vareiko.Foundation.Observability
                 container.Bind<IFoundationLogSink>().To<UnityConsoleLogSink>().AsSingle().IfNotBound();
             }
 
-            container.Bind<string>()
+            container.BindInstance(Path.Combine(Application.persistentDataPath, "foundation-diagnostics"))
                 .WithId("DiagnosticsExportRootPath")
-                .FromInstance(Path.Combine(Application.persistentDataPath, "foundation-diagnostics"))
-                .AsSingle()
                 .IfNotBound();
 
             container.Bind<IFoundationLogger>().To<UnityFoundationLogger>().AsSingle();

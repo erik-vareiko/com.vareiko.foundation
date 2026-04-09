@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+- Fixed Zenject 6 singleton compatibility in primitive path bindings:
+  - `FoundationSaveInstaller` now binds `SaveRootPath` via `BindInstance(...).WithId(...)` instead of `Bind<string>().AsSingle()`
+  - `FoundationObservabilityInstaller` now binds `DiagnosticsExportRootPath` via `BindInstance(...).WithId(...)` instead of `Bind<string>().AsSingle()`
+- Fixed Unity 6 startup/thread-safety issue in `AudioService`:
+  - runtime audio root and `AudioSource` components are now created lazily on first actual audio use
+  - startup initialization no longer creates Unity audio objects eagerly during container initialization
+
 ## 1.1.0
 - Added typed cloud-command contracts and service:
   - `CloudCommandRequest`

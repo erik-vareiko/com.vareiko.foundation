@@ -27,7 +27,6 @@ namespace Vareiko.Foundation.Audio
 
         public void Initialize()
         {
-            CreateRuntimeRoot();
             if (_signalBus != null)
             {
                 _signalBus.Subscribe<SettingsChangedSignal>(HandleSettingsChanged);
@@ -35,14 +34,14 @@ namespace Vareiko.Foundation.Audio
 
             if (_settingsService != null && _settingsService.Current != null)
             {
-                ApplyVolumes(
+                SetVolumeState(
                     _settingsService.Current.MasterVolume,
                     _settingsService.Current.MusicVolume,
                     _settingsService.Current.SfxVolume);
             }
             else
             {
-                ApplyVolumes(1f, 1f, 1f);
+                SetVolumeState(1f, 1f, 1f);
             }
         }
 
@@ -85,6 +84,11 @@ namespace Vareiko.Foundation.Audio
         {
             if (_musicSource == null || clip == null)
             {
+                EnsureRuntimeRoot();
+            }
+
+            if (_musicSource == null || clip == null)
+            {
                 return;
             }
 
@@ -107,13 +111,18 @@ namespace Vareiko.Foundation.Audio
         {
             if (_sfxSource == null || clip == null)
             {
+                EnsureRuntimeRoot();
+            }
+
+            if (_sfxSource == null || clip == null)
+            {
                 return;
             }
 
             _sfxSource.PlayOneShot(clip, Mathf.Clamp01(volumeScale) * _masterVolume * _sfxVolume);
         }
 
-        private void CreateRuntimeRoot()
+        private void EnsureRuntimeRoot()
         {
             if (_root != null)
             {
@@ -129,6 +138,7 @@ namespace Vareiko.Foundation.Audio
 
             _sfxSource = _root.AddComponent<AudioSource>();
             _sfxSource.playOnAwake = false;
+            RefreshSourceVolumes();
         }
 
         private void HandleSettingsChanged(SettingsChangedSignal signal)
@@ -139,16 +149,16 @@ namespace Vareiko.Foundation.Audio
                 return;
             }
 
-            ApplyVolumes(settings.MasterVolume, settings.MusicVolume, settings.SfxVolume);
+            SetVolumeState(settings.MasterVolume, settings.MusicVolume, settings.SfxVolume);
+            FireVolumeSignal();
         }
 
-        private void ApplyVolumes(float master, float music, float sfx)
+        private void SetVolumeState(float master, float music, float sfx)
         {
             _masterVolume = Mathf.Clamp01(master);
             _musicVolume = Mathf.Clamp01(music);
             _sfxVolume = Mathf.Clamp01(sfx);
             RefreshSourceVolumes();
-            FireVolumeSignal();
         }
 
         private void RefreshSourceVolumes()

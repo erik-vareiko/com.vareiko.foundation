@@ -51,10 +51,8 @@ namespace Vareiko.Foundation.Save
                 container.BindInstance(autosaveConfig).IfNotBound();
             }
 
-            container.Bind<string>()
-                .WithId("SaveRootPath")
-                .FromInstance(Path.Combine(Application.persistentDataPath, "saves"))
-                .AsSingle();
+            container.BindInstance(Path.Combine(Application.persistentDataPath, "saves"))
+                .WithId("SaveRootPath");
 
             container.Bind<ISaveStorage>().To<FileSaveStorage>().AsSingle();
             container.Bind<JsonUnitySaveSerializer>().AsSingle();
