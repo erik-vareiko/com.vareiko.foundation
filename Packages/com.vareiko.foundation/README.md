@@ -70,7 +70,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - `LocalizationConfig`
 - `ObservabilityConfig`
 - `DeterministicRngConfig`
-- `UIRegistry` (or legacy `UIScreenRegistry`)
+- `UIRegistry`
 - `ConfigRegistry[]` (optional, auto-registered as bootstrap tasks)
 - `IBootstrapTask` MonoBehaviours
 

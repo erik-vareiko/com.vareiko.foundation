@@ -1,0 +1,23 @@
+{
+  "name": "Vareiko.Foundation.EditorTests",
+  "rootNamespace": "Vareiko.Foundation.EditorTests",
+  "references": [
+    "Vareiko.Foundation",
+    "Vareiko.Foundation.Editor",
+    "Zenject"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

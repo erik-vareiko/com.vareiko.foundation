@@ -31,10 +31,6 @@ namespace Vareiko.Foundation.UI
             container.DeclareSignal<UIBoolValueChangedSignal>();
             container.DeclareSignal<UIStringValueChangedSignal>();
 
-            container.DeclareSignal<UiReadySignal>();
-            container.DeclareSignal<UiScreenShownSignal>();
-            container.DeclareSignal<UiScreenHiddenSignal>();
-
             container.BindInterfacesAndSelfTo<UIService>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<UIWindowManager>().AsSingle().NonLazy();
             container.BindInterfacesAndSelfTo<UIConfirmDialogService>().AsSingle();

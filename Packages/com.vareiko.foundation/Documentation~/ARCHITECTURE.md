@@ -7,7 +7,7 @@
 - Scene UI layer:
   - `FoundationUIInstaller` (`IUIService`, `IUIWindowManager`)
   - `FoundationUINavigationInstaller` (`IUINavigationService`)
-  - shared registry contract: `UIRegistry` (legacy bridge: `UIScreenRegistry`)
+  - shared registry contract: `UIRegistry`
 - Input layer:
   - `FoundationInputInstaller` binds adapters in priority order.
   - `NewInputSystemAdapter` is preferred when `ENABLE_INPUT_SYSTEM` is defined.

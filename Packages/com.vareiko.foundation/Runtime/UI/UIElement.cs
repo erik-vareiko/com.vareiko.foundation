@@ -35,6 +35,11 @@ namespace Vareiko.Foundation.UI
 
         protected virtual void SetVisible(bool visible, bool instant)
         {
+            if (IsVisible == visible)
+            {
+                return;
+            }
+
             if (_canvasGroup == null)
             {
                 gameObject.SetActive(visible);

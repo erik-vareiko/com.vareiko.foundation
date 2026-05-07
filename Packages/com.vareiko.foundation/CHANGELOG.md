@@ -1,6 +1,26 @@
 # Changelog
 
 ## Unreleased
+
+## 2.0.0
+- Breaking UI cleanup:
+  - removed legacy UI bridge APIs (`UIScreenRegistry`, `IUiService`, `UiService`, `Ui*` signals and navigation aliases)
+  - `UIService` now depends only on `UIRegistry`
+  - `UINavigationService` now exposes only `IUINavigationService` and `UINavigationChangedSignal`
+- Hardened UI registry and runtime visibility:
+  - duplicate non-empty UI ids now fail fast instead of silently overwriting registry entries
+  - `UIScreen` and `UIWindow` require non-empty ids
+  - repeated `Show`/`Hide` calls no longer emit duplicate visibility signals
+- Hardened UI binding lifecycle:
+  - value binders use `IUIValueEventService` subscriptions without touching `SignalBus` unsubscribe paths
+  - invalid keys no longer create fallback subscriptions
+  - repeated enable/disable cycles clear previous subscriptions before attaching new ones
+- Added UI validation coverage:
+  - non-interactive validation API for CI/editor tests
+  - duplicate/empty id checks, collection template checks, runtime layout warnings and decorative raycast warnings
+- Added migration guide:
+  - `Documentation~/MIGRATION_2_0.md`
+
 - Fixed Zenject 6 singleton compatibility in primitive path bindings:
   - `FoundationSaveInstaller` now binds `SaveRootPath` via `BindInstance(...).WithId(...)` instead of `Bind<string>().AsSingle()`
   - `FoundationObservabilityInstaller` now binds `DiagnosticsExportRootPath` via `BindInstance(...).WithId(...)` instead of `Bind<string>().AsSingle()`

@@ -20,13 +20,13 @@ namespace Vareiko.Foundation.UI
 
         public bool TryGetElement(string elementId, out UIElement element)
         {
-            if (string.IsNullOrWhiteSpace(elementId))
+            if (!TryNormalizeId(elementId, out string normalized))
             {
                 element = null;
                 return false;
             }
 
-            return _map.TryGetValue(elementId, out element);
+            return _map.TryGetValue(normalized, out element);
         }
 
         public bool TryGetScreen(string screenId, out UIScreen screen)
@@ -97,12 +97,44 @@ namespace Vareiko.Foundation.UI
 
         protected void Register(UIElement element)
         {
-            if (element == null || string.IsNullOrWhiteSpace(element.Id))
+            if (element == null)
             {
                 return;
             }
 
-            _map[element.Id] = element;
+            if (!TryNormalizeId(element.Id, out string id))
+            {
+                if (element is UIScreen || element is UIWindow)
+                {
+                    throw new InvalidOperationException($"{element.GetType().Name} '{element.name}' must have a non-empty UI Id.");
+                }
+
+                return;
+            }
+
+            if (_map.TryGetValue(id, out UIElement existing))
+            {
+                if (ReferenceEquals(existing, element))
+                {
+                    return;
+                }
+
+                throw new InvalidOperationException($"Duplicate UIElement Id '{id}' registered by '{existing.name}' and '{element.name}'.");
+            }
+
+            _map[id] = element;
+        }
+
+        private static bool TryNormalizeId(string id, out string normalized)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                normalized = string.Empty;
+                return false;
+            }
+
+            normalized = id.Trim();
+            return normalized.Length > 0;
         }
 
         private static class ListPool

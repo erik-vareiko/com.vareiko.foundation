@@ -4,21 +4,18 @@ using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
-    public class UIService : IUIService, IUiService, IInitializable
+    public class UIService : IUIService, IInitializable
     {
         private readonly UIRegistry _registry;
-        private readonly UIScreenRegistry _legacyRegistry;
         private readonly SignalBus _signalBus;
         private readonly Dictionary<string, UIElement> _elements = new Dictionary<string, UIElement>(StringComparer.Ordinal);
 
         [Inject]
         public UIService(
             [InjectOptional] UIRegistry registry = null,
-            [InjectOptional] UIScreenRegistry legacyRegistry = null,
             [InjectOptional] SignalBus signalBus = null)
         {
             _registry = registry;
-            _legacyRegistry = legacyRegistry;
             _signalBus = signalBus;
         }
 
@@ -26,11 +23,10 @@ namespace Vareiko.Foundation.UI
         {
             _elements.Clear();
 
-            UIRegistry activeRegistry = _registry ?? _legacyRegistry;
-            if (activeRegistry != null)
+            if (_registry != null)
             {
-                activeRegistry.BuildMap();
-                foreach (KeyValuePair<string, UIElement> pair in activeRegistry.EnumerateElements())
+                _registry.BuildMap();
+                foreach (KeyValuePair<string, UIElement> pair in _registry.EnumerateElements())
                 {
                     _elements[pair.Key] = pair.Value;
                 }
@@ -52,7 +48,6 @@ namespace Vareiko.Foundation.UI
             }
 
             _signalBus?.Fire(new UIReadySignal(_elements.Count, screenCount, windowCount));
-            _signalBus?.Fire(new UiReadySignal(screenCount));
         }
 
         public bool Show(string elementId, bool instant = true)
@@ -63,7 +58,13 @@ namespace Vareiko.Foundation.UI
                 return false;
             }
 
+            bool wasVisible = element.IsVisible;
             element.Show(instant);
+            if (wasVisible || !element.IsVisible)
+            {
+                return element.IsVisible;
+            }
+
             FireShownSignals(elementId, element);
             return true;
         }
@@ -76,7 +77,13 @@ namespace Vareiko.Foundation.UI
                 return false;
             }
 
+            bool wasVisible = element.IsVisible;
             element.Hide(instant);
+            if (!wasVisible || element.IsVisible)
+            {
+                return !element.IsVisible;
+            }
+
             FireHiddenSignals(elementId, element);
             return true;
         }
@@ -96,6 +103,11 @@ namespace Vareiko.Foundation.UI
         {
             foreach (KeyValuePair<string, UIElement> pair in _elements)
             {
+                if (!pair.Value.IsVisible)
+                {
+                    continue;
+                }
+
                 pair.Value.Hide(instant);
                 FireHiddenSignals(pair.Key, pair.Value);
             }
@@ -109,7 +121,7 @@ namespace Vareiko.Foundation.UI
                 return false;
             }
 
-            return _elements.TryGetValue(elementId, out element);
+            return _elements.TryGetValue(elementId.Trim(), out element);
         }
 
         public bool TryGetScreen(string screenId, out UIScreen screen)
@@ -138,11 +150,6 @@ namespace Vareiko.Foundation.UI
             return window != null;
         }
 
-        bool IUiService.TryGet(string screenId, out UIScreen screen)
-        {
-            return TryGetScreen(screenId, out screen);
-        }
-
         private void FireShownSignals(string elementId, UIElement element)
         {
             _signalBus?.Fire(new UIElementShownSignal(elementId, element.GetType().Name));
@@ -151,7 +158,6 @@ namespace Vareiko.Foundation.UI
             if (screen != null)
             {
                 _signalBus?.Fire(new UIScreenShownSignal(elementId));
-                _signalBus?.Fire(new UiScreenShownSignal(elementId));
             }
         }
 
@@ -163,7 +169,6 @@ namespace Vareiko.Foundation.UI
             if (screen != null)
             {
                 _signalBus?.Fire(new UIScreenHiddenSignal(elementId));
-                _signalBus?.Fire(new UiScreenHiddenSignal(elementId));
             }
         }
     }

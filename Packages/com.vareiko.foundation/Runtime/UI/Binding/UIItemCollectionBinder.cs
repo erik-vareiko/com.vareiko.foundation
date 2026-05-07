@@ -127,15 +127,22 @@ namespace Vareiko.Foundation.UI
                 }
 
                 bool shouldBeVisible = i < visibleCount;
+                bool wasVisible = item.IsVisible;
                 if (shouldBeVisible)
                 {
                     item.Show(true);
-                    ItemActivated?.Invoke(i, item);
+                    if (!wasVisible && item.IsVisible)
+                    {
+                        ItemActivated?.Invoke(i, item);
+                    }
                 }
                 else
                 {
                     item.Hide(true);
-                    ItemDeactivated?.Invoke(i, item);
+                    if (wasVisible && !item.IsVisible)
+                    {
+                        ItemDeactivated?.Invoke(i, item);
+                    }
                 }
             }
         }

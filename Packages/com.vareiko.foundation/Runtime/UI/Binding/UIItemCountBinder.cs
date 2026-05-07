@@ -15,6 +15,7 @@ namespace Vareiko.Foundation.UI
         private SignalBus _signalBus;
         private IUIValueEventService _valueService;
         private IDisposable _subscription;
+        private bool _usesSignalBusSubscription;
 
         [Inject]
         public void Construct([InjectOptional] SignalBus signalBus = null, [InjectOptional] IUIValueEventService valueService = null)
@@ -33,6 +34,7 @@ namespace Vareiko.Foundation.UI
 
         private void OnEnable()
         {
+            ClearSubscription();
             if (_collection == null || !TryNormalizeKey(out string key))
             {
                 return;
@@ -41,24 +43,33 @@ namespace Vareiko.Foundation.UI
             if (_valueService != null)
             {
                 _subscription = _valueService.ObserveInt(key).Subscribe(ApplyCount, true);
+                _usesSignalBusSubscription = false;
                 return;
             }
 
             if (_signalBus != null)
             {
                 _signalBus.Subscribe<UIIntValueChangedSignal>(OnIntChanged);
+                _usesSignalBusSubscription = true;
             }
         }
 
         private void OnDisable()
         {
+            ClearSubscription();
+        }
+
+        private void ClearSubscription()
+        {
             _subscription?.Dispose();
             _subscription = null;
 
-            if (_signalBus != null)
+            if (_signalBus != null && _usesSignalBusSubscription)
             {
                 _signalBus.Unsubscribe<UIIntValueChangedSignal>(OnIntChanged);
             }
+
+            _usesSignalBusSubscription = false;
         }
 
         private void OnIntChanged(UIIntValueChangedSignal signal)

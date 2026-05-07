@@ -46,6 +46,31 @@ namespace Vareiko.Foundation.Tests.UI
             }
         }
 
+        [Test]
+        public void SetCount_DoesNotEmitRepeatedActivationEventsForAlreadyVisibleItems()
+        {
+            TestContext context = CreateContext(destroyItemsWhenShrinking: false);
+            try
+            {
+                int activated = 0;
+                int deactivated = 0;
+                context.Binder.ItemActivated += (_, _) => activated++;
+                context.Binder.ItemDeactivated += (_, _) => deactivated++;
+
+                context.Binder.SetCount(2);
+                context.Binder.SetCount(2);
+                context.Binder.SetCount(1);
+                context.Binder.SetCount(1);
+
+                Assert.That(activated, Is.EqualTo(2));
+                Assert.That(deactivated, Is.EqualTo(1));
+            }
+            finally
+            {
+                context.Dispose();
+            }
+        }
+
         private static TestContext CreateContext(bool destroyItemsWhenShrinking)
         {
             GameObject root = new GameObject("ItemsRoot");

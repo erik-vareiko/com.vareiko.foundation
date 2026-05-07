@@ -6,6 +6,8 @@ namespace Vareiko.Foundation.UI
     public sealed class ValueStream<T> : IValueStream<T>
     {
         private readonly List<Action<T>> _listeners = new List<Action<T>>();
+        private readonly List<Action<T>> _dispatchBuffer = new List<Action<T>>();
+        private bool _isDispatching;
 
         public bool HasValue { get; private set; }
         public T Value { get; private set; }
@@ -36,10 +38,26 @@ namespace Vareiko.Foundation.UI
                 return;
             }
 
-            Action<T>[] listeners = _listeners.ToArray();
-            for (int i = 0; i < listeners.Length; i++)
+            if (_isDispatching)
             {
-                listeners[i]?.Invoke(value);
+                DispatchWithTemporarySnapshot(value);
+                return;
+            }
+
+            _isDispatching = true;
+            try
+            {
+                _dispatchBuffer.Clear();
+                _dispatchBuffer.AddRange(_listeners);
+                for (int i = 0; i < _dispatchBuffer.Count; i++)
+                {
+                    _dispatchBuffer[i]?.Invoke(value);
+                }
+            }
+            finally
+            {
+                _dispatchBuffer.Clear();
+                _isDispatching = false;
             }
         }
 
@@ -69,6 +87,15 @@ namespace Vareiko.Foundation.UI
 
                 _listeners.Remove(_listener);
                 _listener = null;
+            }
+        }
+
+        private void DispatchWithTemporarySnapshot(T value)
+        {
+            Action<T>[] listeners = _listeners.ToArray();
+            for (int i = 0; i < listeners.Length; i++)
+            {
+                listeners[i]?.Invoke(value);
             }
         }
 

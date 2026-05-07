@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using Vareiko.Foundation.UI;
 
 namespace Vareiko.Foundation.Tests.UI
@@ -106,6 +107,28 @@ namespace Vareiko.Foundation.Tests.UI
             service.ClearAll();
 
             Assert.That(stream.HasValue, Is.False);
+        }
+
+        [Test]
+        public void ValueStream_AllowsUnsubscribeDuringDispatch()
+        {
+            ValueStream<int> stream = new ValueStream<int>();
+            int firstCalls = 0;
+            int secondCalls = 0;
+            IDisposable firstSubscription = null;
+
+            firstSubscription = stream.Subscribe(_ =>
+            {
+                firstCalls++;
+                firstSubscription.Dispose();
+            }, false);
+
+            stream.Subscribe(_ => secondCalls++, false);
+
+            Assert.DoesNotThrow(() => stream.SetValue(1));
+            Assert.DoesNotThrow(() => stream.SetValue(2));
+            Assert.That(firstCalls, Is.EqualTo(1));
+            Assert.That(secondCalls, Is.EqualTo(2));
         }
     }
 }

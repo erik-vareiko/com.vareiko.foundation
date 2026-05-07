@@ -357,9 +357,17 @@ Use package test assembly `Tests/Runtime` as the default pattern for new modules
 ## 12. Release Checklist
 1. Run `Tools/Vareiko/Foundation/Validate Project`.
 2. Ensure package version and changelog are aligned.
-3. Ensure no compile errors on clean import.
-4. Ensure required runtime tests pass.
-5. Tag release (`vX.Y.Z`) after commit.
+3. Fix all UI registry errors before release:
+- duplicate non-empty UI ids
+- empty `UIScreen` / `UIWindow` ids
+- active scene template items in `UIItemCollectionBinder`
+- non-empty ids on item templates
+4. Review UI validator warnings:
+- active `LayoutGroup` / `ContentSizeFitter` on runtime collection containers
+- decorative `Graphic.raycastTarget` without a parent `Selectable`
+5. Ensure no compile errors on clean import.
+6. Ensure required runtime/editor tests pass.
+7. Tag release (`vX.Y.Z`) after commit.
 
 ## 13. Common Pitfalls
 - Missing provider define/sdks with production provider selected.

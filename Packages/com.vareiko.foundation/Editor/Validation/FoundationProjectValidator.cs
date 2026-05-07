@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Vareiko.Foundation.Installers;
 using Vareiko.Foundation.UI;
 
@@ -52,25 +53,49 @@ namespace Vareiko.Foundation.Editor.Validation
                 return;
             }
 
+            ValidationReport report = RunValidation();
+            LogReport(report, true);
+        }
+
+        public static ValidationReport RunValidation(ValidationOptions options = null)
+        {
+            options = options ?? new ValidationOptions();
             SceneSetup[] setup = EditorSceneManager.GetSceneManagerSetup();
             ValidationReport report = new ValidationReport();
 
             try
             {
-                ValidateReleaseGate(report);
-                ValidateScenes(report);
-                ValidateProjectContextPrefab(report);
+                if (options.ValidateReleaseGate)
+                {
+                    ValidateReleaseGate(report);
+                }
+
+                if (options.ValidateScenes)
+                {
+                    ValidateScenes(report, options);
+                }
+
+                if (options.ValidateProjectContextPrefab)
+                {
+                    ValidateProjectContextPrefab(report);
+                }
             }
             finally
             {
                 EditorSceneManager.RestoreSceneManagerSetup(setup);
             }
 
-            LogReport(report);
+            return report;
         }
 
-        private static void ValidateScenes(ValidationReport report)
+        private static void ValidateScenes(ValidationReport report, ValidationOptions options)
         {
+            if (options.UseOpenScenesOnly)
+            {
+                ValidateOpenScenes(report);
+                return;
+            }
+
             string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets" });
             if (sceneGuids == null || sceneGuids.Length == 0)
             {
@@ -125,6 +150,55 @@ namespace Vareiko.Foundation.Editor.Validation
             }
         }
 
+        private static void ValidateOpenScenes(ValidationReport report)
+        {
+            int sceneCount = SceneManager.sceneCount;
+            if (sceneCount == 0)
+            {
+                report.Add(ValidationSeverity.Warning, "SCN-000", "No open scenes found.");
+                return;
+            }
+
+            int totalSceneInstallers = 0;
+            int totalProjectInstallersInScenes = 0;
+            for (int i = 0; i < sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (!scene.IsValid() || !scene.isLoaded)
+                {
+                    continue;
+                }
+
+                SceneManager.SetActiveScene(scene);
+                string scenePath = string.IsNullOrWhiteSpace(scene.path) ? scene.name : scene.path;
+                FoundationSceneInstaller[] sceneInstallers = UnityEngine.Object.FindObjectsOfType<FoundationSceneInstaller>(true);
+                FoundationProjectInstaller[] projectInstallers = UnityEngine.Object.FindObjectsOfType<FoundationProjectInstaller>(true);
+                totalSceneInstallers += sceneInstallers.Length;
+                totalProjectInstallersInScenes += projectInstallers.Length;
+
+                if (sceneInstallers.Length == 0)
+                {
+                    report.Add(ValidationSeverity.Warning, "SCN-010", "Scene has no FoundationSceneInstaller.", scenePath);
+                }
+                else if (sceneInstallers.Length > 1)
+                {
+                    report.Add(ValidationSeverity.Warning, "SCN-011", $"Scene has multiple FoundationSceneInstaller components ({sceneInstallers.Length}).", scenePath);
+                }
+
+                ValidateUiElements(scenePath, report);
+            }
+
+            if (totalSceneInstallers == 0)
+            {
+                report.Add(ValidationSeverity.Error, "SCN-100", "No FoundationSceneInstaller found in open scenes.");
+            }
+
+            if (totalProjectInstallersInScenes == 0)
+            {
+                report.Add(ValidationSeverity.Info, "SCN-101", "No FoundationProjectInstaller found in open scenes. This is valid if ProjectContext prefab is used.");
+            }
+        }
+
         private static void ValidateUiElements(string scenePath, ValidationReport report)
         {
             UIElement[] elements = UnityEngine.Object.FindObjectsOfType<UIElement>(true);
@@ -155,22 +229,125 @@ namespace Vareiko.Foundation.Editor.Validation
                 string id = element.Id;
                 if (string.IsNullOrWhiteSpace(id))
                 {
-                    report.Add(ValidationSeverity.Warning, "UI-010", $"UIElement '{element.name}' has empty Id.", scenePath);
+                    ValidationSeverity severity = element is UIScreen || element is UIWindow
+                        ? ValidationSeverity.Error
+                        : ValidationSeverity.Warning;
+                    string elementKind = element.GetType().Name;
+                    report.Add(severity, "UI-010", $"{elementKind} '{element.name}' has empty Id.", scenePath);
                     continue;
                 }
 
-                if (byId.TryGetValue(id, out UIElement existing))
+                string normalized = id.Trim();
+                if (byId.TryGetValue(normalized, out UIElement existing))
                 {
                     report.Add(
                         ValidationSeverity.Error,
                         "UI-011",
-                        $"Duplicate UIElement Id '{id}' in scene ('{existing.name}' and '{element.name}').",
+                        $"Duplicate UIElement Id '{normalized}' in scene ('{existing.name}' and '{element.name}').",
                         scenePath);
                     continue;
                 }
 
-                byId[id] = element;
+                byId[normalized] = element;
             }
+
+            ValidateUiCollections(scenePath, report);
+            ValidateUiRaycastTargets(scenePath, report);
+        }
+
+        private static void ValidateUiCollections(string scenePath, ValidationReport report)
+        {
+            UIItemCollectionBinder[] collections = UnityEngine.Object.FindObjectsOfType<UIItemCollectionBinder>(true);
+            for (int i = 0; i < collections.Length; i++)
+            {
+                UIItemCollectionBinder collection = collections[i];
+                if (collection == null)
+                {
+                    continue;
+                }
+
+                UIItemView itemPrefab = GetSerializedObjectReference<UIItemView>(collection, "_itemPrefab");
+                Transform container = GetSerializedObjectReference<Transform>(collection, "_container");
+                Transform resolvedContainer = container != null ? container : collection.transform;
+
+                if (itemPrefab != null && itemPrefab.gameObject.scene.IsValid())
+                {
+                    if (itemPrefab.gameObject.activeSelf)
+                    {
+                        report.Add(
+                            ValidationSeverity.Error,
+                            "UI-020",
+                            $"UIItemCollectionBinder '{collection.name}' has an active scene template item '{itemPrefab.name}'.",
+                            scenePath);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(itemPrefab.Id))
+                    {
+                        report.Add(
+                            ValidationSeverity.Error,
+                            "UI-021",
+                            $"UIItemCollectionBinder '{collection.name}' template item '{itemPrefab.name}' must not have UI Id '{itemPrefab.Id.Trim()}'.",
+                            scenePath);
+                    }
+                }
+
+                if (resolvedContainer == null)
+                {
+                    continue;
+                }
+
+                LayoutGroup layoutGroup = resolvedContainer.GetComponent<LayoutGroup>();
+                if (layoutGroup != null && layoutGroup.enabled && layoutGroup.gameObject.activeInHierarchy)
+                {
+                    report.Add(
+                        ValidationSeverity.Warning,
+                        "UI-030",
+                        $"Runtime UI collection container '{resolvedContainer.name}' has active LayoutGroup '{layoutGroup.GetType().Name}'.",
+                        scenePath);
+                }
+
+                ContentSizeFitter fitter = resolvedContainer.GetComponent<ContentSizeFitter>();
+                if (fitter != null && fitter.enabled && fitter.gameObject.activeInHierarchy)
+                {
+                    report.Add(
+                        ValidationSeverity.Warning,
+                        "UI-031",
+                        $"Runtime UI collection container '{resolvedContainer.name}' has active ContentSizeFitter.",
+                        scenePath);
+                }
+            }
+        }
+
+        private static void ValidateUiRaycastTargets(string scenePath, ValidationReport report)
+        {
+            Graphic[] graphics = UnityEngine.Object.FindObjectsOfType<Graphic>(true);
+            for (int i = 0; i < graphics.Length; i++)
+            {
+                Graphic graphic = graphics[i];
+                if (graphic == null || !graphic.raycastTarget)
+                {
+                    continue;
+                }
+
+                if (graphic.GetComponentInParent<Selectable>(true) != null)
+                {
+                    continue;
+                }
+
+                report.Add(
+                    ValidationSeverity.Warning,
+                    "UI-040",
+                    $"Graphic '{graphic.name}' has raycastTarget enabled but is not under a Selectable.",
+                    scenePath);
+            }
+        }
+
+        private static T GetSerializedObjectReference<T>(UnityEngine.Object target, string propertyName)
+            where T : UnityEngine.Object
+        {
+            SerializedObject serializedObject = new SerializedObject(target);
+            SerializedProperty property = serializedObject.FindProperty(propertyName);
+            return property != null ? property.objectReferenceValue as T : null;
         }
 
         private static void ValidateProjectContextPrefab(ValidationReport report)
@@ -541,7 +718,7 @@ namespace Vareiko.Foundation.Editor.Validation
             return normalizedAbsolute;
         }
 
-        private static void LogReport(ValidationReport report)
+        private static void LogReport(ValidationReport report, bool showDialog)
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("[Foundation Validation]");
@@ -558,29 +735,48 @@ namespace Vareiko.Foundation.Editor.Validation
             if (report.ErrorCount > 0)
             {
                 Debug.LogError(output);
-                EditorUtility.DisplayDialog("Foundation Validation", $"Validation finished with {report.ErrorCount} error(s). See Console.", "OK");
+                if (showDialog)
+                {
+                    EditorUtility.DisplayDialog("Foundation Validation", $"Validation finished with {report.ErrorCount} error(s). See Console.", "OK");
+                }
+
                 return;
             }
 
             if (report.WarningCount > 0)
             {
                 Debug.LogWarning(output);
-                EditorUtility.DisplayDialog("Foundation Validation", $"Validation finished with {report.WarningCount} warning(s). See Console.", "OK");
+                if (showDialog)
+                {
+                    EditorUtility.DisplayDialog("Foundation Validation", $"Validation finished with {report.WarningCount} warning(s). See Console.", "OK");
+                }
+
                 return;
             }
 
             Debug.Log(output);
-            EditorUtility.DisplayDialog("Foundation Validation", "Validation passed without warnings.", "OK");
+            if (showDialog)
+            {
+                EditorUtility.DisplayDialog("Foundation Validation", "Validation passed without warnings.", "OK");
+            }
         }
 
-        private enum ValidationSeverity
+        public enum ValidationSeverity
         {
             Info,
             Warning,
             Error
         }
 
-        private readonly struct ValidationIssue
+        public sealed class ValidationOptions
+        {
+            public bool ValidateReleaseGate = true;
+            public bool ValidateScenes = true;
+            public bool ValidateProjectContextPrefab = true;
+            public bool UseOpenScenesOnly;
+        }
+
+        public readonly struct ValidationIssue
         {
             public readonly ValidationSeverity Severity;
             public readonly string Code;
@@ -596,7 +792,7 @@ namespace Vareiko.Foundation.Editor.Validation
             }
         }
 
-        private sealed class ValidationReport
+        public sealed class ValidationReport
         {
             private readonly List<ValidationIssue> _issues = new List<ValidationIssue>();
 

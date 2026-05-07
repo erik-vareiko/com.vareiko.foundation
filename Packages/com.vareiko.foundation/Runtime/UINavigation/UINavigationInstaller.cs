@@ -23,7 +23,6 @@ namespace Vareiko.Foundation.UINavigation
             }
 
             container.DeclareSignal<UINavigationChangedSignal>();
-            container.DeclareSignal<UiNavigationChangedSignal>();
             container.BindInterfacesAndSelfTo<UINavigationService>().AsSingle().NonLazy();
         }
     }

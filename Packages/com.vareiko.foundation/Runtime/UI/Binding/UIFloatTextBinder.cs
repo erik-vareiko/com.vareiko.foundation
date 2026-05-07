@@ -14,6 +14,7 @@ namespace Vareiko.Foundation.UI
         private SignalBus _signalBus;
         private IUIValueEventService _valueService;
         private IDisposable _subscription;
+        private bool _usesSignalBusSubscription;
 
         [Inject]
         public void Construct([InjectOptional] SignalBus signalBus = null, [InjectOptional] IUIValueEventService valueService = null)
@@ -24,26 +25,41 @@ namespace Vareiko.Foundation.UI
 
         private void OnEnable()
         {
-            if (_valueService != null && TryNormalizeKey(out string key))
+            ClearSubscription();
+            if (!TryNormalizeKey(out string key))
+            {
+                return;
+            }
+
+            if (_valueService != null)
             {
                 IReadOnlyValueStream<float> stream = _valueService.ObserveFloat(key);
                 _subscription = stream.Subscribe(Apply, true);
+                _usesSignalBusSubscription = false;
             }
             else if (_signalBus != null)
             {
                 _signalBus.Subscribe<UIFloatValueChangedSignal>(OnValueChanged);
+                _usesSignalBusSubscription = true;
             }
         }
 
         private void OnDisable()
         {
+            ClearSubscription();
+        }
+
+        private void ClearSubscription()
+        {
             _subscription?.Dispose();
             _subscription = null;
 
-            if (_signalBus != null)
+            if (_signalBus != null && _usesSignalBusSubscription)
             {
                 _signalBus.Unsubscribe<UIFloatValueChangedSignal>(OnValueChanged);
             }
+
+            _usesSignalBusSubscription = false;
         }
 
         private void OnValueChanged(UIFloatValueChangedSignal signal)

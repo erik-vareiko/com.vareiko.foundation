@@ -4,7 +4,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.UINavigation
 {
-    public class UINavigationService : IUINavigationService, IUiNavigationService
+    public class UINavigationService : IUINavigationService
     {
         private readonly IUIService _uiService;
         private readonly SignalBus _signalBus;
@@ -91,7 +91,6 @@ namespace Vareiko.Foundation.UINavigation
         private void FireChanged()
         {
             _signalBus?.Fire(new UINavigationChangedSignal(Current, _stack.Count));
-            _signalBus?.Fire(new UiNavigationChangedSignal(Current, _stack.Count));
         }
     }
 }
