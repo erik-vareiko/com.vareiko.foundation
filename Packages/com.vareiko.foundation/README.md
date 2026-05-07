@@ -407,6 +407,11 @@ Example `Packages/manifest.json`:
 - All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
 
 ### Button Actions
+- `UIButtonView`:
+  - can wrap an assigned or co-located UGUI `Button`
+  - forwards `Button.onClick` through `UIButtonView.Click()` and `UIButtonView.OnClicked`
+  - keeps `UIButtonView.Interactable` and `Button.interactable` synchronized
+  - exposes `SetClickAction` / `ClearClickAction` for one owned runtime callback without removing external inspector or action listeners
 - `UIWindowOpenButtonAction`:
   - subscribes to `UIButtonView.OnClicked`
   - enqueues target window in `IUIWindowManager` with configured priority/duplicate policy

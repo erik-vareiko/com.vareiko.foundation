@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Tests.TestDoubles;
 using Vareiko.Foundation.UI;
+using Zenject;
 
 namespace Vareiko.Foundation.Tests.UI
 {

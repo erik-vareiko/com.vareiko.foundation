@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Extended `UIButtonView`:
+  - optional UGUI `Button` bridge with lifecycle-safe click subscription
+  - `SetInteractable(...)` now syncs an assigned `Button.interactable`
+  - added owned click action API (`SetClickAction` / `ClearClickAction`) without clearing external `OnClicked` listeners
 
 ## 2.0.0
 - Breaking UI cleanup:
