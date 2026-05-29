@@ -18,7 +18,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Scene flow (`ISceneFlowService`).
 - Loading state orchestration (`ILoadingService`) with scene-signal integration.
 - UI loading presenter (`LoadingOverlayPresenter`).
-- Save system (`ISaveService`, atomic file storage, JSON serializer, rolling backups, autosave scheduler).
+- Save system (`ISaveService`, PlayerPrefs JSON storage by default, JSON serializer, rolling backups, autosave scheduler; file storage remains available as an alternative backend).
 - Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.

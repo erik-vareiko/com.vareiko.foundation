@@ -63,7 +63,7 @@
 - Remote-config first feature rollout through feature flags service.
 - Unified runtime observability layer (logger + diagnostics snapshot).
 - Fallback to `AppState.Error` on boot failure and unhandled runtime exceptions.
-- Save reliability baseline with atomic writes, rolling backups and restore fallback.
+- Save reliability baseline with PlayerPrefs JSON storage by default, rolling backups and restore fallback. `FileSaveStorage` remains available for projects that explicitly pre-bind a file-backed `ISaveStorage`.
 - Asset lifecycle baseline with reference tracking and leak diagnostics signals.
 - Localization lookup fallback chain (`current language -> fallback language -> key/default`).
 - Unified UI primitives for screens/windows/panels/items/buttons with queue-based window sequencing.

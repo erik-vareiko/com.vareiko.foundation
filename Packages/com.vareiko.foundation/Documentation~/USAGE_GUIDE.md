@@ -61,6 +61,8 @@ The order is documented in `Documentation~/ARCHITECTURE.md`.
 ## 6. Core Service Usage Patterns
 
 ### Save/Load
+`FoundationSaveInstaller` binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default. Each `slot/key` pair is stored as a separate PlayerPrefs string containing the current JSON save envelope; rolling backups use separate `.bakN` PlayerPrefs keys. Projects that need file-backed saves can pre-bind `ISaveStorage` to `FileSaveStorage` before calling the foundation save installer.
+
 ```csharp
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Save;

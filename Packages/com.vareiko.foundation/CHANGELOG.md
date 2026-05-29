@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Changed default save storage:
+  - `FoundationSaveInstaller` now binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default
+  - `PlayerPrefsSaveStorage` stores one JSON payload per `slot/key` pair using stable relative PlayerPrefs keys
+  - `FileSaveStorage` remains available as an alternative backend for projects that pre-bind `ISaveStorage`
 - Extended `UIButtonView`:
   - optional UGUI `Button` bridge with lifecycle-safe click subscription
   - `SetInteractable(...)` now syncs an assigned `Button.interactable`

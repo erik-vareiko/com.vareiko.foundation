@@ -54,7 +54,7 @@ namespace Vareiko.Foundation.Save
             container.BindInstance(Path.Combine(Application.persistentDataPath, "saves"))
                 .WithId("SaveRootPath");
 
-            container.Bind<ISaveStorage>().To<FileSaveStorage>().AsSingle();
+            container.Bind<ISaveStorage>().To<PlayerPrefsSaveStorage>().AsSingle();
             container.Bind<JsonUnitySaveSerializer>().AsSingle();
             container.Bind<ISaveSerializer>().To<SecureSaveSerializer>().AsSingle();
             container.Bind<ISaveMigrationService>().To<SaveMigrationService>().AsSingle();
