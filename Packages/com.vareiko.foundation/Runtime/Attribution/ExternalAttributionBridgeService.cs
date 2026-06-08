@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Consent;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Attribution
@@ -11,7 +12,7 @@ namespace Vareiko.Foundation.Attribution
     {
         private readonly AttributionConfig _config;
         private readonly IConsentService _consentService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         private bool _initialized;
         private string _userId = string.Empty;
@@ -20,7 +21,7 @@ namespace Vareiko.Foundation.Attribution
         public ExternalAttributionBridgeService(
             [InjectOptional] AttributionConfig config = null,
             [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _consentService = consentService;
@@ -85,7 +86,7 @@ namespace Vareiko.Foundation.Attribution
             }
 
             _initialized = true;
-            _signalBus?.Fire(new AttributionInitializedSignal(true, string.Empty));
+            _signalBus?.Publish(new AttributionInitializedSignal(true, string.Empty));
             return AttributionInitializeResult.Succeed();
         }
 
@@ -154,7 +155,7 @@ namespace Vareiko.Foundation.Attribution
                 return FailEvent(normalized.EventName, normalized.Error, normalized.ErrorCode);
             }
 
-            _signalBus?.Fire(new AttributionEventTrackedSignal(normalized.EventName));
+            _signalBus?.Publish(new AttributionEventTrackedSignal(normalized.EventName));
             return normalized;
         }
 
@@ -230,7 +231,7 @@ namespace Vareiko.Foundation.Attribution
                     normalized.ErrorCode);
             }
 
-            _signalBus?.Fire(new AttributionRevenueTrackedSignal(
+            _signalBus?.Publish(new AttributionRevenueTrackedSignal(
                 normalized.ProductId,
                 normalized.Currency,
                 normalized.Amount,
@@ -284,14 +285,14 @@ namespace Vareiko.Foundation.Attribution
         {
             _initialized = false;
             AttributionInitializeResult result = AttributionInitializeResult.Fail(error, errorCode);
-            _signalBus?.Fire(new AttributionInitializedSignal(false, result.Error));
+            _signalBus?.Publish(new AttributionInitializedSignal(false, result.Error));
             return result;
         }
 
         private AttributionTrackResult FailEvent(string eventName, string error, AttributionErrorCode errorCode)
         {
             AttributionTrackResult result = AttributionTrackResult.Fail(eventName, error, errorCode);
-            _signalBus?.Fire(new AttributionEventTrackFailedSignal(result.EventName, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new AttributionEventTrackFailedSignal(result.EventName, result.Error, result.ErrorCode));
             return result;
         }
 
@@ -303,7 +304,7 @@ namespace Vareiko.Foundation.Attribution
             AttributionErrorCode errorCode)
         {
             AttributionRevenueTrackResult result = AttributionRevenueTrackResult.Fail(productId, currency, amount, error, errorCode);
-            _signalBus?.Fire(new AttributionRevenueTrackFailedSignal(result.ProductId, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new AttributionRevenueTrackFailedSignal(result.ProductId, result.Error, result.ErrorCode));
             return result;
         }
 

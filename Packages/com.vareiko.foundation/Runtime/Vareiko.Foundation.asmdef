@@ -4,7 +4,10 @@
   "references": [
     "Zenject",
     "UniTask",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

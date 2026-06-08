@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.UI
@@ -7,13 +8,13 @@ namespace Vareiko.Foundation.UI
     public class UIService : IUIService, IInitializable
     {
         private readonly UIRegistry _registry;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, UIElement> _elements = new Dictionary<string, UIElement>(StringComparer.Ordinal);
 
         [Inject]
         public UIService(
             [InjectOptional] UIRegistry registry = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _registry = registry;
             _signalBus = signalBus;
@@ -47,7 +48,7 @@ namespace Vareiko.Foundation.UI
                 }
             }
 
-            _signalBus?.Fire(new UIReadySignal(_elements.Count, screenCount, windowCount));
+            _signalBus?.Publish(new UIReadySignal(_elements.Count, screenCount, windowCount));
         }
 
         public bool Show(string elementId, bool instant = true)
@@ -152,23 +153,23 @@ namespace Vareiko.Foundation.UI
 
         private void FireShownSignals(string elementId, UIElement element)
         {
-            _signalBus?.Fire(new UIElementShownSignal(elementId, element.GetType().Name));
+            _signalBus?.Publish(new UIElementShownSignal(elementId, element.GetType().Name));
 
             UIScreen screen = element as UIScreen;
             if (screen != null)
             {
-                _signalBus?.Fire(new UIScreenShownSignal(elementId));
+                _signalBus?.Publish(new UIScreenShownSignal(elementId));
             }
         }
 
         private void FireHiddenSignals(string elementId, UIElement element)
         {
-            _signalBus?.Fire(new UIElementHiddenSignal(elementId, element.GetType().Name));
+            _signalBus?.Publish(new UIElementHiddenSignal(elementId, element.GetType().Name));
 
             UIScreen screen = element as UIScreen;
             if (screen != null)
             {
-                _signalBus?.Fire(new UIScreenHiddenSignal(elementId));
+                _signalBus?.Publish(new UIScreenHiddenSignal(elementId));
             }
         }
     }

@@ -1,11 +1,12 @@
 using System;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.App
 {
     public sealed class ApplicationLifecycleService : IApplicationLifecycleService, IInitializable, IDisposable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly IApplicationLifecycleSource _source;
         private readonly bool _ownsSource;
 
@@ -15,7 +16,7 @@ namespace Vareiko.Foundation.App
 
         [Inject]
         public ApplicationLifecycleService(
-            [InjectOptional] SignalBus signalBus = null,
+            IFoundationSignalBus signalBus,
             [InjectOptional] IApplicationLifecycleSource source = null)
         {
             _signalBus = signalBus;
@@ -56,7 +57,7 @@ namespace Vareiko.Foundation.App
 
             IsPaused = isPaused;
             PauseChanged?.Invoke(isPaused);
-            _signalBus?.Fire(new ApplicationPauseChangedSignal(isPaused));
+            _signalBus.Publish(new ApplicationPauseChangedSignal(isPaused));
         }
 
         private void OnFocusChanged(bool hasFocus)
@@ -68,7 +69,7 @@ namespace Vareiko.Foundation.App
 
             HasFocus = hasFocus;
             FocusChanged?.Invoke(hasFocus);
-            _signalBus?.Fire(new ApplicationFocusChangedSignal(hasFocus));
+            _signalBus.Publish(new ApplicationFocusChangedSignal(hasFocus));
         }
 
         private void OnQuitRequested()
@@ -80,7 +81,7 @@ namespace Vareiko.Foundation.App
 
             IsQuitting = true;
             QuitRequested?.Invoke();
-            _signalBus?.Fire(new ApplicationQuitSignal());
+            _signalBus.Publish(new ApplicationQuitSignal());
         }
     }
 }

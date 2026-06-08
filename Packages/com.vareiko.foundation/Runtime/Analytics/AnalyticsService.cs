@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Time;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -13,7 +14,7 @@ namespace Vareiko.Foundation.Analytics
         private readonly AnalyticsConfig _config;
         private readonly IConsentService _consentService;
         private readonly IFoundationTimeProvider _time;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly List<AnalyticsEventModel> _buffer;
         private readonly Dictionary<string, string> _sessionProperties = new Dictionary<string, string>();
 
@@ -25,7 +26,7 @@ namespace Vareiko.Foundation.Analytics
             IFoundationTimeProvider timeProvider,
             [InjectOptional] IConsentService consentService = null,
             [InjectOptional] AnalyticsConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _time = timeProvider;
             _consentService = consentService;
@@ -61,7 +62,7 @@ namespace Vareiko.Foundation.Analytics
 
             if (!HasTrackingConsent())
             {
-                _signalBus?.Fire(new AnalyticsEventDroppedSignal(eventName, "Consent is not granted."));
+                _signalBus?.Publish(new AnalyticsEventDroppedSignal(eventName, "Consent is not granted."));
                 return;
             }
 
@@ -92,7 +93,7 @@ namespace Vareiko.Foundation.Analytics
                 Debug.Log($"[Analytics] {eventName}");
             }
 
-            _signalBus?.Fire(new AnalyticsEventTrackedSignal(eventName));
+            _signalBus?.Publish(new AnalyticsEventTrackedSignal(eventName));
         }
 
         public UniTask FlushAsync(CancellationToken cancellationToken = default)

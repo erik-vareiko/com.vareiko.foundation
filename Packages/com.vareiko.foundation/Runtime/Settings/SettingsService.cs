@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Save;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -13,13 +14,13 @@ namespace Vareiko.Foundation.Settings
         private const string Key = "settings";
 
         private readonly ISaveService _saveService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         private GameSettings _current = new GameSettings();
         private bool _isLoaded;
 
         [Inject]
-        public SettingsService(ISaveService saveService, [InjectOptional] SignalBus signalBus = null)
+        public SettingsService(ISaveService saveService, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _saveService = saveService;
             _signalBus = signalBus;
@@ -38,8 +39,8 @@ namespace Vareiko.Foundation.Settings
             GameSettings loaded = await _saveService.LoadAsync(Slot, Key, new GameSettings(), cancellationToken);
             _current = loaded ?? new GameSettings();
             _isLoaded = true;
-            _signalBus?.Fire(new SettingsLoadedSignal(_current));
-            _signalBus?.Fire(new SettingsChangedSignal(_current));
+            _signalBus?.Publish(new SettingsLoadedSignal(_current));
+            _signalBus?.Publish(new SettingsChangedSignal(_current));
         }
 
         public UniTask SaveAsync(CancellationToken cancellationToken = default)
@@ -55,7 +56,7 @@ namespace Vareiko.Foundation.Settings
             }
 
             _current = settings;
-            _signalBus?.Fire(new SettingsChangedSignal(_current));
+            _signalBus?.Publish(new SettingsChangedSignal(_current));
             if (saveImmediately)
             {
                 SaveAsync().Forget();
@@ -73,8 +74,8 @@ namespace Vareiko.Foundation.Settings
                 Debug.LogException(exception);
                 _current = new GameSettings();
                 _isLoaded = true;
-                _signalBus?.Fire(new SettingsLoadedSignal(_current));
-                _signalBus?.Fire(new SettingsChangedSignal(_current));
+                _signalBus?.Publish(new SettingsLoadedSignal(_current));
+                _signalBus?.Publish(new SettingsChangedSignal(_current));
             }
         }
     }

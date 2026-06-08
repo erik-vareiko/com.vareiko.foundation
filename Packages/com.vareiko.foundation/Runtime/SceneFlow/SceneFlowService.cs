@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Time;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -11,12 +12,12 @@ namespace Vareiko.Foundation.SceneFlow
     public sealed class SceneFlowService : ISceneFlowService
     {
         private readonly IFoundationTimeProvider _time;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         private bool _isBusy;
 
         [Inject]
-        public SceneFlowService(IFoundationTimeProvider timeProvider, [InjectOptional] SignalBus signalBus = null)
+        public SceneFlowService(IFoundationTimeProvider timeProvider, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _time = timeProvider;
             _signalBus = signalBus;
@@ -39,7 +40,7 @@ namespace Vareiko.Foundation.SceneFlow
 
             _isBusy = true;
             float startTime = _time.Time;
-            _signalBus?.Fire(new SceneLoadStartedSignal(sceneName, mode));
+            _signalBus?.Publish(new SceneLoadStartedSignal(sceneName, mode));
 
             try
             {
@@ -52,7 +53,7 @@ namespace Vareiko.Foundation.SceneFlow
                 while (!operation.isDone)
                 {
                     float progress = Mathf.Clamp01(operation.progress / 0.9f);
-                    _signalBus?.Fire(new SceneLoadProgressSignal(sceneName, progress));
+                    _signalBus?.Publish(new SceneLoadProgressSignal(sceneName, progress));
                     await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
                 }
 
@@ -65,9 +66,9 @@ namespace Vareiko.Foundation.SceneFlow
                     }
                 }
 
-                _signalBus?.Fire(new SceneLoadProgressSignal(sceneName, 1f));
+                _signalBus?.Publish(new SceneLoadProgressSignal(sceneName, 1f));
                 float duration = Mathf.Max(0f, _time.Time - startTime);
-                _signalBus?.Fire(new SceneLoadCompletedSignal(sceneName, mode, duration));
+                _signalBus?.Publish(new SceneLoadCompletedSignal(sceneName, mode, duration));
             }
             finally
             {
@@ -95,7 +96,7 @@ namespace Vareiko.Foundation.SceneFlow
 
             _isBusy = true;
             float startTime = _time.Time;
-            _signalBus?.Fire(new SceneUnloadStartedSignal(sceneName));
+            _signalBus?.Publish(new SceneUnloadStartedSignal(sceneName));
 
             try
             {
@@ -111,7 +112,7 @@ namespace Vareiko.Foundation.SceneFlow
                 }
 
                 float duration = Mathf.Max(0f, _time.Time - startTime);
-                _signalBus?.Fire(new SceneUnloadCompletedSignal(sceneName, duration));
+                _signalBus?.Publish(new SceneUnloadCompletedSignal(sceneName, duration));
             }
             finally
             {

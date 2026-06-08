@@ -4,7 +4,6 @@ using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Backend
 {
@@ -55,7 +54,7 @@ namespace Vareiko.Foundation.Tests.Backend
                 ReflectionTestUtil.SetPrivateField(config, "_provider", BackendProviderType.PlayFab);
                 ReflectionTestUtil.SetPrivateField(config, "_titleId", "TEST_TITLE");
 
-                SignalBus signalBus = CreateSignalBus();
+                FakeSignalBus signalBus = new FakeSignalBus();
                 BackendAuthStateChangedSignal lastSignal = default;
                 bool hasSignal = false;
                 signalBus.Subscribe<BackendAuthStateChangedSignal>(signal =>
@@ -221,12 +220,5 @@ namespace Vareiko.Foundation.Tests.Backend
             Assert.ThrowsAsync<System.OperationCanceledException>(async () => await remoteConfig.RefreshAsync(cts.Token));
         }
 
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<BackendAuthStateChangedSignal>();
-            return container.Resolve<SignalBus>();
-        }
     }
 }

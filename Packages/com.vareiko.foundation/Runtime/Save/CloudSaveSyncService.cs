@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Backend;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Save
@@ -15,7 +16,7 @@ namespace Vareiko.Foundation.Save
         private readonly ISaveSerializer _serializer;
         private readonly ISaveConflictResolver _conflictResolver;
         private readonly IBackendService _backendService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         [Inject]
         public CloudSaveSyncService(
@@ -23,7 +24,7 @@ namespace Vareiko.Foundation.Save
             ISaveSerializer serializer,
             [InjectOptional] ISaveConflictResolver conflictResolver = null,
             [InjectOptional] IBackendService backendService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _saveService = saveService;
             _serializer = serializer;
@@ -37,14 +38,14 @@ namespace Vareiko.Foundation.Save
             cancellationToken.ThrowIfCancellationRequested();
             if (!ValidateSlotAndKey(slot, key, out CloudSaveSyncResult validationResult))
             {
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, validationResult.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, validationResult.Error));
                 return validationResult;
             }
 
             CloudSaveSyncResult availability = ValidateBackendAvailability();
             if (!availability.Success)
             {
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, availability.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, availability.Error));
                 return availability;
             }
 
@@ -52,7 +53,7 @@ namespace Vareiko.Foundation.Save
             if (!localExists)
             {
                 CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Local save does not exist.", BackendErrorCode.ValidationFailed);
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                 return fail;
             }
 
@@ -61,11 +62,11 @@ namespace Vareiko.Foundation.Save
             if (!await PushPayloadAsync(slot, key, localPayload, cancellationToken))
             {
                 CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to push save payload to cloud.", BackendErrorCode.ProviderUnavailable);
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                 return fail;
             }
 
-            _signalBus?.Fire(new SaveCloudPushedSignal(slot, key));
+            _signalBus?.Publish(new SaveCloudPushedSignal(slot, key));
             return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.PushedLocalToCloud);
         }
 
@@ -74,14 +75,14 @@ namespace Vareiko.Foundation.Save
             cancellationToken.ThrowIfCancellationRequested();
             if (!ValidateSlotAndKey(slot, key, out CloudSaveSyncResult validationResult))
             {
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, validationResult.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, validationResult.Error));
                 return validationResult;
             }
 
             CloudPayloadResult cloudPayloadResult = await TryGetCloudPayloadAsync(slot, key, cancellationToken);
             if (!cloudPayloadResult.Success)
             {
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, cloudPayloadResult.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, cloudPayloadResult.Error));
                 return CloudSaveSyncResult.Fail(cloudPayloadResult.Error, cloudPayloadResult.BackendErrorCode);
             }
 
@@ -94,12 +95,12 @@ namespace Vareiko.Foundation.Save
             if (!_serializer.TryDeserialize(cloudPayloadResult.CloudPayload, out cloudModel))
             {
                 CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to deserialize cloud save payload.", BackendErrorCode.Unknown);
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                 return fail;
             }
 
             await _saveService.SaveAsync(slot, key, cloudModel, cancellationToken);
-            _signalBus?.Fire(new SaveCloudPulledSignal(slot, key));
+            _signalBus?.Publish(new SaveCloudPulledSignal(slot, key));
             return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.PulledCloudToLocal);
         }
 
@@ -108,14 +109,14 @@ namespace Vareiko.Foundation.Save
             cancellationToken.ThrowIfCancellationRequested();
             if (!ValidateSlotAndKey(slot, key, out CloudSaveSyncResult validationResult))
             {
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, validationResult.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, validationResult.Error));
                 return validationResult;
             }
 
             CloudPayloadResult cloudPayloadResult = await TryGetCloudPayloadAsync(slot, key, cancellationToken);
             if (!cloudPayloadResult.Success)
             {
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, cloudPayloadResult.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, cloudPayloadResult.Error));
                 return CloudSaveSyncResult.Fail(cloudPayloadResult.Error, cloudPayloadResult.BackendErrorCode);
             }
 
@@ -138,11 +139,11 @@ namespace Vareiko.Foundation.Save
                 if (!await PushPayloadAsync(slot, key, localPayload, cancellationToken))
                 {
                     CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to push local save to cloud.", BackendErrorCode.ProviderUnavailable);
-                    _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                    _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                     return fail;
                 }
 
-                _signalBus?.Fire(new SaveCloudPushedSignal(slot, key));
+                _signalBus?.Publish(new SaveCloudPushedSignal(slot, key));
                 return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.PushedLocalToCloud);
             }
 
@@ -152,12 +153,12 @@ namespace Vareiko.Foundation.Save
                 if (!_serializer.TryDeserialize(cloudPayloadResult.CloudPayload, out cloudOnlyModel))
                 {
                     CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to deserialize cloud save payload.", BackendErrorCode.Unknown);
-                    _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                    _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                     return fail;
                 }
 
                 await _saveService.SaveAsync(slot, key, cloudOnlyModel, cancellationToken);
-                _signalBus?.Fire(new SaveCloudPulledSignal(slot, key));
+                _signalBus?.Publish(new SaveCloudPulledSignal(slot, key));
                 return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.PulledCloudToLocal);
             }
 
@@ -174,7 +175,7 @@ namespace Vareiko.Foundation.Save
             if (!ApplyConflictChoiceIsValid(resolution))
             {
                 CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Invalid save conflict resolution payload.", BackendErrorCode.ValidationFailed);
-                _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                 return fail;
             }
 
@@ -186,11 +187,11 @@ namespace Vareiko.Foundation.Save
                     if (!await PushPayloadAsync(slot, key, chosenPayload, cancellationToken))
                     {
                         CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to push local conflict result to cloud.", BackendErrorCode.ProviderUnavailable);
-                        _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                        _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                         return fail;
                     }
 
-                    _signalBus?.Fire(new SaveCloudConflictResolvedSignal(slot, key, SaveConflictChoice.KeepLocal));
+                    _signalBus?.Publish(new SaveCloudConflictResolvedSignal(slot, key, SaveConflictChoice.KeepLocal));
                     return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.ResolvedKeepLocal, SaveConflictChoice.KeepLocal);
                 }
 
@@ -201,13 +202,13 @@ namespace Vareiko.Foundation.Save
                     if (!_serializer.TryDeserialize(chosenPayload, out chosenModel))
                     {
                         CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to deserialize cloud conflict payload.", BackendErrorCode.ValidationFailed);
-                        _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                        _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                         return fail;
                     }
 
                     await _saveService.SaveAsync(slot, key, chosenModel, cancellationToken);
-                    _signalBus?.Fire(new SaveCloudConflictResolvedSignal(slot, key, SaveConflictChoice.UseCloud));
-                    _signalBus?.Fire(new SaveCloudPulledSignal(slot, key));
+                    _signalBus?.Publish(new SaveCloudConflictResolvedSignal(slot, key, SaveConflictChoice.UseCloud));
+                    _signalBus?.Publish(new SaveCloudPulledSignal(slot, key));
                     return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.ResolvedUseCloud, SaveConflictChoice.UseCloud);
                 }
 
@@ -218,7 +219,7 @@ namespace Vareiko.Foundation.Save
                     if (!_serializer.TryDeserialize(chosenPayload, out mergedModel))
                     {
                         CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to deserialize merged conflict payload.", BackendErrorCode.ValidationFailed);
-                        _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                        _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                         return fail;
                     }
 
@@ -226,17 +227,17 @@ namespace Vareiko.Foundation.Save
                     if (!await PushPayloadAsync(slot, key, chosenPayload, cancellationToken))
                     {
                         CloudSaveSyncResult fail = CloudSaveSyncResult.Fail("Failed to push merged conflict payload to cloud.", BackendErrorCode.ProviderUnavailable);
-                        _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
+                        _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, fail.Error));
                         return fail;
                     }
 
-                    _signalBus?.Fire(new SaveCloudConflictResolvedSignal(slot, key, SaveConflictChoice.Merge));
+                    _signalBus?.Publish(new SaveCloudConflictResolvedSignal(slot, key, SaveConflictChoice.Merge));
                     return CloudSaveSyncResult.Succeed(CloudSaveSyncAction.ResolvedMerge, SaveConflictChoice.Merge);
                 }
             }
 
             CloudSaveSyncResult unknown = CloudSaveSyncResult.Fail("Unsupported save conflict choice.", BackendErrorCode.ValidationFailed);
-            _signalBus?.Fire(new SaveCloudSyncFailedSignal(slot, key, unknown.Error));
+            _signalBus?.Publish(new SaveCloudSyncFailedSignal(slot, key, unknown.Error));
             return unknown;
         }
 

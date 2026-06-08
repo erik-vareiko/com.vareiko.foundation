@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Settings;
 using Vareiko.Foundation.Time;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -14,8 +17,9 @@ namespace Vareiko.Foundation.Save
         private readonly IFoundationTimeProvider _timeProvider;
         private readonly ISettingsService _settingsService;
         private readonly IConsentService _consentService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly IApplicationLifecycleService _applicationLifecycleService;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
 
         private bool _dirtySettings;
         private bool _dirtyConsent;
@@ -29,7 +33,7 @@ namespace Vareiko.Foundation.Save
             [InjectOptional] AutosaveConfig config = null,
             [InjectOptional] ISettingsService settingsService = null,
             [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IFoundationSignalBus signalBus = null,
             [InjectOptional] IApplicationLifecycleService applicationLifecycleService = null)
         {
             _timeProvider = timeProvider;
@@ -46,8 +50,8 @@ namespace Vareiko.Foundation.Save
 
             if (_signalBus != null)
             {
-                _signalBus.Subscribe<SettingsChangedSignal>(OnSettingsChanged);
-                _signalBus.Subscribe<ConsentChangedSignal>(OnConsentChanged);
+                _signalSubscriptions.Add(_signalBus.Subscribe<SettingsChangedSignal>(OnSettingsChanged));
+                _signalSubscriptions.Add(_signalBus.Subscribe<ConsentChangedSignal>(OnConsentChanged));
             }
 
             if (ShouldSaveOnPause())
@@ -78,11 +82,11 @@ namespace Vareiko.Foundation.Save
 
         public void Dispose()
         {
-            if (_signalBus != null)
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
             {
-                _signalBus.Unsubscribe<SettingsChangedSignal>(OnSettingsChanged);
-                _signalBus.Unsubscribe<ConsentChangedSignal>(OnConsentChanged);
+                _signalSubscriptions[i].Dispose();
             }
+            _signalSubscriptions.Clear();
 
             if (ShouldSaveOnPause())
             {
@@ -165,7 +169,7 @@ namespace Vareiko.Foundation.Save
             }
 
             _isSaving = true;
-            _signalBus?.Fire(new AutosaveTriggeredSignal(reason, shouldSaveSettings, shouldSaveConsent));
+            _signalBus?.Publish(new AutosaveTriggeredSignal(reason, shouldSaveSettings, shouldSaveConsent));
             int savedTargets = 0;
 
             try
@@ -184,12 +188,12 @@ namespace Vareiko.Foundation.Save
                     savedTargets++;
                 }
 
-                _signalBus?.Fire(new AutosaveCompletedSignal(reason, savedTargets));
+                _signalBus?.Publish(new AutosaveCompletedSignal(reason, savedTargets));
             }
             catch (System.Exception exception)
             {
                 Debug.LogException(exception);
-                _signalBus?.Fire(new AutosaveFailedSignal(reason, exception.Message));
+                _signalBus?.Publish(new AutosaveFailedSignal(reason, exception.Message));
             }
             finally
             {
@@ -231,7 +235,7 @@ namespace Vareiko.Foundation.Save
                 }
 
                 GameObject host = new GameObject("[Foundation] AutosaveLifecycleHook");
-                Object.DontDestroyOnLoad(host);
+                UnityEngine.Object.DontDestroyOnLoad(host);
                 _instance = host.AddComponent<AutosaveLifecycleHook>();
                 return _instance;
             }

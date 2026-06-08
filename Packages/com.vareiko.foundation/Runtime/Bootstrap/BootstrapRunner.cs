@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.App;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Bootstrap
@@ -11,7 +12,7 @@ namespace Vareiko.Foundation.Bootstrap
     public sealed class BootstrapRunner : IInitializable, IDisposable
     {
         private readonly List<IBootstrapTask> _tasks;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly IAppStateMachine _appStateMachine;
 
         private CancellationTokenSource _lifecycleCts;
@@ -20,7 +21,7 @@ namespace Vareiko.Foundation.Bootstrap
         [Inject]
         public BootstrapRunner(
             [InjectOptional] List<IBootstrapTask> tasks = null,
-            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IFoundationSignalBus signalBus = null,
             [InjectOptional] IAppStateMachine appStateMachine = null)
         {
             _tasks = tasks ?? new List<IBootstrapTask>(0);
@@ -55,7 +56,7 @@ namespace Vareiko.Foundation.Bootstrap
             List<IBootstrapTask> orderedTasks = CollectOrderedTasks();
             int totalTasks = orderedTasks.Count;
 
-            _signalBus?.Fire(new ApplicationBootStartedSignal(totalTasks));
+            _signalBus?.Publish(new ApplicationBootStartedSignal(totalTasks));
 
             for (int i = 0; i < orderedTasks.Count; i++)
             {
@@ -66,7 +67,7 @@ namespace Vareiko.Foundation.Bootstrap
                 }
 
                 string taskName = string.IsNullOrWhiteSpace(task.Name) ? task.GetType().Name : task.Name;
-                _signalBus?.Fire(new ApplicationBootTaskStartedSignal(taskName, task.Order, i + 1, totalTasks));
+                _signalBus?.Publish(new ApplicationBootTaskStartedSignal(taskName, task.Order, i + 1, totalTasks));
 
                 try
                 {
@@ -79,7 +80,7 @@ namespace Vareiko.Foundation.Bootstrap
                 catch (Exception exception)
                 {
                     Debug.LogException(exception);
-                    _signalBus?.Fire(new ApplicationBootFailedSignal(taskName, exception.Message));
+                    _signalBus?.Publish(new ApplicationBootFailedSignal(taskName, exception.Message));
                     if (_appStateMachine != null && !_appStateMachine.IsIn(AppState.Error))
                     {
                         _appStateMachine.TryEnter(AppState.Error);
@@ -87,10 +88,10 @@ namespace Vareiko.Foundation.Bootstrap
                     return;
                 }
 
-                _signalBus?.Fire(new ApplicationBootTaskCompletedSignal(taskName, task.Order, i + 1, totalTasks));
+                _signalBus?.Publish(new ApplicationBootTaskCompletedSignal(taskName, task.Order, i + 1, totalTasks));
             }
 
-            _signalBus?.Fire(new ApplicationBootCompletedSignal(totalTasks));
+            _signalBus?.Publish(new ApplicationBootCompletedSignal(totalTasks));
         }
 
         private List<IBootstrapTask> CollectOrderedTasks()

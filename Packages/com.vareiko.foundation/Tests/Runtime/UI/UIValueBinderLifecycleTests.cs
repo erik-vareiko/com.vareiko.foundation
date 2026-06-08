@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Vareiko.Foundation.Tests.TestDoubles;
 using Vareiko.Foundation.UI;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.UI
 {
@@ -25,14 +24,14 @@ namespace Vareiko.Foundation.Tests.UI
         [Test]
         public void InvalidKeys_DoNotSubscribeOrUpdateTargets()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             UIValueEventService valueService = new UIValueEventService(signalBus);
             BinderCase binderCase = CreateStringCase(" ");
             try
             {
                 binderCase.Activate(signalBus, valueService);
                 valueService.SetString("hud.name", "Rogue");
-                signalBus.Fire(new UIStringValueChangedSignal("hud.name", "Mage"));
+                signalBus.Publish(new UIStringValueChangedSignal("hud.name", "Mage"));
 
                 Assert.That(binderCase.ReadString(), Is.Empty);
                 Assert.DoesNotThrow(() => binderCase.Root.SetActive(false));
@@ -55,7 +54,7 @@ namespace Vareiko.Foundation.Tests.UI
                 CreateItemCountCase("hud.item_count")
             };
 
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             UIValueEventService valueService = new UIValueEventService(signalBus);
             for (int i = 0; i < cases.Length; i++)
             {
@@ -93,7 +92,7 @@ namespace Vareiko.Foundation.Tests.UI
                 root,
                 (bus, service) => binder.Construct(bus, service),
                 service => service.SetString("hud.name", "Rogue"),
-                bus => bus.Fire(new UIStringValueChangedSignal("hud.name", "Rogue")),
+                bus => bus.Publish(new UIStringValueChangedSignal("hud.name", "Rogue")),
                 () => Assert.That(text.text, Is.EqualTo("Rogue")),
                 () => text.text);
         }
@@ -109,7 +108,7 @@ namespace Vareiko.Foundation.Tests.UI
                 root,
                 (bus, service) => binder.Construct(bus, service),
                 service => service.SetInt("hud.coins", 42),
-                bus => bus.Fire(new UIIntValueChangedSignal("hud.coins", 42)),
+                bus => bus.Publish(new UIIntValueChangedSignal("hud.coins", 42)),
                 () => Assert.That(text.text, Is.EqualTo("42")));
         }
 
@@ -124,7 +123,7 @@ namespace Vareiko.Foundation.Tests.UI
                 root,
                 (bus, service) => binder.Construct(bus, service),
                 service => service.SetFloat("hud.hp", 12.5f),
-                bus => bus.Fire(new UIFloatValueChangedSignal("hud.hp", 12.5f)),
+                bus => bus.Publish(new UIFloatValueChangedSignal("hud.hp", 12.5f)),
                 () => Assert.That(text.text, Is.EqualTo("12.5")));
         }
 
@@ -141,7 +140,7 @@ namespace Vareiko.Foundation.Tests.UI
                 root,
                 (bus, service) => binder.Construct(bus, service),
                 service => service.SetBool("hud.visible", true),
-                bus => bus.Fire(new UIBoolValueChangedSignal("hud.visible", true)),
+                bus => bus.Publish(new UIBoolValueChangedSignal("hud.visible", true)),
                 () => Assert.That(target.activeSelf, Is.True));
         }
 
@@ -156,7 +155,7 @@ namespace Vareiko.Foundation.Tests.UI
                 root,
                 (bus, service) => binder.Construct(bus, service),
                 service => service.SetBool("hud.can_click", false),
-                bus => bus.Fire(new UIBoolValueChangedSignal("hud.can_click", false)),
+                bus => bus.Publish(new UIBoolValueChangedSignal("hud.can_click", false)),
                 () => Assert.That(button.Interactable, Is.False));
         }
 
@@ -171,7 +170,7 @@ namespace Vareiko.Foundation.Tests.UI
                 root,
                 (bus, service) => binder.Construct(bus, service),
                 service => service.SetInt("hud.item_count", 2),
-                bus => bus.Fire(new UIIntValueChangedSignal("hud.item_count", 2)),
+                bus => bus.Publish(new UIIntValueChangedSignal("hud.item_count", 2)),
                 () => Assert.That(collection.ActiveCount, Is.EqualTo(2)));
         }
 
@@ -197,32 +196,21 @@ namespace Vareiko.Foundation.Tests.UI
             return root;
         }
 
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<UIIntValueChangedSignal>();
-            container.DeclareSignal<UIFloatValueChangedSignal>();
-            container.DeclareSignal<UIBoolValueChangedSignal>();
-            container.DeclareSignal<UIStringValueChangedSignal>();
-            return container.Resolve<SignalBus>();
-        }
-
         private sealed class BinderCase : IDisposable
         {
-            private readonly Action<SignalBus, IUIValueEventService> _construct;
+            private readonly Action<FakeSignalBus, IUIValueEventService> _construct;
             private readonly Func<string> _readString;
 
             public readonly GameObject Root;
             public readonly Action<UIValueEventService> PublishValueService;
-            public readonly Action<SignalBus> PublishSignalBus;
+            public readonly Action<FakeSignalBus> PublishSignalBus;
             public readonly Action AssertApplied;
 
             public BinderCase(
                 GameObject root,
-                Action<SignalBus, IUIValueEventService> construct,
+                Action<FakeSignalBus, IUIValueEventService> construct,
                 Action<UIValueEventService> publishValueService,
-                Action<SignalBus> publishSignalBus,
+                Action<FakeSignalBus> publishSignalBus,
                 Action assertApplied,
                 Func<string> readString = null)
             {
@@ -234,7 +222,7 @@ namespace Vareiko.Foundation.Tests.UI
                 _readString = readString;
             }
 
-            public void Activate(SignalBus signalBus, IUIValueEventService valueService)
+            public void Activate(FakeSignalBus signalBus, IUIValueEventService valueService)
             {
                 _construct(signalBus, valueService);
                 Root.SetActive(true);

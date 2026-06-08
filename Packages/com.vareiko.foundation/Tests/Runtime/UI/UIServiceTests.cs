@@ -2,7 +2,6 @@ using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Tests.TestDoubles;
 using Vareiko.Foundation.UI;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.UI
 {
@@ -47,20 +46,12 @@ namespace Vareiko.Foundation.Tests.UI
 
         private sealed class CountingSignalBus
         {
-            public readonly Zenject.SignalBus Bus;
+            public readonly FakeSignalBus Bus = new FakeSignalBus();
             public int ScreenShownCount;
             public int ScreenHiddenCount;
 
             public CountingSignalBus()
             {
-                Zenject.DiContainer container = new Zenject.DiContainer();
-                Zenject.SignalBusInstaller.Install(container);
-                container.DeclareSignal<UIReadySignal>();
-                container.DeclareSignal<UIElementShownSignal>();
-                container.DeclareSignal<UIElementHiddenSignal>();
-                container.DeclareSignal<UIScreenShownSignal>();
-                container.DeclareSignal<UIScreenHiddenSignal>();
-                Bus = container.Resolve<Zenject.SignalBus>();
                 Bus.Subscribe<UIScreenShownSignal>(_ => ScreenShownCount++);
                 Bus.Subscribe<UIScreenHiddenSignal>(_ => ScreenHiddenCount++);
             }

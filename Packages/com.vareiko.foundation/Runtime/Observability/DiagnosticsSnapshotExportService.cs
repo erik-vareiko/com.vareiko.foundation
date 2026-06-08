@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Observability
@@ -14,7 +15,7 @@ namespace Vareiko.Foundation.Observability
         private const string DefaultFilePrefix = "diagnostics";
 
         private readonly IDiagnosticsService _diagnosticsService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly IFoundationLogger _logger;
         private readonly string _exportDirectory;
 
@@ -22,7 +23,7 @@ namespace Vareiko.Foundation.Observability
         public DiagnosticsSnapshotExportService(
             IDiagnosticsService diagnosticsService,
             [Inject(Id = "DiagnosticsExportRootPath")] string exportDirectory,
-            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IFoundationSignalBus signalBus = null,
             [InjectOptional] IFoundationLogger logger = null)
         {
             _diagnosticsService = diagnosticsService;
@@ -65,7 +66,7 @@ namespace Vareiko.Foundation.Observability
                 string json = JsonUtility.ToJson(envelope, true);
                 File.WriteAllText(filePath, json, Encoding.UTF8);
 
-                _signalBus?.Fire(new DiagnosticsSnapshotExportedSignal(filePath));
+                _signalBus?.Publish(new DiagnosticsSnapshotExportedSignal(filePath));
                 _logger?.Info($"Diagnostics snapshot exported: {filePath}", "Diagnostics");
                 return UniTask.FromResult(DiagnosticsSnapshotExportResult.Succeed(filePath));
             }
@@ -78,7 +79,7 @@ namespace Vareiko.Foundation.Observability
         private DiagnosticsSnapshotExportResult Fail(string error)
         {
             string safeError = string.IsNullOrWhiteSpace(error) ? "Diagnostics export failed." : error;
-            _signalBus?.Fire(new DiagnosticsSnapshotExportFailedSignal(safeError));
+            _signalBus?.Publish(new DiagnosticsSnapshotExportFailedSignal(safeError));
             _logger?.Warn($"Diagnostics snapshot export failed: {safeError}", "Diagnostics");
             return DiagnosticsSnapshotExportResult.Fail(safeError);
         }

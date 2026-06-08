@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
     public sealed class UIValueEventService : IUIValueEventService
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, int> _intValues = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, float> _floatValues = new Dictionary<string, float>(StringComparer.Ordinal);
         private readonly Dictionary<string, bool> _boolValues = new Dictionary<string, bool>(StringComparer.Ordinal);
@@ -18,7 +19,7 @@ namespace Vareiko.Foundation.UI
         private readonly Dictionary<string, ValueStream<string>> _stringStreams = new Dictionary<string, ValueStream<string>>(StringComparer.Ordinal);
 
         [Inject]
-        public UIValueEventService([InjectOptional] SignalBus signalBus = null)
+        public UIValueEventService([InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }
@@ -37,7 +38,7 @@ namespace Vareiko.Foundation.UI
 
             _intValues[normalized] = value;
             GetOrCreateStream(_intStreams, normalized).SetValue(value);
-            _signalBus?.Fire(new UIIntValueChangedSignal(normalized, value));
+            _signalBus?.Publish(new UIIntValueChangedSignal(normalized, value));
         }
 
         public void SetFloat(string key, float value)
@@ -54,7 +55,7 @@ namespace Vareiko.Foundation.UI
 
             _floatValues[normalized] = value;
             GetOrCreateStream(_floatStreams, normalized).SetValue(value);
-            _signalBus?.Fire(new UIFloatValueChangedSignal(normalized, value));
+            _signalBus?.Publish(new UIFloatValueChangedSignal(normalized, value));
         }
 
         public void SetBool(string key, bool value)
@@ -71,7 +72,7 @@ namespace Vareiko.Foundation.UI
 
             _boolValues[normalized] = value;
             GetOrCreateStream(_boolStreams, normalized).SetValue(value);
-            _signalBus?.Fire(new UIBoolValueChangedSignal(normalized, value));
+            _signalBus?.Publish(new UIBoolValueChangedSignal(normalized, value));
         }
 
         public void SetString(string key, string value)
@@ -89,7 +90,7 @@ namespace Vareiko.Foundation.UI
 
             _stringValues[normalized] = safeValue;
             GetOrCreateStream(_stringStreams, normalized).SetValue(safeValue);
-            _signalBus?.Fire(new UIStringValueChangedSignal(normalized, safeValue));
+            _signalBus?.Publish(new UIStringValueChangedSignal(normalized, safeValue));
         }
 
         public bool TryGetInt(string key, out int value)

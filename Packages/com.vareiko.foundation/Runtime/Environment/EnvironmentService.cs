@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Environment
@@ -8,14 +9,14 @@ namespace Vareiko.Foundation.Environment
     public sealed class EnvironmentService : IEnvironmentService, IInitializable
     {
         private readonly EnvironmentConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, EnvironmentConfig.Profile> _profiles = new Dictionary<string, EnvironmentConfig.Profile>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, string> _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private string _activeProfileId = "dev";
 
         [Inject]
-        public EnvironmentService([InjectOptional] EnvironmentConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public EnvironmentService([InjectOptional] EnvironmentConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -78,7 +79,7 @@ namespace Vareiko.Foundation.Environment
             }
 
             value = string.Empty;
-            _signalBus?.Fire(new EnvironmentValueMissingSignal(_activeProfileId, key));
+            _signalBus?.Publish(new EnvironmentValueMissingSignal(_activeProfileId, key));
             return false;
         }
 
@@ -162,7 +163,7 @@ namespace Vareiko.Foundation.Environment
                 }
             }
 
-            _signalBus?.Fire(new EnvironmentProfileChangedSignal(_activeProfileId));
+            _signalBus?.Publish(new EnvironmentProfileChangedSignal(_activeProfileId));
         }
 
         private void BuildProfilesLookup()

@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Audio;
 using Vareiko.Foundation.Settings;
-using Zenject;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.Audio
 {
@@ -20,7 +20,7 @@ namespace Vareiko.Foundation.Tests.Audio
         [Test]
         public void Initialize_UsesSettingsVolumes_AndEmitsInitialSignal()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             List<AudioVolumesChangedSignal> signals = new List<AudioVolumesChangedSignal>(2);
             signalBus.Subscribe<AudioVolumesChangedSignal>(signal => signals.Add(signal));
 
@@ -50,7 +50,7 @@ namespace Vareiko.Foundation.Tests.Audio
         [Test]
         public void SettingsChangedSignal_UpdatesAudioVolumes()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             AudioVolumesChangedSignal last = default;
             signalBus.Subscribe<AudioVolumesChangedSignal>(signal => last = signal);
 
@@ -59,7 +59,7 @@ namespace Vareiko.Foundation.Tests.Audio
             {
                 service.Initialize();
 
-                signalBus.Fire(new SettingsChangedSignal(new GameSettings
+                signalBus.Publish(new SettingsChangedSignal(new GameSettings
                 {
                     MasterVolume = 0.25f,
                     MusicVolume = 0.5f,
@@ -79,7 +79,7 @@ namespace Vareiko.Foundation.Tests.Audio
         [Test]
         public void Setters_ClampValues_AndEmitSignals()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             AudioVolumesChangedSignal last = default;
             int fired = 0;
             signalBus.Subscribe<AudioVolumesChangedSignal>(signal =>
@@ -108,15 +108,6 @@ namespace Vareiko.Foundation.Tests.Audio
             {
                 service.Dispose();
             }
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<SettingsChangedSignal>();
-            container.DeclareSignal<AudioVolumesChangedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static void CleanupRuntimeAudioRoots()

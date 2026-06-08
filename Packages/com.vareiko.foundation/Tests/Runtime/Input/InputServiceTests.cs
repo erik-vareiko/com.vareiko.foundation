@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Input;
-using Zenject;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.Input
 {
@@ -11,7 +11,7 @@ namespace Vareiko.Foundation.Tests.Input
         [Test]
         public void CurrentScheme_UsesFirstAvailable_ThenSwitchesToPreferred()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             List<InputScheme> changes = new List<InputScheme>(2);
             signalBus.Subscribe<InputSchemeChangedSignal>(signal => changes.Add(signal.Scheme));
 
@@ -35,7 +35,7 @@ namespace Vareiko.Foundation.Tests.Input
         [Test]
         public void PreferredSchemeUnavailable_FallsBackToFirstAvailable()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
 
             InputService service = new InputService(new List<IInputAdapter>
             {
@@ -52,7 +52,7 @@ namespace Vareiko.Foundation.Tests.Input
         [Test]
         public void NoAvailableAdapters_ReturnsUnknown()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int signalCount = 0;
             signalBus.Subscribe<InputSchemeChangedSignal>(_ => signalCount++);
 
@@ -65,14 +65,6 @@ namespace Vareiko.Foundation.Tests.Input
             Assert.That(service.Move, Is.EqualTo(Vector2.zero));
             Assert.That(service.DashPressedDown, Is.False);
             Assert.That(signalCount, Is.EqualTo(0));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<InputSchemeChangedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class FakeInputAdapter : IInputAdapter

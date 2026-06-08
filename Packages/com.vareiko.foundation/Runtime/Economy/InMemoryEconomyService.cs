@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Economy
@@ -9,12 +10,12 @@ namespace Vareiko.Foundation.Economy
     public sealed class InMemoryEconomyService : IEconomyService, IInitializable
     {
         private readonly EconomyConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, long> _balances = new Dictionary<string, long>();
         private readonly Dictionary<string, int> _inventory = new Dictionary<string, int>();
 
         [Inject]
-        public InMemoryEconomyService([InjectOptional] EconomyConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public InMemoryEconomyService([InjectOptional] EconomyConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -82,7 +83,7 @@ namespace Vareiko.Foundation.Economy
             _balances.TryGetValue(currencyId, out current);
             long next = current + amount;
             _balances[currencyId] = next;
-            _signalBus?.Fire(new CurrencyBalanceChangedSignal(currencyId, next));
+            _signalBus?.Publish(new CurrencyBalanceChangedSignal(currencyId, next));
             return UniTask.FromResult(EconomyOperationResult.Ok());
         }
 
@@ -103,7 +104,7 @@ namespace Vareiko.Foundation.Economy
 
             long next = current - amount;
             _balances[currencyId] = next;
-            _signalBus?.Fire(new CurrencyBalanceChangedSignal(currencyId, next));
+            _signalBus?.Publish(new CurrencyBalanceChangedSignal(currencyId, next));
             return UniTask.FromResult(EconomyOperationResult.Ok());
         }
 
@@ -127,7 +128,7 @@ namespace Vareiko.Foundation.Economy
             _inventory.TryGetValue(itemId, out current);
             int next = current + count;
             _inventory[itemId] = next;
-            _signalBus?.Fire(new InventoryItemChangedSignal(itemId, next));
+            _signalBus?.Publish(new InventoryItemChangedSignal(itemId, next));
             return UniTask.FromResult(EconomyOperationResult.Ok());
         }
 
@@ -148,13 +149,13 @@ namespace Vareiko.Foundation.Economy
 
             int next = current - count;
             _inventory[itemId] = next;
-            _signalBus?.Fire(new InventoryItemChangedSignal(itemId, next));
+            _signalBus?.Publish(new InventoryItemChangedSignal(itemId, next));
             return UniTask.FromResult(EconomyOperationResult.Ok());
         }
 
         private EconomyOperationResult Fail(string operation, string error)
         {
-            _signalBus?.Fire(new EconomyOperationFailedSignal(operation, error));
+            _signalBus?.Publish(new EconomyOperationFailedSignal(operation, error));
             return EconomyOperationResult.Fail(error);
         }
     }

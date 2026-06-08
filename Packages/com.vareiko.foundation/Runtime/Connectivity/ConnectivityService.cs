@@ -1,6 +1,7 @@
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.Time;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Connectivity
@@ -9,7 +10,7 @@ namespace Vareiko.Foundation.Connectivity
     {
         private readonly IFoundationTimeProvider _timeProvider;
         private readonly ConnectivityConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly INetworkReachabilityProvider _reachabilityProvider;
         private readonly IApplicationLifecycleService _applicationLifecycleService;
 
@@ -22,7 +23,7 @@ namespace Vareiko.Foundation.Connectivity
         public ConnectivityService(
             IFoundationTimeProvider timeProvider,
             [InjectOptional] ConnectivityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IFoundationSignalBus signalBus = null,
             [InjectOptional] INetworkReachabilityProvider reachabilityProvider = null,
             [InjectOptional] IApplicationLifecycleService applicationLifecycleService = null)
         {
@@ -77,7 +78,7 @@ namespace Vareiko.Foundation.Connectivity
 
             _reachability = nextReachability;
             _isOnline = nextOnline;
-            _signalBus?.Fire(new ConnectivityChangedSignal(_isOnline, _reachability));
+            _signalBus?.Publish(new ConnectivityChangedSignal(_isOnline, _reachability));
         }
 
         private void OnFocusChanged(bool hasFocus)

@@ -1,14 +1,18 @@
+using System;
+using System.Collections.Generic;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Push;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
     public sealed class MonetizationObservabilityService : IMonetizationObservabilityService, IInitializable, System.IDisposable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly MonetizationObservabilitySnapshot _snapshot = new MonetizationObservabilitySnapshot();
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
 
         private int _iapPurchaseLatencySamples;
         private float _iapPurchaseLatencyTotalMs;
@@ -18,7 +22,7 @@ namespace Vareiko.Foundation.Observability
         private float _pushPermissionLatencyTotalMs;
 
         [Inject]
-        public MonetizationObservabilityService([InjectOptional] SignalBus signalBus = null)
+        public MonetizationObservabilityService([InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }
@@ -53,18 +57,12 @@ namespace Vareiko.Foundation.Observability
                 return;
             }
 
-            TryUnsubscribe<IapPurchaseSucceededSignal>(OnIapPurchaseSucceeded);
-            TryUnsubscribe<IapPurchaseFailedSignal>(OnIapPurchaseFailed);
-            TryUnsubscribe<IapOperationTelemetrySignal>(OnIapTelemetry);
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
+            {
+                _signalSubscriptions[i].Dispose();
+            }
 
-            TryUnsubscribe<AdShownSignal>(OnAdShown);
-            TryUnsubscribe<AdShowFailedSignal>(OnAdShowFailed);
-            TryUnsubscribe<AdsOperationTelemetrySignal>(OnAdsTelemetry);
-
-            TryUnsubscribe<PushPermissionChangedSignal>(OnPushPermissionChanged);
-            TryUnsubscribe<PushOperationTelemetrySignal>(OnPushTelemetry);
-            TryUnsubscribe<PushTopicSubscribedSignal>(OnPushTopicSubscribed);
-            TryUnsubscribe<PushTopicSubscriptionFailedSignal>(OnPushTopicSubscriptionFailed);
+            _signalSubscriptions.Clear();
         }
 
         private void OnIapPurchaseSucceeded(IapPurchaseSucceededSignal signal)
@@ -172,18 +170,7 @@ namespace Vareiko.Foundation.Observability
         {
             try
             {
-                _signalBus.Subscribe(handler);
-            }
-            catch (System.Exception)
-            {
-            }
-        }
-
-        private void TryUnsubscribe<TSignal>(System.Action<TSignal> handler)
-        {
-            try
-            {
-                _signalBus.Unsubscribe(handler);
+                _signalSubscriptions.Add(_signalBus.Subscribe(handler));
             }
             catch (System.Exception)
             {

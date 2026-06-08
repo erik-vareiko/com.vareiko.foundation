@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Vareiko.Foundation.App;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.App
 {
@@ -9,7 +10,7 @@ namespace Vareiko.Foundation.Tests.App
         public void SourceEvents_UpdateState_AndRaiseServiceEvents()
         {
             FakeLifecycleSource source = new FakeLifecycleSource();
-            ApplicationLifecycleService service = new ApplicationLifecycleService(null, source);
+            ApplicationLifecycleService service = new ApplicationLifecycleService(new FakeSignalBus(), source);
 
             int pauseCalls = 0;
             int focusCalls = 0;

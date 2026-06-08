@@ -1,15 +1,18 @@
+using System;
 using Vareiko.Foundation.Bootstrap;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.App
 {
-    public sealed class AppStateMachine : IAppStateMachine, IInitializable, System.IDisposable
+    public sealed class AppStateMachine : IAppStateMachine, IInitializable, IDisposable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private AppState _current = AppState.None;
+        private IDisposable _bootFailedSubscription;
 
         [Inject]
-        public AppStateMachine([InjectOptional] SignalBus signalBus = null)
+        public AppStateMachine(IFoundationSignalBus signalBus)
         {
             _signalBus = signalBus;
         }
@@ -18,13 +21,14 @@ namespace Vareiko.Foundation.App
 
         public void Initialize()
         {
-            _signalBus?.Subscribe<ApplicationBootFailedSignal>(OnApplicationBootFailed);
+            _bootFailedSubscription = _signalBus.Subscribe<ApplicationBootFailedSignal>(OnApplicationBootFailed);
             ForceEnter(AppState.Boot);
         }
 
         public void Dispose()
         {
-            _signalBus?.Unsubscribe<ApplicationBootFailedSignal>(OnApplicationBootFailed);
+            _bootFailedSubscription?.Dispose();
+            _bootFailedSubscription = null;
         }
 
         public bool IsIn(AppState state)
@@ -52,7 +56,7 @@ namespace Vareiko.Foundation.App
         {
             AppState previous = _current;
             _current = next;
-            _signalBus?.Fire(new AppStateChangedSignal(previous, _current));
+            _signalBus.Publish(new AppStateChangedSignal(previous, _current));
         }
 
         private void OnApplicationBootFailed(ApplicationBootFailedSignal signal)

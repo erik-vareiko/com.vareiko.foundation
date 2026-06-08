@@ -11,7 +11,6 @@ using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Loading;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Observability
 {
@@ -24,7 +23,7 @@ namespace Vareiko.Foundation.Tests.Observability
             ObservabilityConfig config = ScriptableObject.CreateInstance<ObservabilityConfig>();
             ReflectionTestUtil.SetPrivateField(config, "_diagnosticsRefreshIntervalSeconds", 1f);
 
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int updates = 0;
             signalBus.Subscribe<DiagnosticsSnapshotUpdatedSignal>(_ => updates++);
 
@@ -88,23 +87,23 @@ namespace Vareiko.Foundation.Tests.Observability
         public void BootAndStateSignals_UpdateBootFlags()
         {
             FakeTimeProvider timeProvider = new FakeTimeProvider { Time = 0f };
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             FoundationDiagnosticsService service = new FoundationDiagnosticsService(timeProvider, null, null, null, null, null, null, signalBus);
 
             service.Initialize();
-            signalBus.Fire(new ApplicationBootFailedSignal("init", "fail"));
+            signalBus.Publish(new ApplicationBootFailedSignal("init", "fail"));
 
             Assert.That(service.Snapshot.IsBootFailed, Is.True);
             Assert.That(service.Snapshot.IsBootCompleted, Is.False);
             Assert.That(service.Snapshot.LastBootError, Is.EqualTo("fail"));
 
-            signalBus.Fire(new AppStateChangedSignal(AppState.Boot, AppState.MainMenu));
+            signalBus.Publish(new AppStateChangedSignal(AppState.Boot, AppState.MainMenu));
 
             Assert.That(service.Snapshot.IsBootCompleted, Is.True);
             Assert.That(service.Snapshot.IsBootFailed, Is.False);
             Assert.That(service.Snapshot.LastBootError, Is.Empty);
 
-            signalBus.Fire(new ApplicationBootCompletedSignal(3));
+            signalBus.Publish(new ApplicationBootCompletedSignal(3));
             Assert.That(service.Snapshot.IsBootCompleted, Is.True);
             Assert.That(service.Snapshot.IsBootFailed, Is.False);
             Assert.That(service.Snapshot.LastBootError, Is.Empty);
@@ -166,17 +165,6 @@ namespace Vareiko.Foundation.Tests.Observability
             Assert.That(service.Snapshot.PushTopicSubscribeFailureCount, Is.EqualTo(2));
 
             service.Dispose();
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<ApplicationBootCompletedSignal>();
-            container.DeclareSignal<ApplicationBootFailedSignal>();
-            container.DeclareSignal<AppStateChangedSignal>();
-            container.DeclareSignal<DiagnosticsSnapshotUpdatedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class FakeLoadingService : ILoadingService

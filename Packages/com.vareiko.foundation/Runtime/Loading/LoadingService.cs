@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using Vareiko.Foundation.SceneFlow;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -6,7 +9,8 @@ namespace Vareiko.Foundation.Loading
 {
     public sealed class LoadingService : ILoadingService, IInitializable, System.IDisposable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
 
         private bool _manualMode;
         private bool _isLoading;
@@ -14,7 +18,7 @@ namespace Vareiko.Foundation.Loading
         private string _activeOperation;
 
         [Inject]
-        public LoadingService([InjectOptional] SignalBus signalBus = null)
+        public LoadingService([InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }
@@ -30,11 +34,11 @@ namespace Vareiko.Foundation.Loading
                 return;
             }
 
-            _signalBus.Subscribe<SceneLoadStartedSignal>(OnSceneLoadStarted);
-            _signalBus.Subscribe<SceneLoadProgressSignal>(OnSceneLoadProgress);
-            _signalBus.Subscribe<SceneLoadCompletedSignal>(OnSceneLoadCompleted);
-            _signalBus.Subscribe<SceneUnloadStartedSignal>(OnSceneUnloadStarted);
-            _signalBus.Subscribe<SceneUnloadCompletedSignal>(OnSceneUnloadCompleted);
+            _signalSubscriptions.Add(_signalBus.Subscribe<SceneLoadStartedSignal>(OnSceneLoadStarted));
+            _signalSubscriptions.Add(_signalBus.Subscribe<SceneLoadProgressSignal>(OnSceneLoadProgress));
+            _signalSubscriptions.Add(_signalBus.Subscribe<SceneLoadCompletedSignal>(OnSceneLoadCompleted));
+            _signalSubscriptions.Add(_signalBus.Subscribe<SceneUnloadStartedSignal>(OnSceneUnloadStarted));
+            _signalSubscriptions.Add(_signalBus.Subscribe<SceneUnloadCompletedSignal>(OnSceneUnloadCompleted));
         }
 
         public void Dispose()
@@ -44,11 +48,11 @@ namespace Vareiko.Foundation.Loading
                 return;
             }
 
-            _signalBus.Unsubscribe<SceneLoadStartedSignal>(OnSceneLoadStarted);
-            _signalBus.Unsubscribe<SceneLoadProgressSignal>(OnSceneLoadProgress);
-            _signalBus.Unsubscribe<SceneLoadCompletedSignal>(OnSceneLoadCompleted);
-            _signalBus.Unsubscribe<SceneUnloadStartedSignal>(OnSceneUnloadStarted);
-            _signalBus.Unsubscribe<SceneUnloadCompletedSignal>(OnSceneUnloadCompleted);
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
+            {
+                _signalSubscriptions[i].Dispose();
+            }
+            _signalSubscriptions.Clear();
         }
 
         public void BeginManual(string operationName)
@@ -140,7 +144,7 @@ namespace Vareiko.Foundation.Loading
 
             if (changed)
             {
-                _signalBus?.Fire(new LoadingStateChangedSignal(_isLoading, _progress, _activeOperation));
+                _signalBus?.Publish(new LoadingStateChangedSignal(_isLoading, _progress, _activeOperation));
             }
         }
     }

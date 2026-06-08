@@ -6,7 +6,6 @@ using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Backend
 {
@@ -17,7 +16,7 @@ namespace Vareiko.Foundation.Tests.Backend
         {
             FakeMutableRemoteConfigService inner = new FakeMutableRemoteConfigService();
             FakeTimeProvider time = new FakeTimeProvider { Time = 10f };
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
 
             string source = string.Empty;
             signalBus.Subscribe<RemoteConfigRefreshedSignal>(signal => source = signal.Source);
@@ -43,7 +42,7 @@ namespace Vareiko.Foundation.Tests.Backend
             FakeMutableRemoteConfigService inner = new FakeMutableRemoteConfigService();
             FakeTimeProvider time = new FakeTimeProvider { Time = 1f };
             RemoteConfigCacheConfig config = CreateCacheConfig(refreshOnInitialize: false, autoRefresh: true, intervalSeconds: 60f);
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
 
             int clearedValueCount = -1;
             signalBus.Subscribe<RemoteConfigCacheInvalidatedSignal>(signal => clearedValueCount = signal.ClearedValueCount);
@@ -75,7 +74,7 @@ namespace Vareiko.Foundation.Tests.Backend
             FakeMutableRemoteConfigService inner = new FakeMutableRemoteConfigService();
             FakeTimeProvider time = new FakeTimeProvider { Time = 0f };
             RemoteConfigCacheConfig config = CreateCacheConfig(refreshOnInitialize: false, autoRefresh: true, intervalSeconds: 5f);
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
 
             string source = string.Empty;
             signalBus.Subscribe<RemoteConfigRefreshedSignal>(signal => source = signal.Source);
@@ -95,16 +94,6 @@ namespace Vareiko.Foundation.Tests.Backend
             Assert.That(inner.RefreshCalls, Is.EqualTo(1));
             Assert.That(source, Is.EqualTo("auto"));
             Object.DestroyImmediate(config);
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<RemoteConfigRefreshedSignal>();
-            container.DeclareSignal<RemoteConfigRefreshFailedSignal>();
-            container.DeclareSignal<RemoteConfigCacheInvalidatedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static RemoteConfigCacheConfig CreateCacheConfig(bool refreshOnInitialize, bool autoRefresh, float intervalSeconds)

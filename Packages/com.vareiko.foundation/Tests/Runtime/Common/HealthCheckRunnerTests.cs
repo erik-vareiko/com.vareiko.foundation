@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using Vareiko.Foundation.Common;
-using Zenject;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.Common
 {
@@ -14,7 +14,7 @@ namespace Vareiko.Foundation.Tests.Common
         [Test]
         public async Task RunAsync_ProcessesChecks_AndEmitsSignals()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int passedSignals = 0;
             List<string> failedCheckNames = new List<string>(2);
 
@@ -41,15 +41,6 @@ namespace Vareiko.Foundation.Tests.Common
             Assert.That(failedCheckNames.Count, Is.EqualTo(2));
             Assert.That(failedCheckNames[0], Is.EqualTo("FixedHealthCheck"));
             Assert.That(failedCheckNames[1], Is.EqualTo("backend"));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<HealthCheckPassedSignal>();
-            container.DeclareSignal<HealthCheckFailedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class FixedHealthCheck : IHealthCheck

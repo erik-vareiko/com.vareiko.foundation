@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.Time;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Monetization
@@ -12,7 +13,7 @@ namespace Vareiko.Foundation.Monetization
     {
         private readonly MonetizationPolicyConfig _config;
         private readonly IFoundationTimeProvider _timeProvider;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         private readonly Dictionary<string, PlacementPolicySnapshot> _placementPolicies = new Dictionary<string, PlacementPolicySnapshot>(StringComparer.Ordinal);
         private readonly Dictionary<string, ProductPolicySnapshot> _productPolicies = new Dictionary<string, ProductPolicySnapshot>(StringComparer.Ordinal);
@@ -23,7 +24,7 @@ namespace Vareiko.Foundation.Monetization
         public MonetizationPolicyService(
             IFoundationTimeProvider timeProvider,
             [InjectOptional] MonetizationPolicyConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _timeProvider = timeProvider;
             _config = config;
@@ -146,7 +147,7 @@ namespace Vareiko.Foundation.Monetization
             counter.LastActionTime = _timeProvider.UnscaledTime;
             counter.HasEntry = true;
             _adCounters[normalizedPlacementId] = counter;
-            _signalBus?.Fire(new MonetizationAdRecordedSignal(normalizedPlacementId, placementType, counter.Count));
+            _signalBus?.Publish(new MonetizationAdRecordedSignal(normalizedPlacementId, placementType, counter.Count));
             return UniTask.CompletedTask;
         }
 
@@ -216,7 +217,7 @@ namespace Vareiko.Foundation.Monetization
             counter.LastActionTime = _timeProvider.UnscaledTime;
             counter.HasEntry = true;
             _iapCounters[normalizedProductId] = counter;
-            _signalBus?.Fire(new MonetizationIapRecordedSignal(normalizedProductId, counter.Count));
+            _signalBus?.Publish(new MonetizationIapRecordedSignal(normalizedProductId, counter.Count));
             return UniTask.CompletedTask;
         }
 
@@ -225,7 +226,7 @@ namespace Vareiko.Foundation.Monetization
             cancellationToken.ThrowIfCancellationRequested();
             _adCounters.Clear();
             _iapCounters.Clear();
-            _signalBus?.Fire(new MonetizationSessionResetSignal());
+            _signalBus?.Publish(new MonetizationSessionResetSignal());
             return UniTask.CompletedTask;
         }
 
@@ -335,7 +336,7 @@ namespace Vareiko.Foundation.Monetization
 
         private void EmitAdBlocked(MonetizationAdDecision decision)
         {
-            _signalBus?.Fire(new MonetizationAdBlockedSignal(
+            _signalBus?.Publish(new MonetizationAdBlockedSignal(
                 decision.PlacementId,
                 decision.PlacementType,
                 decision.BlockReason,
@@ -345,7 +346,7 @@ namespace Vareiko.Foundation.Monetization
 
         private void EmitIapBlocked(MonetizationIapDecision decision)
         {
-            _signalBus?.Fire(new MonetizationIapBlockedSignal(
+            _signalBus?.Publish(new MonetizationIapBlockedSignal(
                 decision.ProductId,
                 decision.BlockReason,
                 decision.Message,

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -10,11 +13,12 @@ namespace Vareiko.Foundation.Loading
         [SerializeField] private bool _hideWhenIdle = true;
         [SerializeField] private bool _useProgressAsAlpha;
 
-        private SignalBus _signalBus;
+        private IFoundationSignalBus _signalBus;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
         private bool _subscribed;
 
         [Inject]
-        public void Construct([InjectOptional] SignalBus signalBus = null)
+        public void Construct([InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }
@@ -26,7 +30,7 @@ namespace Vareiko.Foundation.Loading
                 return;
             }
 
-            _signalBus.Subscribe<LoadingStateChangedSignal>(OnLoadingChanged);
+            _signalSubscriptions.Add(_signalBus.Subscribe<LoadingStateChangedSignal>(OnLoadingChanged));
             _subscribed = true;
         }
 
@@ -37,7 +41,11 @@ namespace Vareiko.Foundation.Loading
                 return;
             }
 
-            _signalBus.Unsubscribe<LoadingStateChangedSignal>(OnLoadingChanged);
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
+            {
+                _signalSubscriptions[i].Dispose();
+            }
+            _signalSubscriptions.Clear();
             _subscribed = false;
         }
 

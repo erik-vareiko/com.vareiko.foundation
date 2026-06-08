@@ -1,3 +1,4 @@
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Common
@@ -15,6 +16,8 @@ namespace Vareiko.Foundation.Common
             {
                 SignalBusInstaller.Install(container);
             }
+
+            container.Bind<IFoundationSignalBus>().To<ZenjectFoundationSignalBus>().AsSingle().IfNotBound();
 
             container.DeclareSignal<HealthCheckPassedSignal>();
             container.DeclareSignal<HealthCheckFailedSignal>();

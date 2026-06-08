@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Save
@@ -14,7 +15,7 @@ namespace Vareiko.Foundation.Save
         private readonly ISaveSerializer _serializer;
         private readonly ISaveMigrationService _migrationService;
         private readonly SaveSecurityConfig _securityConfig;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly string _rootPath;
         private readonly int _schemaVersion;
 
@@ -25,7 +26,7 @@ namespace Vareiko.Foundation.Save
             [InjectOptional] ISaveMigrationService migrationService = null,
             [InjectOptional] SaveSchemaConfig schemaConfig = null,
             [InjectOptional] SaveSecurityConfig securityConfig = null,
-            [InjectOptional] SignalBus signalBus = null,
+            [InjectOptional] IFoundationSignalBus signalBus = null,
             [InjectOptional(Id = "SaveRootPath")] string rootPath = null)
         {
             _storage = storage;
@@ -47,7 +48,7 @@ namespace Vareiko.Foundation.Save
             string payload = _serializer.Serialize(model);
             string wrapped = WrapPayload(payload, _schemaVersion);
             await _storage.WriteTextAsync(path, wrapped, cancellationToken);
-            _signalBus?.Fire(new SaveWrittenSignal(slot, key));
+            _signalBus?.Publish(new SaveWrittenSignal(slot, key));
         }
 
         public async UniTask<T> LoadAsync<T>(string slot, string key, T fallback = default, CancellationToken cancellationToken = default)
@@ -72,7 +73,7 @@ namespace Vareiko.Foundation.Save
             if (restored.Restored)
             {
                 await _storage.WriteTextAsync(path, restored.Raw, cancellationToken);
-                _signalBus?.Fire(new SaveRestoredFromBackupSignal(slot, key, restored.BackupIndex));
+                _signalBus?.Publish(new SaveRestoredFromBackupSignal(slot, key, restored.BackupIndex));
                 LoadAttempt<T> restoredAttempt = await TryLoadModelAsync<T>(slot, key, path, restored.Raw, cancellationToken);
                 if (restoredAttempt.Success)
                 {
@@ -82,7 +83,7 @@ namespace Vareiko.Foundation.Save
                 attempt = restoredAttempt;
             }
 
-            _signalBus?.Fire(new SaveLoadFailedSignal(slot, key, attempt.Error));
+            _signalBus?.Publish(new SaveLoadFailedSignal(slot, key, attempt.Error));
             return fallback;
         }
 
@@ -104,7 +105,7 @@ namespace Vareiko.Foundation.Save
                 await _storage.DeleteAsync(BuildBackupPath(path, i), cancellationToken);
             }
 
-            _signalBus?.Fire(new SaveDeletedSignal(slot, key));
+            _signalBus?.Publish(new SaveDeletedSignal(slot, key));
         }
 
         private string BuildPath(string slot, string key)
@@ -213,7 +214,7 @@ namespace Vareiko.Foundation.Save
             if (!string.IsNullOrEmpty(currentPayload))
             {
                 await _storage.WriteTextAsync(BuildBackupPath(primaryPath, 1), currentPayload, cancellationToken);
-                _signalBus?.Fire(new SaveBackupWrittenSignal(slot, key, 1));
+                _signalBus?.Publish(new SaveBackupWrittenSignal(slot, key, 1));
             }
         }
 
@@ -277,7 +278,7 @@ namespace Vareiko.Foundation.Save
                 int fromVersion = payloadVersion;
                 payloadVersion = migrated.Version;
                 await _storage.WriteTextAsync(primaryPath, WrapPayload(payload, payloadVersion), cancellationToken);
-                _signalBus?.Fire(new SaveMigratedSignal(slot, key, fromVersion, payloadVersion));
+                _signalBus?.Publish(new SaveMigratedSignal(slot, key, fromVersion, payloadVersion));
             }
 
             T model;

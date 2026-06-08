@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Consent;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Push
@@ -10,7 +11,7 @@ namespace Vareiko.Foundation.Push
     {
         private readonly PushNotificationConfig _config;
         private readonly IConsentService _consentService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly HashSet<string> _topics = new HashSet<string>(System.StringComparer.Ordinal);
 
         private bool _initialized;
@@ -21,7 +22,7 @@ namespace Vareiko.Foundation.Push
         public SimulatedPushNotificationService(
             [InjectOptional] PushNotificationConfig config = null,
             [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _consentService = consentService;
@@ -65,7 +66,7 @@ namespace Vareiko.Foundation.Push
             _deviceToken = string.IsNullOrWhiteSpace(_config.SimulatedDeviceToken) ? "SIMULATED_PUSH_TOKEN" : _config.SimulatedDeviceToken.Trim();
             _initialized = true;
 
-            _signalBus?.Fire(new PushInitializedSignal(true, string.Empty));
+            _signalBus?.Publish(new PushInitializedSignal(true, string.Empty));
 
             if (_config.AutoRequestPermissionOnInitialize)
             {
@@ -91,20 +92,20 @@ namespace Vareiko.Foundation.Push
             if (!HasPushConsent())
             {
                 _permissionStatus = PushNotificationPermissionStatus.Denied;
-                _signalBus?.Fire(new PushPermissionChangedSignal(_permissionStatus));
+                _signalBus?.Publish(new PushPermissionChangedSignal(_permissionStatus));
                 return UniTask.FromResult(PushPermissionResult.Fail(_permissionStatus, "Push notifications consent is required.", PushNotificationErrorCode.ConsentDenied));
             }
 
             if (_config != null && _config.SimulatePermissionDenied)
             {
                 _permissionStatus = PushNotificationPermissionStatus.Denied;
-                _signalBus?.Fire(new PushPermissionChangedSignal(_permissionStatus));
+                _signalBus?.Publish(new PushPermissionChangedSignal(_permissionStatus));
                 return UniTask.FromResult(PushPermissionResult.Fail(_permissionStatus, "Simulated push permission denial.", PushNotificationErrorCode.PermissionDenied));
             }
 
             _permissionStatus = PushNotificationPermissionStatus.Granted;
-            _signalBus?.Fire(new PushPermissionChangedSignal(_permissionStatus));
-            _signalBus?.Fire(new PushTokenUpdatedSignal(_deviceToken));
+            _signalBus?.Publish(new PushPermissionChangedSignal(_permissionStatus));
+            _signalBus?.Publish(new PushTokenUpdatedSignal(_deviceToken));
             return UniTask.FromResult(PushPermissionResult.Succeed());
         }
 
@@ -146,7 +147,7 @@ namespace Vareiko.Foundation.Push
             }
 
             _topics.Add(normalizedTopic);
-            _signalBus?.Fire(new PushTopicSubscribedSignal(normalizedTopic));
+            _signalBus?.Publish(new PushTopicSubscribedSignal(normalizedTopic));
             return UniTask.FromResult(PushTopicResult.Succeed(normalizedTopic, true));
         }
 
@@ -170,7 +171,7 @@ namespace Vareiko.Foundation.Push
                 return UniTask.FromResult(FailUnsubscribe(normalizedTopic, "Push notifications topic is not subscribed.", PushNotificationErrorCode.TopicNotSubscribed));
             }
 
-            _signalBus?.Fire(new PushTopicUnsubscribedSignal(normalizedTopic));
+            _signalBus?.Publish(new PushTopicUnsubscribedSignal(normalizedTopic));
             return UniTask.FromResult(PushTopicResult.Succeed(normalizedTopic, false));
         }
 
@@ -238,7 +239,7 @@ namespace Vareiko.Foundation.Push
 
                 if (_topics.Add(normalizedTopic))
                 {
-                    _signalBus?.Fire(new PushTopicSubscribedSignal(normalizedTopic));
+                    _signalBus?.Publish(new PushTopicSubscribedSignal(normalizedTopic));
                 }
             }
         }
@@ -272,21 +273,21 @@ namespace Vareiko.Foundation.Push
             _permissionStatus = PushNotificationPermissionStatus.Unknown;
             _topics.Clear();
             PushInitializeResult result = PushInitializeResult.Fail(error, errorCode);
-            _signalBus?.Fire(new PushInitializedSignal(false, result.Error));
+            _signalBus?.Publish(new PushInitializedSignal(false, result.Error));
             return result;
         }
 
         private PushTopicResult FailSubscribe(string topic, string error, PushNotificationErrorCode errorCode)
         {
             PushTopicResult result = PushTopicResult.Fail(topic, error, errorCode);
-            _signalBus?.Fire(new PushTopicSubscriptionFailedSignal(result.Topic, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new PushTopicSubscriptionFailedSignal(result.Topic, result.Error, result.ErrorCode));
             return result;
         }
 
         private PushTopicResult FailUnsubscribe(string topic, string error, PushNotificationErrorCode errorCode)
         {
             PushTopicResult result = PushTopicResult.Fail(topic, error, errorCode);
-            _signalBus?.Fire(new PushTopicUnsubscriptionFailedSignal(result.Topic, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new PushTopicUnsubscriptionFailedSignal(result.Topic, result.Error, result.ErrorCode));
             return result;
         }
     }

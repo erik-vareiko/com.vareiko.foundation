@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Vareiko.Foundation.Observability;
-using Zenject;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.Observability
 {
@@ -23,7 +23,7 @@ namespace Vareiko.Foundation.Tests.Observability
                     LastUpdatedAt = 12.5f
                 };
 
-                SignalBus signalBus = CreateSignalBus();
+                FakeSignalBus signalBus = new FakeSignalBus();
                 bool exportedSignalReceived = false;
                 string exportedPath = string.Empty;
                 signalBus.Subscribe<DiagnosticsSnapshotExportedSignal>(signal =>
@@ -63,7 +63,7 @@ namespace Vareiko.Foundation.Tests.Observability
         [Test]
         public async Task ExportAsync_WhenSnapshotMissing_ReturnsFailureAndFiresFailedSignal()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             bool failedSignalReceived = false;
             string failedError = string.Empty;
             signalBus.Subscribe<DiagnosticsSnapshotExportFailedSignal>(signal =>
@@ -84,15 +84,6 @@ namespace Vareiko.Foundation.Tests.Observability
             Assert.That(result.Error, Does.Contain("not available"));
             Assert.That(failedSignalReceived, Is.True);
             Assert.That(failedError, Does.Contain("not available"));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<DiagnosticsSnapshotExportedSignal>();
-            container.DeclareSignal<DiagnosticsSnapshotExportFailedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class FakeDiagnosticsService : IDiagnosticsService

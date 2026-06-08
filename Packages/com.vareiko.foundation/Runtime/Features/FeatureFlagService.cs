@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Backend;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Features
@@ -10,7 +11,7 @@ namespace Vareiko.Foundation.Features
     {
         private readonly IRemoteConfigService _remoteConfigService;
         private readonly FeatureFlagsConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, bool> _defaultBools = new Dictionary<string, bool>(System.StringComparer.Ordinal);
         private readonly Dictionary<string, bool> _overrides = new Dictionary<string, bool>(System.StringComparer.Ordinal);
 
@@ -18,7 +19,7 @@ namespace Vareiko.Foundation.Features
         public FeatureFlagService(
             [InjectOptional] IRemoteConfigService remoteConfigService = null,
             [InjectOptional] FeatureFlagsConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _remoteConfigService = remoteConfigService;
             _config = config;
@@ -109,7 +110,7 @@ namespace Vareiko.Foundation.Features
             }
 
             _overrides[key] = value;
-            _signalBus?.Fire(new FeatureFlagOverriddenSignal(key, value));
+            _signalBus?.Publish(new FeatureFlagOverriddenSignal(key, value));
         }
 
         public void ClearLocalOverrides()
@@ -121,14 +122,14 @@ namespace Vareiko.Foundation.Features
         {
             if (_remoteConfigService == null)
             {
-                _signalBus?.Fire(new FeatureFlagsRefreshedSignal(0));
+                _signalBus?.Publish(new FeatureFlagsRefreshedSignal(0));
                 return;
             }
 
             await _remoteConfigService.RefreshAsync(cancellationToken);
             IReadOnlyDictionary<string, string> snapshot = _remoteConfigService.Snapshot();
             int count = snapshot != null ? snapshot.Count : 0;
-            _signalBus?.Fire(new FeatureFlagsRefreshedSignal(count));
+            _signalBus?.Publish(new FeatureFlagsRefreshedSignal(count));
         }
 
         private async UniTaskVoid RefreshSafeAsync()

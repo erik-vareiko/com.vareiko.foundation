@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Localization
@@ -8,7 +9,7 @@ namespace Vareiko.Foundation.Localization
     public sealed class LocalizationService : ILocalizationService, IInitializable
     {
         private readonly LocalizationConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, Dictionary<string, string>> _tables = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
         private readonly List<string> _supportedLanguages = new List<string>();
 
@@ -16,7 +17,7 @@ namespace Vareiko.Foundation.Localization
         private string _fallbackLanguage = "en";
 
         [Inject]
-        public LocalizationService([InjectOptional] LocalizationConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public LocalizationService([InjectOptional] LocalizationConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -60,7 +61,7 @@ namespace Vareiko.Foundation.Localization
 
             string previous = _currentLanguage;
             _currentLanguage = normalized;
-            _signalBus?.Fire(new LanguageChangedSignal(previous, _currentLanguage));
+            _signalBus?.Publish(new LanguageChangedSignal(previous, _currentLanguage));
             return true;
         }
 
@@ -84,7 +85,7 @@ namespace Vareiko.Foundation.Localization
                 return true;
             }
 
-            _signalBus?.Fire(new LocalizationKeyMissingSignal(_currentLanguage, normalizedKey));
+            _signalBus?.Publish(new LocalizationKeyMissingSignal(_currentLanguage, normalizedKey));
             return false;
         }
 

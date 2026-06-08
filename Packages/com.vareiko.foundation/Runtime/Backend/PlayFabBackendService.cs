@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Backend
@@ -11,12 +12,12 @@ namespace Vareiko.Foundation.Backend
     {
         private static readonly IReadOnlyDictionary<string, string> EmptyData = new Dictionary<string, string>(0, StringComparer.Ordinal);
         private readonly BackendConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private bool _isAuthenticated;
         private string _playerId;
 
         [Inject]
-        public PlayFabBackendService([InjectOptional] BackendConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public PlayFabBackendService([InjectOptional] BackendConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -136,7 +137,7 @@ namespace Vareiko.Foundation.Backend
 
             if (changed)
             {
-                _signalBus?.Fire(new BackendAuthStateChangedSignal(_isAuthenticated, _playerId));
+                _signalBus?.Publish(new BackendAuthStateChangedSignal(_isAuthenticated, _playerId));
             }
         }
     }

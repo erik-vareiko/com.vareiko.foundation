@@ -4,7 +4,10 @@
   "references": [
     "Vareiko.Foundation",
     "UniTask",
-    "Zenject"
+    "Zenject",
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

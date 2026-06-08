@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Save;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -13,13 +14,13 @@ namespace Vareiko.Foundation.Consent
         private const string Key = "consent";
 
         private readonly ISaveService _saveService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         private ConsentState _state = new ConsentState();
         private bool _isLoaded;
 
         [Inject]
-        public ConsentService(ISaveService saveService, [InjectOptional] SignalBus signalBus = null)
+        public ConsentService(ISaveService saveService, IFoundationSignalBus signalBus)
         {
             _saveService = saveService;
             _signalBus = signalBus;
@@ -43,7 +44,7 @@ namespace Vareiko.Foundation.Consent
             ConsentState loaded = await _saveService.LoadAsync(Slot, Key, new ConsentState(), cancellationToken);
             _state = loaded ?? new ConsentState();
             _isLoaded = true;
-            _signalBus?.Fire(new ConsentLoadedSignal(_state.IsCollected));
+            _signalBus.Publish(new ConsentLoadedSignal(_state.IsCollected));
         }
 
         public UniTask SaveAsync(CancellationToken cancellationToken = default)
@@ -76,7 +77,7 @@ namespace Vareiko.Foundation.Consent
 
         private void FireChanged(ConsentScope scope)
         {
-            _signalBus?.Fire(new ConsentChangedSignal(scope, _state.Get(scope), _state.IsCollected));
+            _signalBus.Publish(new ConsentChangedSignal(scope, _state.Get(scope), _state.IsCollected));
         }
 
         private async UniTaskVoid LoadSafeAsync()
@@ -90,7 +91,7 @@ namespace Vareiko.Foundation.Consent
                 Debug.LogException(exception);
                 _state = new ConsentState();
                 _isLoaded = true;
-                _signalBus?.Fire(new ConsentLoadedSignal(false));
+                _signalBus.Publish(new ConsentLoadedSignal(false));
             }
         }
     }

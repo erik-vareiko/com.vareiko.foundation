@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Vareiko.Foundation.Validation;
-using Zenject;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.Validation
 {
@@ -10,7 +10,7 @@ namespace Vareiko.Foundation.Tests.Validation
         [Test]
         public void Initialize_EmitsCompletedSummary_WithWarningAndErrorCounts()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int passed = 0;
             int warnings = 0;
             int errors = 0;
@@ -50,7 +50,7 @@ namespace Vareiko.Foundation.Tests.Validation
         [Test]
         public void Initialize_WhenNoRules_EmitsEmptySummary()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             StartupValidationCompletedSignal summary = default;
             bool hasSummary = false;
 
@@ -69,17 +69,6 @@ namespace Vareiko.Foundation.Tests.Validation
             Assert.That(summary.WarningCount, Is.EqualTo(0));
             Assert.That(summary.ErrorCount, Is.EqualTo(0));
             Assert.That(summary.HasBlockingFailures, Is.False);
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<StartupValidationPassedSignal>();
-            container.DeclareSignal<StartupValidationWarningSignal>();
-            container.DeclareSignal<StartupValidationFailedSignal>();
-            container.DeclareSignal<StartupValidationCompletedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class FixedRule : IStartupValidationRule

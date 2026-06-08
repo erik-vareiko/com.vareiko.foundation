@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Consent;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Ads
@@ -10,7 +11,7 @@ namespace Vareiko.Foundation.Ads
     {
         private readonly AdsConfig _config;
         private readonly IConsentService _consentService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, AdsConfig.Placement> _placementsById = new Dictionary<string, AdsConfig.Placement>(System.StringComparer.Ordinal);
         private readonly HashSet<string> _loadedPlacements = new HashSet<string>(System.StringComparer.Ordinal);
 
@@ -20,7 +21,7 @@ namespace Vareiko.Foundation.Ads
         public SimulatedAdsService(
             [InjectOptional] AdsConfig config = null,
             [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _consentService = consentService;
@@ -85,7 +86,7 @@ namespace Vareiko.Foundation.Ads
 
             _initialized = true;
             AdsInitializeResult success = AdsInitializeResult.Succeed();
-            _signalBus?.Fire(new AdsInitializedSignal(true, string.Empty));
+            _signalBus?.Publish(new AdsInitializedSignal(true, string.Empty));
             return UniTask.FromResult(success);
         }
 
@@ -129,7 +130,7 @@ namespace Vareiko.Foundation.Ads
 
             _loadedPlacements.Add(placement.PlacementId);
             AdLoadResult success = AdLoadResult.Succeed(placement.PlacementId, placement.PlacementType);
-            _signalBus?.Fire(new AdLoadedSignal(success.PlacementId, success.PlacementType));
+            _signalBus?.Publish(new AdLoadedSignal(success.PlacementId, success.PlacementType));
             return UniTask.FromResult(FinalizeResult(success));
         }
 
@@ -179,10 +180,10 @@ namespace Vareiko.Foundation.Ads
 
             if (rewardGranted)
             {
-                _signalBus?.Fire(new AdRewardGrantedSignal(success.PlacementId, success.RewardId, success.RewardAmount));
+                _signalBus?.Publish(new AdRewardGrantedSignal(success.PlacementId, success.RewardId, success.RewardAmount));
             }
 
-            _signalBus?.Fire(new AdShownSignal(success.PlacementId, success.PlacementType, success.RewardGranted));
+            _signalBus?.Publish(new AdShownSignal(success.PlacementId, success.PlacementType, success.RewardGranted));
             return UniTask.FromResult(FinalizeResult(success));
         }
 
@@ -247,28 +248,28 @@ namespace Vareiko.Foundation.Ads
         {
             _initialized = false;
             AdsInitializeResult result = AdsInitializeResult.Fail(error, errorCode);
-            _signalBus?.Fire(new AdsInitializedSignal(false, result.Error));
+            _signalBus?.Publish(new AdsInitializedSignal(false, result.Error));
             return result;
         }
 
         private AdLoadResult FailLoad(string placementId, AdPlacementType placementType, string error, AdsErrorCode errorCode)
         {
             AdLoadResult result = AdLoadResult.Fail(placementId, placementType, error, errorCode);
-            _signalBus?.Fire(new AdLoadFailedSignal(result.PlacementId, result.PlacementType, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new AdLoadFailedSignal(result.PlacementId, result.PlacementType, result.Error, result.ErrorCode));
             return result;
         }
 
         private AdShowResult FailShow(string placementId, AdPlacementType placementType, string error, AdsErrorCode errorCode)
         {
             AdShowResult result = AdShowResult.Fail(placementId, placementType, error, errorCode);
-            _signalBus?.Fire(new AdShowFailedSignal(result.PlacementId, result.PlacementType, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new AdShowFailedSignal(result.PlacementId, result.PlacementType, result.Error, result.ErrorCode));
             return result;
         }
 
         private void EmitTelemetry(string operation, string placementId, bool success, AdsErrorCode errorCode, float startedAt)
         {
             float elapsedMs = UnityEngine.Mathf.Max(0f, (UnityEngine.Time.realtimeSinceStartup - startedAt) * 1000f);
-            _signalBus?.Fire(new AdsOperationTelemetrySignal(operation, placementId, success, elapsedMs, errorCode));
+            _signalBus?.Publish(new AdsOperationTelemetrySignal(operation, placementId, success, elapsedMs, errorCode));
         }
     }
 }

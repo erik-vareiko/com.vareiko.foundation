@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Iap
@@ -9,7 +10,7 @@ namespace Vareiko.Foundation.Iap
     public sealed class SimulatedInAppPurchaseService : IInAppPurchaseService, IInitializable
     {
         private readonly IapConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, IapConfig.ProductDefinition> _productsById = new Dictionary<string, IapConfig.ProductDefinition>(StringComparer.Ordinal);
         private readonly Dictionary<string, InAppPurchaseResult> _ownedPurchases = new Dictionary<string, InAppPurchaseResult>(StringComparer.Ordinal);
         private readonly List<InAppPurchaseProductInfo> _catalog = new List<InAppPurchaseProductInfo>(16);
@@ -17,7 +18,7 @@ namespace Vareiko.Foundation.Iap
         private bool _initialized;
 
         [Inject]
-        public SimulatedInAppPurchaseService([InjectOptional] IapConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public SimulatedInAppPurchaseService([InjectOptional] IapConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -90,7 +91,7 @@ namespace Vareiko.Foundation.Iap
             _ownedPurchases.Clear();
             _initialized = true;
             InAppPurchaseInitializeResult success = InAppPurchaseInitializeResult.Succeed();
-            _signalBus?.Fire(new IapInitializedSignal(true, string.Empty));
+            _signalBus?.Publish(new IapInitializedSignal(true, string.Empty));
             return UniTask.FromResult(success);
         }
 
@@ -135,7 +136,7 @@ namespace Vareiko.Foundation.Iap
                 _ownedPurchases[trimmedId] = success;
             }
 
-            _signalBus?.Fire(new IapPurchaseSucceededSignal(trimmedId, transactionId, false));
+            _signalBus?.Publish(new IapPurchaseSucceededSignal(trimmedId, transactionId, false));
             return UniTask.FromResult(success);
         }
 
@@ -145,7 +146,7 @@ namespace Vareiko.Foundation.Iap
             if (!_initialized)
             {
                 InAppPurchaseRestoreResult failed = InAppPurchaseRestoreResult.Fail("IAP service is not initialized.", InAppPurchaseErrorCode.NotInitialized);
-                _signalBus?.Fire(new IapRestoreFailedSignal(failed.Error, failed.ErrorCode));
+                _signalBus?.Publish(new IapRestoreFailedSignal(failed.Error, failed.ErrorCode));
                 return UniTask.FromResult(failed);
             }
 
@@ -153,12 +154,12 @@ namespace Vareiko.Foundation.Iap
             foreach (KeyValuePair<string, InAppPurchaseResult> pair in _ownedPurchases)
             {
                 InAppPurchaseResult owned = pair.Value;
-                _signalBus?.Fire(new IapPurchaseSucceededSignal(owned.ProductId, owned.TransactionId, true));
+                _signalBus?.Publish(new IapPurchaseSucceededSignal(owned.ProductId, owned.TransactionId, true));
                 restored++;
             }
 
             InAppPurchaseRestoreResult result = InAppPurchaseRestoreResult.Succeed(restored);
-            _signalBus?.Fire(new IapRestoreCompletedSignal(restored));
+            _signalBus?.Publish(new IapRestoreCompletedSignal(restored));
             return UniTask.FromResult(result);
         }
 
@@ -166,14 +167,14 @@ namespace Vareiko.Foundation.Iap
         {
             _initialized = false;
             InAppPurchaseInitializeResult result = InAppPurchaseInitializeResult.Fail(error, errorCode);
-            _signalBus?.Fire(new IapInitializedSignal(false, result.Error));
+            _signalBus?.Publish(new IapInitializedSignal(false, result.Error));
             return result;
         }
 
         private InAppPurchaseResult FailPurchase(string productId, string error, InAppPurchaseErrorCode errorCode)
         {
             InAppPurchaseResult result = InAppPurchaseResult.Fail(productId, error, errorCode);
-            _signalBus?.Fire(new IapPurchaseFailedSignal(result.ProductId, result.Error, result.ErrorCode));
+            _signalBus?.Publish(new IapPurchaseFailedSignal(result.ProductId, result.Error, result.ErrorCode));
             return result;
         }
     }

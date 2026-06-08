@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Common
@@ -9,10 +10,10 @@ namespace Vareiko.Foundation.Common
     public sealed class HealthCheckRunner : IHealthCheckRunner
     {
         private readonly List<IHealthCheck> _checks;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
         [Inject]
-        public HealthCheckRunner([InjectOptional] List<IHealthCheck> checks = null, [InjectOptional] SignalBus signalBus = null)
+        public HealthCheckRunner([InjectOptional] List<IHealthCheck> checks = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _checks = checks ?? new List<IHealthCheck>(0);
             _signalBus = signalBus;
@@ -45,11 +46,11 @@ namespace Vareiko.Foundation.Common
                 results.Add(result);
                 if (result.IsHealthy)
                 {
-                    _signalBus?.Fire(new HealthCheckPassedSignal(checkName, result.Message));
+                    _signalBus?.Publish(new HealthCheckPassedSignal(checkName, result.Message));
                 }
                 else
                 {
-                    _signalBus?.Fire(new HealthCheckFailedSignal(checkName, result.Message));
+                    _signalBus?.Publish(new HealthCheckFailedSignal(checkName, result.Message));
                 }
             }
 

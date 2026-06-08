@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Config;
-using Zenject;
+using Vareiko.Foundation.Tests.TestDoubles;
 
 namespace Vareiko.Foundation.Tests.Config
 {
@@ -11,7 +11,7 @@ namespace Vareiko.Foundation.Tests.Config
         [Test]
         public void Register_AndTryGet_ReturnsRegisteredConfig_AndFiresSignal()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int registeredSignals = 0;
             signalBus.Subscribe<ConfigRegisteredSignal>(_ => registeredSignals++);
 
@@ -36,7 +36,7 @@ namespace Vareiko.Foundation.Tests.Config
         [Test]
         public void MissingConfig_FiresMissingSignal_AndGetRequiredThrows()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             ConfigMissingSignal missing = default;
             int missingSignals = 0;
             signalBus.Subscribe<ConfigMissingSignal>(signal =>
@@ -75,15 +75,6 @@ namespace Vareiko.Foundation.Tests.Config
             {
                 UnityEngine.Object.DestroyImmediate(config);
             }
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<ConfigRegisteredSignal>();
-            container.DeclareSignal<ConfigMissingSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class TestConfig : ScriptableObject

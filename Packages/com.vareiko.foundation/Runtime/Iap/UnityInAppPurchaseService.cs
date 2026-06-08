@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 #if UNITY_PURCHASING
@@ -18,7 +19,7 @@ namespace Vareiko.Foundation.Iap
 #endif
     {
         private readonly IapConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, IapConfig.ProductDefinition> _productsById = new Dictionary<string, IapConfig.ProductDefinition>(StringComparer.Ordinal);
         private readonly List<InAppPurchaseProductInfo> _catalog = new List<InAppPurchaseProductInfo>(16);
 
@@ -37,7 +38,7 @@ namespace Vareiko.Foundation.Iap
 #endif
 
         [Inject]
-        public UnityInAppPurchaseService([InjectOptional] IapConfig config = null, [InjectOptional] SignalBus signalBus = null)
+        public UnityInAppPurchaseService([InjectOptional] IapConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -267,7 +268,7 @@ namespace Vareiko.Foundation.Iap
 #else
             await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
             InAppPurchaseRestoreResult result = InAppPurchaseRestoreResult.Succeed(0);
-            _signalBus?.Fire(new IapRestoreCompletedSignal(result.RestoredCount));
+            _signalBus?.Publish(new IapRestoreCompletedSignal(result.RestoredCount));
             return FinalizeResult(result);
 #endif
 #else
@@ -286,7 +287,7 @@ namespace Vareiko.Foundation.Iap
             RefreshCatalogFromStore();
 
             InAppPurchaseInitializeResult result = InAppPurchaseInitializeResult.Succeed();
-            _signalBus?.Fire(new IapInitializedSignal(true, string.Empty));
+            _signalBus?.Publish(new IapInitializedSignal(true, string.Empty));
             _initializeCompletion?.TrySetResult(result);
             _initializeCompletion = null;
         }
@@ -320,12 +321,12 @@ namespace Vareiko.Foundation.Iap
             if (_restoreInProgress)
             {
                 _restoredTransactionsCount++;
-                _signalBus?.Fire(new IapPurchaseSucceededSignal(productId, transactionId, true));
+                _signalBus?.Publish(new IapPurchaseSucceededSignal(productId, transactionId, true));
                 return PurchaseProcessingResult.Complete;
             }
 
             InAppPurchaseResult success = InAppPurchaseResult.Succeed(productId, transactionId, receipt, false);
-            _signalBus?.Fire(new IapPurchaseSucceededSignal(productId, transactionId, false));
+            _signalBus?.Publish(new IapPurchaseSucceededSignal(productId, transactionId, false));
 
             _purchaseCompletion?.TrySetResult(success);
             _purchaseCompletion = null;
@@ -362,7 +363,7 @@ namespace Vareiko.Foundation.Iap
             if (success)
             {
                 InAppPurchaseRestoreResult result = InAppPurchaseRestoreResult.Succeed(_restoredTransactionsCount);
-                _signalBus?.Fire(new IapRestoreCompletedSignal(result.RestoredCount));
+                _signalBus?.Publish(new IapRestoreCompletedSignal(result.RestoredCount));
                 _restoreCompletion.TrySetResult(result);
             }
             else
@@ -487,28 +488,28 @@ namespace Vareiko.Foundation.Iap
             _extensionProvider = null;
 #endif
             InAppPurchaseInitializeResult failed = InAppPurchaseInitializeResult.Fail(error, errorCode);
-            _signalBus?.Fire(new IapInitializedSignal(false, failed.Error));
+            _signalBus?.Publish(new IapInitializedSignal(false, failed.Error));
             return failed;
         }
 
         private InAppPurchaseResult FailPurchase(string productId, string error, InAppPurchaseErrorCode errorCode)
         {
             InAppPurchaseResult failed = InAppPurchaseResult.Fail(productId, error, errorCode);
-            _signalBus?.Fire(new IapPurchaseFailedSignal(failed.ProductId, failed.Error, failed.ErrorCode));
+            _signalBus?.Publish(new IapPurchaseFailedSignal(failed.ProductId, failed.Error, failed.ErrorCode));
             return failed;
         }
 
         private InAppPurchaseRestoreResult FailRestore(string error, InAppPurchaseErrorCode errorCode)
         {
             InAppPurchaseRestoreResult failed = InAppPurchaseRestoreResult.Fail(error, errorCode);
-            _signalBus?.Fire(new IapRestoreFailedSignal(failed.Error, failed.ErrorCode));
+            _signalBus?.Publish(new IapRestoreFailedSignal(failed.Error, failed.ErrorCode));
             return failed;
         }
 
         private void EmitTelemetry(string operation, bool success, InAppPurchaseErrorCode errorCode, float startedAt)
         {
             float elapsedMs = Mathf.Max(0f, (UnityEngine.Time.realtimeSinceStartup - startedAt) * 1000f);
-            _signalBus?.Fire(new IapOperationTelemetrySignal(operation, success, elapsedMs, errorCode));
+            _signalBus?.Publish(new IapOperationTelemetrySignal(operation, success, elapsedMs, errorCode));
         }
     }
 }

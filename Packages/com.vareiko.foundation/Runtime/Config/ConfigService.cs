@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Vareiko.Foundation.Signals;
 using Zenject;
 
 namespace Vareiko.Foundation.Config
 {
     public sealed class ConfigService : IConfigService
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, ScriptableObject> _map = new Dictionary<string, ScriptableObject>(StringComparer.Ordinal);
 
         [Inject]
-        public ConfigService([InjectOptional] SignalBus signalBus = null)
+        public ConfigService([InjectOptional] IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }
@@ -25,7 +26,7 @@ namespace Vareiko.Foundation.Config
 
             string key = MakeKey(typeof(T), id);
             _map[key] = config;
-            _signalBus?.Fire(new ConfigRegisteredSignal(id, typeof(T).Name));
+            _signalBus?.Publish(new ConfigRegisteredSignal(id, typeof(T).Name));
         }
 
         public bool TryGet<T>(out T config, string id = "default") where T : ScriptableObject
@@ -39,7 +40,7 @@ namespace Vareiko.Foundation.Config
             }
 
             config = null;
-            _signalBus?.Fire(new ConfigMissingSignal(id, typeof(T).Name));
+            _signalBus?.Publish(new ConfigMissingSignal(id, typeof(T).Name));
             return false;
         }
 

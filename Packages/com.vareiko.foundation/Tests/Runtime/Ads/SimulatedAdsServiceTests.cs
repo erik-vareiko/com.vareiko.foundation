@@ -5,7 +5,6 @@ using UnityEngine;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Ads
 {
@@ -56,7 +55,7 @@ namespace Vareiko.Foundation.Tests.Ads
         public async Task RewardedFlow_LoadThenShow_GrantsReward_AndFiresSignal()
         {
             AdsConfig config = CreateConfig(requireConsent: true);
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int rewardAmount = 0;
             signalBus.Subscribe<AdRewardGrantedSignal>(signal => rewardAmount = signal.RewardAmount);
 
@@ -115,20 +114,6 @@ namespace Vareiko.Foundation.Tests.Ads
             Assert.That(load.Success, Is.False);
             Assert.That(show.Success, Is.False);
             Assert.That(show.ErrorCode, Is.EqualTo(AdsErrorCode.ProviderUnavailable));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<AdsInitializedSignal>();
-            container.DeclareSignal<AdLoadedSignal>();
-            container.DeclareSignal<AdLoadFailedSignal>();
-            container.DeclareSignal<AdShownSignal>();
-            container.DeclareSignal<AdShowFailedSignal>();
-            container.DeclareSignal<AdRewardGrantedSignal>();
-            container.DeclareSignal<AdsOperationTelemetrySignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static AdsConfig CreateConfig(bool requireConsent)
