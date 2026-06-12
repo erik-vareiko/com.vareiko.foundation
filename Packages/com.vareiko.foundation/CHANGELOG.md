@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Vertical Slice sample (Phase 4, G8): drop `VerticalSliceBootstrap` into an empty scene and press Play — full code-driven composition (project + scene scopes), an `IBootstrapTask` loading a dictionary-bearing save profile, a host-defined `AppState("Run")`, tick-driven pooled gameplay (`ITickService` + `ComponentPool`) and interval autosave. Both samples are now declared in `package.json` (`samples`), so they appear in the Package Manager UI.
 - Save serializer default swap (Phase 4, G9): `NewtonsoftJsonSaveSerializer` is the new default payload serializer behind `SecureSaveSerializer` — dictionaries, nullables and polymorphic payloads now serialize correctly. It writes the same `{"Value": ...}` envelope as the old JsonUtility serializer, so pre-3.0 saves keep loading; `JsonUnitySaveSerializer` stays available as a dependency-free fallback. New package dependency: `com.unity.nuget.newtonsoft-json` 3.2.1 (added to validator/CI required-deps). `SecureSaveSerializer` now composes over `ISaveSerializer` instead of the concrete JsonUtility type.
 - Core primitives (Phase 3, second batch):
   - `Result` / `Result<T>` (`Vareiko.Foundation`) — canonical success/failure primitive (factories, `TryGetValue`, `GetValueOrDefault`, `AsResult`); the default for new foundation APIs. `IDiagnosticsSnapshotExportService.ExportAsync` migrated from its ad-hoc result struct to `Result<string>` (breaking); domain results carrying codes/flags (backend, cloud sync) intentionally keep their shapes.

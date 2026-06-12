@@ -166,7 +166,13 @@ the owner: grouped granularity, Observability via direct refs):
   extensions deferred until a concrete consumer needs them (avoid speculative API).
 
 ### Phase 4 — Maturity
-- Vertical-slice sample (dogfood). (G8)
+- ~~Vertical-slice sample (dogfood). (G8)~~ DONE 2026-06-12:
+  `Samples~/VerticalSlice` — one component in an empty scene boots the full
+  composition: bootstrap task → custom `AppState("Run")` → `ITickService` +
+  `ComponentPool` gameplay → dictionary-bearing profile autosaved through the
+  Newtonsoft serializer. Compile-verified against the package (samples are not
+  CI-compiled — checked by temporarily copying into `Assets/`). Both samples now
+  declared in `package.json` `samples`.
 - ~~Swap `JsonUtility` default in `ISaveSerializer`. (G9)~~ DONE 2026-06-12:
   `NewtonsoftJsonSaveSerializer` (com.unity.nuget.newtonsoft-json 3.2.1) is the
   default behind `SecureSaveSerializer`; same `{"Value": ...}` envelope as the
