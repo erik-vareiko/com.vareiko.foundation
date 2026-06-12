@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- Core primitives (Phase 3, second batch):
+  - `Result` / `Result<T>` (`Vareiko.Foundation`) — canonical success/failure primitive (factories, `TryGetValue`, `GetValueOrDefault`, `AsResult`); the default for new foundation APIs. `IDiagnosticsSnapshotExportService.ExportAsync` migrated from its ad-hoc result struct to `Result<string>` (breaking); domain results carrying codes/flags (backend, cloud sync) intentionally keep their shapes.
+  - `StateMachine<TState>` (`Vareiko.Foundation`) — minimal generic FSM (transition guard, `TryEnter`/`ForceEnter`, change event, custom comparer).
+  - **`AppState` is no longer an enum** (breaking for `switch`/casts, source-compatible otherwise): it is a string-backed struct with the same well-known states (`Boot`…`Shutdown`), so hosts add custom states via `new AppState("MetaShop")`. `AppStateMachine` is rebuilt on `StateMachine<AppState>` with the same default lifecycle rules; custom states flow through them.
+  - Disposable utilities (`Vareiko.Foundation`) — `DisposableAction` (idempotent) and `CompositeDisposable` (the signal-subscription bag pattern).
 - Core primitives (Phase 3 of the 3.0 refactor, first batch):
   - `ITickService` / `TickService` (`Vareiko.Foundation.Time`) — central ordered update loop: per-frame listeners with explicit ordering, `Delay`/`Repeat`/`NextFrame` timers (scaled or unscaled time), pause support, exception isolation per listener, `IDisposable` handles everywhere; driven by the container player-loop in play mode, manually via `Advance` in tests. Registered by `FoundationTimeInstaller` and resolvable from the project scope.
   - Object pooling (`Vareiko.Foundation.Pooling`) — `IObjectPool<T>` with `ObjectPool<T>` for plain classes (factory, get/release/destroy callbacks, max size, prewarm, double-release detection) and `ComponentPool<T>` for prefab instances (activate/deactivate lifecycle, reparenting, overflow destruction, tolerance to externally destroyed instances), plus a `using`-scoped `GetScoped` helper.

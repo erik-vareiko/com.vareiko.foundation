@@ -38,16 +38,16 @@ namespace Vareiko.Foundation.Tests.Observability
                     signalBus,
                     null);
 
-                DiagnosticsSnapshotExportResult result = await service.ExportAsync("qa run#1");
+                Vareiko.Foundation.Result<string> result = await service.ExportAsync("qa run#1");
 
-                Assert.That(result.Success, Is.True);
-                Assert.That(result.FilePath, Is.Not.Empty);
-                Assert.That(File.Exists(result.FilePath), Is.True);
+                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.Value, Is.Not.Empty);
+                Assert.That(File.Exists(result.Value), Is.True);
                 Assert.That(exportedSignalReceived, Is.True);
-                Assert.That(exportedPath, Is.EqualTo(result.FilePath));
-                Assert.That(Path.GetFileName(result.FilePath), Does.Contain("qa_run_1"));
+                Assert.That(exportedPath, Is.EqualTo(result.Value));
+                Assert.That(Path.GetFileName(result.Value), Does.Contain("qa_run_1"));
 
-                string json = File.ReadAllText(result.FilePath);
+                string json = File.ReadAllText(result.Value);
                 Assert.That(json, Does.Contain("\"IsBootCompleted\": true"));
                 Assert.That(json, Does.Contain("\"RemoteConfigValues\": 4"));
             }
@@ -78,9 +78,9 @@ namespace Vareiko.Foundation.Tests.Observability
                 signalBus,
                 null);
 
-            DiagnosticsSnapshotExportResult result = await service.ExportAsync();
+            Vareiko.Foundation.Result<string> result = await service.ExportAsync();
 
-            Assert.That(result.Success, Is.False);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Error, Does.Contain("not available"));
             Assert.That(failedSignalReceived, Is.True);
             Assert.That(failedError, Does.Contain("not available"));

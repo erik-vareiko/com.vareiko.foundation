@@ -7,15 +7,17 @@ namespace Vareiko.Foundation.App
     public sealed class AppStateMachine : IAppStateMachine, VContainer.Unity.IInitializable, IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
-        private AppState _current = AppState.None;
+        private readonly StateMachine<AppState> _stateMachine;
         private IDisposable _bootFailedSubscription;
 
         public AppStateMachine(IFoundationSignalBus signalBus)
         {
             _signalBus = signalBus;
+            _stateMachine = new StateMachine<AppState>(AppState.None, CanTransition);
+            _stateMachine.StateChanged += OnStateChanged;
         }
 
-        public AppState Current => _current;
+        public AppState Current => _stateMachine.Current;
 
         public void Initialize()
         {
@@ -31,35 +33,27 @@ namespace Vareiko.Foundation.App
 
         public bool IsIn(AppState state)
         {
-            return _current == state;
+            return _stateMachine.IsIn(state);
         }
 
         public bool TryEnter(AppState next)
         {
-            if (next == _current)
-            {
-                return false;
-            }
-
-            if (!CanTransition(_current, next))
-            {
-                return false;
-            }
-
-            ForceEnter(next);
-            return true;
+            return _stateMachine.TryEnter(next);
         }
 
         public void ForceEnter(AppState next)
         {
-            AppState previous = _current;
-            _current = next;
-            _signalBus.Publish(new AppStateChangedSignal(previous, _current));
+            _stateMachine.ForceEnter(next);
+        }
+
+        private void OnStateChanged(AppState previous, AppState current)
+        {
+            _signalBus.Publish(new AppStateChangedSignal(previous, current));
         }
 
         private void OnApplicationBootFailed(ApplicationBootFailedSignal signal)
         {
-            if (_current == AppState.Shutdown || _current == AppState.Error)
+            if (IsIn(AppState.Shutdown) || IsIn(AppState.Error))
             {
                 return;
             }
@@ -67,14 +61,15 @@ namespace Vareiko.Foundation.App
             ForceEnter(AppState.Error);
         }
 
+        // Default lifecycle rules; host-defined states flow through the permissive branch.
         private static bool CanTransition(AppState current, AppState next)
         {
-            if (next == AppState.None)
+            if (next.IsNone)
             {
                 return false;
             }
 
-            if (current == AppState.None)
+            if (current.IsNone)
             {
                 return next == AppState.Boot;
             }

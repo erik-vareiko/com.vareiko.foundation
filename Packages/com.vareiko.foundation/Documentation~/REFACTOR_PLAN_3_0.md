@@ -138,7 +138,13 @@ the owner: grouped granularity, Observability via direct refs):
   MonetizationObservability→Monetization, startup rules→composition root).
 
 ### Phase 3 — Core primitives (extended scope)
-- `Result<T>` / error primitive; migrate ad-hoc result types onto it. (G5)
+- ~~`Result<T>` / error primitive; migrate ad-hoc result types onto it. (G5)~~ DONE
+  2026-06-12: `Result`/`Result<T>` in `Vareiko.Foundation` (Core/Primitives) — the
+  default for new APIs. Migration policy decided while landing: pure value+error
+  results migrate (`DiagnosticsSnapshotExportResult` → `Result<string>` as the
+  exemplar); domain results carrying codes/retry flags (Backend, CloudSaveSync,
+  Push/Ads models) intentionally keep their shapes — forcing them into `Result<T>`
+  would lose the domain fields or spawn a parallel error model.
 - ~~Generic object pool (`IPool<T>`, prefab pool, auto-return). (G2)~~ DONE 2026-06-12:
   `Vareiko.Foundation.Pooling` in Core — `IObjectPool<T>`, `ObjectPool<T>` (callbacks,
   maxSize, prewarm, double-release detection), `ComponentPool<T>` (prefab lifecycle,
@@ -148,8 +154,16 @@ the owner: grouped granularity, Observability via direct refs):
   `Delay`/`Repeat`/`NextFrame` (scaled/unscaled), pause, per-listener exception
   isolation; container player-loop entry point in play mode, manual `Advance` in
   tests. Registered in `FoundationTimeInstaller`; part of the composition spec.
-- Generic FSM + extensible app states replacing the hardcoded `AppState` enum. (G4)
-- Core utility layer. (G6)
+- ~~Generic FSM + extensible app states replacing the hardcoded `AppState` enum. (G4)~~
+  DONE 2026-06-12: `StateMachine<TState>` in Core/Primitives (guard + event +
+  comparer); `AppState` converted enum → string-backed struct with the same
+  well-known names (call sites compile unchanged — verified no `switch`/casts
+  existed), so hosts mint custom states with `new AppState("X")`;
+  `AppStateMachine` rebuilt on the generic FSM with the original lifecycle rules.
+- ~~Core utility layer. (G6)~~ PARTIAL 2026-06-12: `DisposableAction` +
+  `CompositeDisposable` landed (the highest-value pieces — the subscription-bag
+  pattern every service hand-rolls). Id/guid helpers, weak events, collection
+  extensions deferred until a concrete consumer needs them (avoid speculative API).
 
 ### Phase 4 — Maturity
 - Vertical-slice sample (dogfood). (G8)
