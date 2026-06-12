@@ -13,7 +13,7 @@ namespace Vareiko.Foundation.Backend
         private readonly RetryPolicy _retryPolicy;
 
         public RetryingBackendService(
-            [Inject(Id = "BackendInner")] IBackendService inner,
+            IBackendService inner,
             BackendReliabilityConfig config = null,
             IFoundationSignalBus signalBus = null)
         {

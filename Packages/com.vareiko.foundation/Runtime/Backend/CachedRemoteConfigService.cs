@@ -18,7 +18,7 @@ namespace Vareiko.Foundation.Backend
         private bool _isRefreshing;
 
         public CachedRemoteConfigService(
-            [Inject(Id = "RemoteConfigInner")] IRemoteConfigService inner,
+            IRemoteConfigService inner,
             IFoundationTimeProvider timeProvider,
             RemoteConfigCacheConfig config = null,
             IFoundationSignalBus signalBus = null)

@@ -14,7 +14,7 @@ namespace Vareiko.Foundation.Input
         private const string DefaultStorageKey = "vareiko.foundation.input.rebind_overrides";
         private readonly string _storageKey;
 
-        public PlayerPrefsInputRebindStorage([InjectOptional(Id = "InputRebindStorageKey")] string storageKey = null)
+        public PlayerPrefsInputRebindStorage(string storageKey = null)
         {
             _storageKey = string.IsNullOrWhiteSpace(storageKey) ? DefaultStorageKey : storageKey.Trim();
         }

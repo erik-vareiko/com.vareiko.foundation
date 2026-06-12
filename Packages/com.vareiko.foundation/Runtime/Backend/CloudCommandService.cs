@@ -26,7 +26,7 @@ namespace Vareiko.Foundation.Backend
         private bool _isFlushing;
 
         public CloudCommandService(
-            [Inject(Id = "CloudFunctionInner")] ICloudFunctionService transport,
+            ICloudFunctionService transport,
             BackendReliabilityConfig reliabilityConfig = null,
             BackendCommandConfig commandConfig = null,
             ICloudCommandRetryClassifier retryClassifier = null,

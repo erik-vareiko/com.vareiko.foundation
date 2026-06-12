@@ -25,7 +25,7 @@ namespace Vareiko.Foundation.Save
             SaveSchemaConfig schemaConfig = null,
             SaveSecurityConfig securityConfig = null,
             IFoundationSignalBus signalBus = null,
-            [InjectOptional(Id = "SaveRootPath")] string rootPath = null)
+            string rootPath = null)
         {
             _storage = storage;
             _serializer = serializer;

@@ -22,7 +22,7 @@ namespace Vareiko.Foundation.Backend
         private bool _isFlushing;
 
         public ReliableCloudFunctionService(
-            [Inject(Id = "CloudFunctionInner")] ICloudFunctionService inner,
+            ICloudFunctionService inner,
             IConnectivityService connectivityService = null,
             BackendReliabilityConfig config = null,
             IFoundationSignalBus signalBus = null,

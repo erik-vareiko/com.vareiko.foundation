@@ -20,7 +20,7 @@ namespace Vareiko.Foundation.Observability
 
         public DiagnosticsSnapshotExportService(
             IDiagnosticsService diagnosticsService,
-            [Inject(Id = "DiagnosticsExportRootPath")] string exportDirectory,
+            string exportDirectory,
             IFoundationSignalBus signalBus = null,
             IFoundationLogger logger = null)
         {

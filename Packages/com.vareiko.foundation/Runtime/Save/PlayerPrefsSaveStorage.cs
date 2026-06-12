@@ -13,8 +13,8 @@ namespace Vareiko.Foundation.Save
         private readonly string _keyPrefix;
 
         public PlayerPrefsSaveStorage(
-            [InjectOptional(Id = "SaveRootPath")] string rootPath = null,
-            [InjectOptional(Id = "SavePlayerPrefsKeyPrefix")] string keyPrefix = null)
+            string rootPath = null,
+            string keyPrefix = null)
         {
             _rootPath = NormalizePath(rootPath);
             _keyPrefix = string.IsNullOrWhiteSpace(keyPrefix) ? DefaultKeyPrefix : keyPrefix;
