@@ -2,14 +2,15 @@
   "name": "com.vareiko.foundation",
   "version": "2.0.0",
   "displayName": "Vareiko Foundation",
-  "description": "Zenject-first foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
+  "description": "VContainer-based foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
   "unity": "2022.3",
   "license": "MIT",
   "author": {
     "name": "Vareiko"
   },
   "keywords": [
-    "zenject",
+    "vcontainer",
+    "messagepipe",
     "architecture",
     "foundation",
     "analytics",
@@ -19,6 +20,8 @@
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
     "com.unity.inputsystem": "1.7.0",
-    "net.bobbo.extenject": "9.3.2"
+    "jp.hadashikick.vcontainer": "1.18.0",
+    "com.cysharp.messagepipe": "1.8.1",
+    "com.cysharp.messagepipe.vcontainer": "1.8.1"
   }
 }

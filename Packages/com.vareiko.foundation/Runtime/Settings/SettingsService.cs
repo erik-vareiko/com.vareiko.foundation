@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Save;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Settings
 {
@@ -19,8 +18,7 @@ namespace Vareiko.Foundation.Settings
         private GameSettings _current = new GameSettings();
         private bool _isLoaded;
 
-        [Inject]
-        public SettingsService(ISaveService saveService, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public SettingsService(ISaveService saveService, IFoundationSignalBus signalBus = null)
         {
             _saveService = saveService;
             _signalBus = signalBus;

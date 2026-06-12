@@ -16,6 +16,20 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private ConfigRegistry[] _configRegistries;
         [SerializeField] private bool _injectSceneObjects = true;
 
+        protected override void Awake()
+        {
+            // Scene services (UIService, BootstrapRunner) resolve project services, so this scope
+            // must parent to the project scope — a parentless LifetimeScope silently becomes a
+            // root. Default the parent here; an explicit inspector reference wins. If the project
+            // scope hasn't built yet, VContainer queues this scope until it does.
+            if (parentReference.Object == null && parentReference.Type == null)
+            {
+                parentReference = ParentReference.Create<FoundationProjectInstaller>();
+            }
+
+            base.Awake();
+        }
+
         protected override void Configure(IContainerBuilder builder)
         {
             // Zenject's SceneContext injected every MonoBehaviour in the scene; VContainer does not.

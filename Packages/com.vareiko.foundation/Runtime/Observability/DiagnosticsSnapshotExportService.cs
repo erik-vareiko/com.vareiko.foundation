@@ -5,7 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -19,12 +18,11 @@ namespace Vareiko.Foundation.Observability
         private readonly IFoundationLogger _logger;
         private readonly string _exportDirectory;
 
-        [Inject]
         public DiagnosticsSnapshotExportService(
             IDiagnosticsService diagnosticsService,
             [Inject(Id = "DiagnosticsExportRootPath")] string exportDirectory,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] IFoundationLogger logger = null)
+            IFoundationSignalBus signalBus = null,
+            IFoundationLogger logger = null)
         {
             _diagnosticsService = diagnosticsService;
             _exportDirectory = exportDirectory ?? string.Empty;

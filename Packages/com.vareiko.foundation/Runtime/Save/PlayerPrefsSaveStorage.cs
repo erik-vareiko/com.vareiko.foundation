@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
@@ -13,7 +12,6 @@ namespace Vareiko.Foundation.Save
         private readonly string _rootPath;
         private readonly string _keyPrefix;
 
-        [Inject]
         public PlayerPrefsSaveStorage(
             [InjectOptional(Id = "SaveRootPath")] string rootPath = null,
             [InjectOptional(Id = "SavePlayerPrefsKeyPrefix")] string keyPrefix = null)

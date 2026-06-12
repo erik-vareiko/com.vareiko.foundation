@@ -4,8 +4,8 @@ This is a practical, end-to-end guide for using `com.vareiko.foundation` as a st
 
 ## 1. What You Get
 The package provides:
-- deterministic bootstrap and service composition (`ProjectContext` + `FoundationProjectInstaller`);
-- scene-local composition (`SceneContext` + `FoundationSceneInstaller`);
+- deterministic bootstrap and service composition (`FoundationProjectInstaller`, a VContainer `LifetimeScope`);
+- scene-local composition (`FoundationSceneInstaller`, a child `LifetimeScope`);
 - modular runtime services (save/settings, analytics, backend, monetization, push, attribution, UI, observability);
 - typed cloud command service with idempotency/retry queue contracts;
 - deterministic RNG streams with snapshot/restore support;
@@ -15,11 +15,9 @@ The package provides:
 Use it as your baseline layer, then add game-specific domain modules above it.
 
 ## 2. Minimal Integration (Fresh Project)
-1. Add `ProjectContext` to your bootstrap scene.
-2. Attach `FoundationProjectInstaller`.
-3. Add `SceneContext` to gameplay scenes.
-4. Attach `FoundationSceneInstaller`.
-5. Create and assign these configs first:
+1. Add `FoundationProjectInstaller` to your bootstrap scene (it is the project-scope `LifetimeScope`).
+2. Add `FoundationSceneInstaller` to gameplay scenes (it parents to the project scope automatically).
+3. Create and assign these configs first:
 - `EnvironmentConfig`
 - `ObservabilityConfig`
 - `SaveSecurityConfig`
@@ -37,7 +35,9 @@ For the first run keep optional providers in fallback mode:
 ## 3. Installation Dependencies
 Required:
 - `com.cysharp.unitask`
-- `net.bobbo.extenject`
+- `jp.hadashikick.vcontainer`
+- `com.cysharp.messagepipe`
+- `com.cysharp.messagepipe.vcontainer`
 - `com.unity.inputsystem`
 
 Optional production dependencies:
@@ -66,13 +66,11 @@ The order is documented in `Documentation~/ARCHITECTURE.md`.
 ```csharp
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Save;
-using Zenject;
 
 public sealed class ProfileFacade
 {
     private readonly ISaveService _save;
 
-    [Inject]
     public ProfileFacade(ISaveService save)
     {
         _save = save;
@@ -93,13 +91,11 @@ public sealed class ProfileFacade
 ### Settings
 ```csharp
 using Vareiko.Foundation.Settings;
-using Zenject;
 
 public sealed class AudioSettingsFacade
 {
     private readonly ISettingsService _settings;
 
-    [Inject]
     public AudioSettingsFacade(ISettingsService settings)
     {
         _settings = settings;
@@ -119,13 +115,11 @@ public sealed class AudioSettingsFacade
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using Vareiko.Foundation.SceneFlow;
-using Zenject;
 
 public sealed class SceneRouter
 {
     private readonly ISceneFlowService _sceneFlow;
 
-    [Inject]
     public SceneRouter(ISceneFlowService sceneFlow)
     {
         _sceneFlow = sceneFlow;
@@ -142,13 +136,11 @@ public sealed class SceneRouter
 ```csharp
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Features;
-using Zenject;
 
 public sealed class FeatureGate
 {
     private readonly IFeatureFlagService _flags;
 
-    [Inject]
     public FeatureGate(IFeatureFlagService flags)
     {
         _flags = flags;
@@ -167,13 +159,11 @@ public sealed class FeatureGate
 using System;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Backend;
-using Zenject;
 
 public sealed class RunBackendFacade
 {
     private readonly ICloudCommandService _commands;
 
-    [Inject]
     public RunBackendFacade(ICloudCommandService commands)
     {
         _commands = commands;
@@ -203,13 +193,11 @@ public sealed class RunBackendFacade
 ### Deterministic RNG
 ```csharp
 using Vareiko.Foundation.Rng;
-using Zenject;
 
 public sealed class RunRngFacade
 {
     private readonly IDeterministicRngService _rng;
 
-    [Inject]
     public RunRngFacade(IDeterministicRngService rng)
     {
         _rng = rng;
@@ -236,7 +224,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Save;
-using Zenject;
 
 public sealed class LoadProfileBootstrapTask : IBootstrapTask
 {
@@ -245,7 +232,6 @@ public sealed class LoadProfileBootstrapTask : IBootstrapTask
     public int Order => 100;
     public string Name => "Load Player Profile";
 
-    [Inject]
     public LoadProfileBootstrapTask(ISaveService save)
     {
         _save = save;
@@ -375,6 +361,6 @@ Use package test assembly `Tests/Runtime` as the default pattern for new modules
 - Missing provider define/sdks with production provider selected.
 - Enabling consent-required modules without loaded consent state.
 - Registering bridge handlers too late (after provider init).
-- Skipping `SceneContext`/`FoundationSceneInstaller` in gameplay scenes.
+- Skipping `FoundationSceneInstaller` in gameplay scenes.
 
 If you follow the starter flow and keep provider-heavy modules in fallback mode first, integration is usually stable from day one.

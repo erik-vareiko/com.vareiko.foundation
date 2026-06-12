@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Vareiko.Foundation.UI;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.UINavigation
 {
@@ -11,8 +10,7 @@ namespace Vareiko.Foundation.UINavigation
         private readonly IFoundationSignalBus _signalBus;
         private readonly Stack<string> _stack = new Stack<string>();
 
-        [Inject]
-        public UINavigationService(IUIService uiService, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public UINavigationService(IUIService uiService, IFoundationSignalBus signalBus = null)
         {
             _uiService = uiService;
             _signalBus = signalBus;

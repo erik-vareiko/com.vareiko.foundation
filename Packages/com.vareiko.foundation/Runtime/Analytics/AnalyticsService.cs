@@ -5,7 +5,6 @@ using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Analytics
 {
@@ -21,12 +20,11 @@ namespace Vareiko.Foundation.Analytics
         private string _userId;
         private readonly int _maxBufferedEvents;
 
-        [Inject]
         public AnalyticsService(
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] AnalyticsConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            IConsentService consentService = null,
+            AnalyticsConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _time = timeProvider;
             _consentService = consentService;

@@ -7,7 +7,15 @@
   - lifecycle services register via `RegisterEntryPoint`; `IInitializable`/`ITickable` fully-qualified to `VContainer.Unity.*`
   - ex-`[InjectOptional]` parity: configs always bound (real or default), `List<T>` collection deps resolved via `IEnumerable<T>` factory registration, host-optional deps (`IApplicationLifecycleSource`, `ICrashReportingService`, `UIRegistry`, input adapter) resolved with `TryResolve`
   - Backend decorator chains rebuilt with delegate registration; transitional `ZenjectFoundationSignalBus` removed; composition tests rewritten against VContainer
-  - follow-up (deferred): strip remaining Zenject `[Inject]`/`[InjectOptional]` attributes + asmdef reference, and port UI `Construct(...)` MonoBehaviour method-injection binders to VContainer
+- DI migration — scene MonoBehaviour injection (Zenject `SceneContext` parity):
+  - the 12 scene-placed `[Inject] Construct(...)` components (UI value binders, window button actions, `UIConfirmDialogPresenter`, `LoadingOverlayPresenter`, `DiagnosticsOverlayView`) ported to VContainer method injection with required dependencies
+  - `FoundationSceneInstaller` now injects every scene root GameObject hierarchy at container build (before entry points run); opt-out via the `_injectSceneObjects` inspector flag
+  - `FoundationSceneInstaller` defaults its parent scope to `FoundationProjectInstaller` so scene services resolve project services without inspector wiring
+- DI migration — Zenject fully removed:
+  - stripped `using Zenject;` and `[Inject]`/`[InjectOptional]` attributes from all remaining services (VContainer ignored them; no behavior change)
+  - removed the `Zenject` reference from all asmdefs and `net.bobbo.extenject` from `package.json` (replaced by `jp.hadashikick.vcontainer` + `com.cysharp.messagepipe`)
+  - `FoundationRuntimeInstaller.InstallProjectServices` now returns the `MessagePipeOptions` so hosts can register message brokers for their own signal types
+  - module scaffolding templates and the BasicSetup sample rewritten for VContainer (`LifetimeScope` roots instead of `ProjectContext`/`SceneContext`)
 - Changed default save storage:
   - `FoundationSaveInstaller` now binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default
   - `PlayerPrefsSaveStorage` stores one JSON payload per `slot/key` pair using stable relative PlayerPrefs keys

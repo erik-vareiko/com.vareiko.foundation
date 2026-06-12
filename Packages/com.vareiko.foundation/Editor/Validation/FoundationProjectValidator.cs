@@ -22,7 +22,9 @@ namespace Vareiko.Foundation.Editor.Validation
         private static readonly string[] RequiredDependencies =
         {
             "com.cysharp.unitask",
-            "net.bobbo.extenject",
+            "jp.hadashikick.vcontainer",
+            "com.cysharp.messagepipe",
+            "com.cysharp.messagepipe.vcontainer",
             "com.unity.inputsystem"
         };
 
@@ -75,9 +77,9 @@ namespace Vareiko.Foundation.Editor.Validation
                     ValidateScenes(report, options);
                 }
 
-                if (options.ValidateProjectContextPrefab)
+                if (options.ValidateProjectScopePrefab)
                 {
-                    ValidateProjectContextPrefab(report);
+                    ValidateProjectScopePrefab(report);
                 }
             }
             finally
@@ -146,7 +148,7 @@ namespace Vareiko.Foundation.Editor.Validation
 
             if (totalProjectInstallersInScenes == 0)
             {
-                report.Add(ValidationSeverity.Info, "SCN-101", "No FoundationProjectInstaller found in scenes. This is valid if ProjectContext prefab is used.");
+                report.Add(ValidationSeverity.Info, "SCN-101", "No FoundationProjectInstaller found in scenes. This is valid if a project-scope prefab is used.");
             }
         }
 
@@ -195,7 +197,7 @@ namespace Vareiko.Foundation.Editor.Validation
 
             if (totalProjectInstallersInScenes == 0)
             {
-                report.Add(ValidationSeverity.Info, "SCN-101", "No FoundationProjectInstaller found in open scenes. This is valid if ProjectContext prefab is used.");
+                report.Add(ValidationSeverity.Info, "SCN-101", "No FoundationProjectInstaller found in open scenes. This is valid if a project-scope prefab is used.");
             }
         }
 
@@ -350,7 +352,7 @@ namespace Vareiko.Foundation.Editor.Validation
             return property != null ? property.objectReferenceValue as T : null;
         }
 
-        private static void ValidateProjectContextPrefab(ValidationReport report)
+        private static void ValidateProjectScopePrefab(ValidationReport report)
         {
             string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets" });
             List<string> projectInstallerPrefabs = new List<string>();
@@ -384,12 +386,12 @@ namespace Vareiko.Foundation.Editor.Validation
                 report.Add(ValidationSeverity.Warning, "CTX-002", $"Multiple prefabs with FoundationProjectInstaller found ({projectInstallerPrefabs.Count}).");
                 for (int i = 0; i < projectInstallerPrefabs.Count; i++)
                 {
-                    report.Add(ValidationSeverity.Info, "CTX-003", "Candidate ProjectContext prefab.", projectInstallerPrefabs[i]);
+                    report.Add(ValidationSeverity.Info, "CTX-003", "Candidate project-scope prefab.", projectInstallerPrefabs[i]);
                 }
             }
             else
             {
-                report.Add(ValidationSeverity.Info, "CTX-004", "ProjectContext prefab candidate found.", projectInstallerPrefabs[0]);
+                report.Add(ValidationSeverity.Info, "CTX-004", "Project-scope prefab candidate found.", projectInstallerPrefabs[0]);
             }
         }
 
@@ -772,7 +774,7 @@ namespace Vareiko.Foundation.Editor.Validation
         {
             public bool ValidateReleaseGate = true;
             public bool ValidateScenes = true;
-            public bool ValidateProjectContextPrefab = true;
+            public bool ValidateProjectScopePrefab = true;
             public bool UseOpenScenesOnly;
         }
 

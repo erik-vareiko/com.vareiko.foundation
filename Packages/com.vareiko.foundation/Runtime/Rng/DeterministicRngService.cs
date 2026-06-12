@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Rng
 {
@@ -13,8 +12,7 @@ namespace Vareiko.Foundation.Rng
         private int _rootSeed;
         private bool _initialized;
 
-        [Inject]
-        public DeterministicRngService([InjectOptional] DeterministicRngConfig config = null)
+        public DeterministicRngService(DeterministicRngConfig config = null)
         {
             _config = config;
             _rootSeed = _config != null ? _config.DefaultRootSeed : 1;

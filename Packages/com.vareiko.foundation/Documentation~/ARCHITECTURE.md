@@ -1,8 +1,8 @@
 # Foundation Architecture
 
 ## Composition Model
-- `ProjectContext`: global runtime services.
-- `SceneContext`: scene-local UI and startup tasks.
+- `FoundationProjectInstaller` (a VContainer `LifetimeScope`): global runtime services.
+- `FoundationSceneInstaller` (a child `LifetimeScope`, auto-parented to the project scope): scene-local UI and startup tasks; injects scene-placed MonoBehaviours at container build.
   `FoundationSceneInstaller` can auto-bind `ConfigRegistry` components as bootstrap tasks.
 - Scene UI layer:
   - `FoundationUIInstaller` (`IUIService`, `IUIWindowManager`)
@@ -16,12 +16,12 @@
 - Practical onboarding flow for a fresh host project is documented in `Documentation~/STARTER_FLOW.md`.
 
 ## Starter Runtime Flow
-1. Boot scene creates `ProjectContext` and installs global services.
+1. Boot scene creates the `FoundationProjectInstaller` scope and installs global services.
 2. `FoundationRuntimeInstaller` installs core modules in deterministic order.
 3. Bootstrap tasks run through `BootstrapRunner`.
 4. Startup validation emits `StartupValidationCompletedSignal`.
 5. App transitions into initial state or safe `AppState.Error` fallback on fatal boot failure.
-6. Gameplay scenes provide `SceneContext` with scene-local UI/navigation bindings.
+6. Gameplay scenes provide a `FoundationSceneInstaller` scope with scene-local UI/navigation bindings.
 
 ## Runtime Bootstrap Order
 1. `FoundationTimeInstaller`

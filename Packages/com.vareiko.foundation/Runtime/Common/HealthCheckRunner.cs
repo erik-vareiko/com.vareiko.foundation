@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Common
 {
@@ -12,8 +11,7 @@ namespace Vareiko.Foundation.Common
         private readonly List<IHealthCheck> _checks;
         private readonly IFoundationSignalBus _signalBus;
 
-        [Inject]
-        public HealthCheckRunner([InjectOptional] List<IHealthCheck> checks = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public HealthCheckRunner(List<IHealthCheck> checks = null, IFoundationSignalBus signalBus = null)
         {
             _checks = checks ?? new List<IHealthCheck>(0);
             _signalBus = signalBus;

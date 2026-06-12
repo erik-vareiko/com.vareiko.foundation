@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -11,11 +10,10 @@ namespace Vareiko.Foundation.Observability
         private readonly IFoundationSignalBus _signalBus;
         private readonly List<IFoundationLogSink> _sinks;
 
-        [Inject]
         public UnityFoundationLogger(
-            [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] List<IFoundationLogSink> sinks = null)
+            ObservabilityConfig config = null,
+            IFoundationSignalBus signalBus = null,
+            List<IFoundationLogSink> sinks = null)
         {
             _config = config;
             _signalBus = signalBus;

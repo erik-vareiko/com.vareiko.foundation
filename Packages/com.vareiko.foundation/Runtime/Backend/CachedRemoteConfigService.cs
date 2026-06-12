@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -18,12 +17,11 @@ namespace Vareiko.Foundation.Backend
         private float _nextRefreshAt;
         private bool _isRefreshing;
 
-        [Inject]
         public CachedRemoteConfigService(
             [Inject(Id = "RemoteConfigInner")] IRemoteConfigService inner,
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] RemoteConfigCacheConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            RemoteConfigCacheConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _inner = inner;
             _timeProvider = timeProvider;

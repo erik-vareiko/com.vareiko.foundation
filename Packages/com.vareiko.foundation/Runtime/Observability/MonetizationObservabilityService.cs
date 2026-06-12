@@ -4,7 +4,6 @@ using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -21,8 +20,7 @@ namespace Vareiko.Foundation.Observability
         private int _pushPermissionLatencySamples;
         private float _pushPermissionLatencyTotalMs;
 
-        [Inject]
-        public MonetizationObservabilityService([InjectOptional] IFoundationSignalBus signalBus = null)
+        public MonetizationObservabilityService(IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }

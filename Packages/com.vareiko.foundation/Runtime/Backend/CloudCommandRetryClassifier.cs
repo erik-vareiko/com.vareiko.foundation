@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -60,8 +59,7 @@ namespace Vareiko.Foundation.Backend
 
         private readonly Dictionary<string, BackendCommandConfig.ErrorRetryabilityRule> _rules;
 
-        [Inject]
-        public CloudCommandRetryClassifier([InjectOptional] BackendCommandConfig config = null)
+        public CloudCommandRetryClassifier(BackendCommandConfig config = null)
         {
             _rules = new Dictionary<string, BackendCommandConfig.ErrorRetryabilityRule>(StringComparer.OrdinalIgnoreCase);
             if (config == null || config.ErrorRules == null)

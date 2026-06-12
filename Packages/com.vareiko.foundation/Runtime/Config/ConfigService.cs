@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Config
 {
@@ -11,8 +10,7 @@ namespace Vareiko.Foundation.Config
         private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, ScriptableObject> _map = new Dictionary<string, ScriptableObject>(StringComparer.Ordinal);
 
-        [Inject]
-        public ConfigService([InjectOptional] IFoundationSignalBus signalBus = null)
+        public ConfigService(IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }

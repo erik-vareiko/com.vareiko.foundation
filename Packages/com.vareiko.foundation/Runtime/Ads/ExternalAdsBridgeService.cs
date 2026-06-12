@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Ads
 {
@@ -17,11 +16,10 @@ namespace Vareiko.Foundation.Ads
 
         private bool _initialized;
 
-        [Inject]
         public ExternalAdsBridgeService(
-            [InjectOptional] AdsConfig config = null,
-            [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            AdsConfig config = null,
+            IConsentService consentService = null,
+            IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _consentService = consentService;

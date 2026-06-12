@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Common;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -13,11 +12,10 @@ namespace Vareiko.Foundation.Backend
         private readonly IFoundationSignalBus _signalBus;
         private readonly RetryPolicy _retryPolicy;
 
-        [Inject]
         public RetryingBackendService(
             [Inject(Id = "BackendInner")] IBackendService inner,
-            [InjectOptional] BackendReliabilityConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            BackendReliabilityConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _inner = inner;
             _signalBus = signalBus;

@@ -7,7 +7,6 @@ using Vareiko.Foundation.Common;
 using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -26,15 +25,14 @@ namespace Vareiko.Foundation.Backend
         private readonly List<CloudCommandQueueItem> _queue = new List<CloudCommandQueueItem>();
         private bool _isFlushing;
 
-        [Inject]
         public CloudCommandService(
             [Inject(Id = "CloudFunctionInner")] ICloudFunctionService transport,
-            [InjectOptional] BackendReliabilityConfig reliabilityConfig = null,
-            [InjectOptional] BackendCommandConfig commandConfig = null,
-            [InjectOptional] ICloudCommandRetryClassifier retryClassifier = null,
-            [InjectOptional] ICloudCommandQueueStore queueStore = null,
-            [InjectOptional] IConnectivityService connectivityService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            BackendReliabilityConfig reliabilityConfig = null,
+            BackendCommandConfig commandConfig = null,
+            ICloudCommandRetryClassifier retryClassifier = null,
+            ICloudCommandQueueStore queueStore = null,
+            IConnectivityService connectivityService = null,
+            IFoundationSignalBus signalBus = null)
         {
             _transport = transport;
             _reliabilityConfig = reliabilityConfig;

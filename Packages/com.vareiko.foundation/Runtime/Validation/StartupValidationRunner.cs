@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Validation
 {
@@ -10,8 +9,7 @@ namespace Vareiko.Foundation.Validation
         private readonly List<IStartupValidationRule> _rules;
         private readonly IFoundationSignalBus _signalBus;
 
-        [Inject]
-        public StartupValidationRunner([InjectOptional] List<IStartupValidationRule> rules = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public StartupValidationRunner(List<IStartupValidationRule> rules = null, IFoundationSignalBus signalBus = null)
         {
             _rules = rules ?? new List<IStartupValidationRule>(0);
             _signalBus = signalBus;

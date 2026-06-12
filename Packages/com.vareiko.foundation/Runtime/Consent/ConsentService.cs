@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Save;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Consent
 {
@@ -19,7 +18,6 @@ namespace Vareiko.Foundation.Consent
         private ConsentState _state = new ConsentState();
         private bool _isLoaded;
 
-        [Inject]
         public ConsentService(ISaveService saveService, IFoundationSignalBus signalBus)
         {
             _saveService = saveService;

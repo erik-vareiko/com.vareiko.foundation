@@ -1,6 +1,5 @@
 using System;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.App
 {
@@ -14,10 +13,9 @@ namespace Vareiko.Foundation.App
         public event Action<bool> FocusChanged;
         public event Action QuitRequested;
 
-        [Inject]
         public ApplicationLifecycleService(
             IFoundationSignalBus signalBus,
-            [InjectOptional] IApplicationLifecycleSource source = null)
+            IApplicationLifecycleSource source = null)
         {
             _signalBus = signalBus;
             _source = source ?? new UnityApplicationLifecycleSource();

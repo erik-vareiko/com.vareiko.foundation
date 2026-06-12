@@ -2,7 +2,6 @@ using System.Reflection;
 using UnityEngine;
 using Vareiko.Foundation.Installers;
 using Vareiko.Foundation.UI;
-using Zenject;
 
 namespace Vareiko.Foundation.Samples.BasicSetup
 {
@@ -21,42 +20,37 @@ namespace Vareiko.Foundation.Samples.BasicSetup
         [ContextMenu("Ensure Foundation Wiring")]
         public void EnsureFoundationWiring()
         {
-            EnsureProjectContext();
-            FoundationSceneInstaller sceneInstaller = EnsureSceneContextAndInstaller();
+            EnsureProjectScope();
             UIRegistry registry = EnsureUiRegistry();
-            AssignPrivate(sceneInstaller, "_uiRegistry", registry);
+            EnsureSceneScope(registry);
         }
 
-        private static void EnsureProjectContext()
+        private static void EnsureProjectScope()
         {
-            ProjectContext projectContext = FindFirst<ProjectContext>();
-            if (projectContext == null)
+            FoundationProjectInstaller projectInstaller = FindFirst<FoundationProjectInstaller>();
+            if (projectInstaller == null)
             {
-                GameObject contextRoot = new GameObject("ProjectContext");
-                projectContext = contextRoot.AddComponent<ProjectContext>();
-            }
-
-            if (projectContext.GetComponent<FoundationProjectInstaller>() == null)
-            {
-                projectContext.gameObject.AddComponent<FoundationProjectInstaller>();
+                GameObject projectRoot = new GameObject("FoundationProjectScope");
+                projectInstaller = projectRoot.AddComponent<FoundationProjectInstaller>();
+                DontDestroyOnLoad(projectRoot);
             }
         }
 
-        private static FoundationSceneInstaller EnsureSceneContextAndInstaller()
+        private static FoundationSceneInstaller EnsureSceneScope(UIRegistry registry)
         {
-            SceneContext sceneContext = FindFirst<SceneContext>();
-            if (sceneContext == null)
+            FoundationSceneInstaller installer = FindFirst<FoundationSceneInstaller>();
+            if (installer != null)
             {
-                GameObject sceneContextRoot = new GameObject("SceneContext");
-                sceneContext = sceneContextRoot.AddComponent<SceneContext>();
+                return installer;
             }
 
-            FoundationSceneInstaller installer = sceneContext.GetComponent<FoundationSceneInstaller>();
-            if (installer == null)
-            {
-                installer = sceneContext.gameObject.AddComponent<FoundationSceneInstaller>();
-            }
-
+            // The scope builds in Awake, so the registry reference must be assigned before the
+            // GameObject activates — create it inactive, wire it up, then let it build.
+            GameObject sceneScopeRoot = new GameObject("FoundationSceneScope");
+            sceneScopeRoot.SetActive(false);
+            installer = sceneScopeRoot.AddComponent<FoundationSceneInstaller>();
+            AssignPrivate(installer, "_uiRegistry", registry);
+            sceneScopeRoot.SetActive(true);
             return installer;
         }
 

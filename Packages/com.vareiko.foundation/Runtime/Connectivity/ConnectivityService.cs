@@ -2,7 +2,6 @@ using Vareiko.Foundation.App;
 using Vareiko.Foundation.Time;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Connectivity
 {
@@ -19,13 +18,12 @@ namespace Vareiko.Foundation.Connectivity
         private float _nextPollAt;
         private float _nextFocusRefreshAt;
 
-        [Inject]
         public ConnectivityService(
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] ConnectivityConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] INetworkReachabilityProvider reachabilityProvider = null,
-            [InjectOptional] IApplicationLifecycleService applicationLifecycleService = null)
+            ConnectivityConfig config = null,
+            IFoundationSignalBus signalBus = null,
+            INetworkReachabilityProvider reachabilityProvider = null,
+            IApplicationLifecycleService applicationLifecycleService = null)
         {
             _timeProvider = timeProvider;
             _config = config;

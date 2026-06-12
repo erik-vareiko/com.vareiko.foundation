@@ -1,13 +1,12 @@
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace {{NAMESPACE}}
 {
-    public sealed class {{MODULE_NAME}}Service : I{{MODULE_NAME}}Service, IInitializable
+    public sealed class {{MODULE_NAME}}Service : I{{MODULE_NAME}}Service, VContainer.Unity.IInitializable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
 
-        [Inject]
-        public {{MODULE_NAME}}Service([InjectOptional] SignalBus signalBus = null)
+        public {{MODULE_NAME}}Service(IFoundationSignalBus signalBus)
         {
             _signalBus = signalBus;
         }
@@ -17,7 +16,7 @@ namespace {{NAMESPACE}}
         public void Initialize()
         {
             IsReady = true;
-            _signalBus?.Fire(new {{MODULE_NAME}}InitializedSignal());
+            _signalBus.Publish(new {{MODULE_NAME}}InitializedSignal());
         }
     }
 }

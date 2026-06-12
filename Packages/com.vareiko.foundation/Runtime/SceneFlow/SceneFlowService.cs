@@ -5,7 +5,6 @@ using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Zenject;
 
 namespace Vareiko.Foundation.SceneFlow
 {
@@ -16,8 +15,7 @@ namespace Vareiko.Foundation.SceneFlow
 
         private bool _isBusy;
 
-        [Inject]
-        public SceneFlowService(IFoundationTimeProvider timeProvider, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public SceneFlowService(IFoundationTimeProvider timeProvider, IFoundationSignalBus signalBus = null)
         {
             _time = timeProvider;
             _signalBus = signalBus;

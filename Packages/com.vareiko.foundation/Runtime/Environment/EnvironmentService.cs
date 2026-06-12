@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Environment
 {
@@ -15,8 +14,7 @@ namespace Vareiko.Foundation.Environment
 
         private string _activeProfileId = "dev";
 
-        [Inject]
-        public EnvironmentService([InjectOptional] EnvironmentConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public EnvironmentService(EnvironmentConfig config = null, IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;

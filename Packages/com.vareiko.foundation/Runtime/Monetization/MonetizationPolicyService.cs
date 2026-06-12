@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Monetization
 {
@@ -20,11 +19,10 @@ namespace Vareiko.Foundation.Monetization
         private readonly Dictionary<string, SessionCounter> _adCounters = new Dictionary<string, SessionCounter>(StringComparer.Ordinal);
         private readonly Dictionary<string, SessionCounter> _iapCounters = new Dictionary<string, SessionCounter>(StringComparer.Ordinal);
 
-        [Inject]
         public MonetizationPolicyService(
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] MonetizationPolicyConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            MonetizationPolicyConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _timeProvider = timeProvider;
             _config = config;

@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Push
 {
@@ -20,11 +19,10 @@ namespace Vareiko.Foundation.Push
         private string _deviceToken = string.Empty;
         private PushNotificationPermissionStatus _permissionStatus = PushNotificationPermissionStatus.Unknown;
 
-        [Inject]
         public UnityPushNotificationService(
-            [InjectOptional] PushNotificationConfig config = null,
-            [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            PushNotificationConfig config = null,
+            IConsentService consentService = null,
+            IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _consentService = consentService;

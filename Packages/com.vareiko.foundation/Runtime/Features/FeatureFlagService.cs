@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Features
 {
@@ -15,11 +14,10 @@ namespace Vareiko.Foundation.Features
         private readonly Dictionary<string, bool> _defaultBools = new Dictionary<string, bool>(System.StringComparer.Ordinal);
         private readonly Dictionary<string, bool> _overrides = new Dictionary<string, bool>(System.StringComparer.Ordinal);
 
-        [Inject]
         public FeatureFlagService(
-            [InjectOptional] IRemoteConfigService remoteConfigService = null,
-            [InjectOptional] FeatureFlagsConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            IRemoteConfigService remoteConfigService = null,
+            FeatureFlagsConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _remoteConfigService = remoteConfigService;
             _config = config;

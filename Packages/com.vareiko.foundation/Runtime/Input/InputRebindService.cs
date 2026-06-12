@@ -1,4 +1,3 @@
-using Zenject;
 
 namespace Vareiko.Foundation.Input
 {
@@ -6,8 +5,7 @@ namespace Vareiko.Foundation.Input
     {
         private readonly NewInputSystemAdapter _adapter;
 
-        [Inject]
-        public InputRebindService([InjectOptional] NewInputSystemAdapter adapter = null)
+        public InputRebindService(NewInputSystemAdapter adapter = null)
         {
             _adapter = adapter;
         }

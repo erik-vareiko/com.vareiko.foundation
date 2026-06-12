@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Localization
 {
@@ -16,8 +15,7 @@ namespace Vareiko.Foundation.Localization
         private string _currentLanguage = "en";
         private string _fallbackLanguage = "en";
 
-        [Inject]
-        public LocalizationService([InjectOptional] LocalizationConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public LocalizationService(LocalizationConfig config = null, IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;

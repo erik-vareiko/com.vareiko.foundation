@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
@@ -7,8 +6,7 @@ namespace Vareiko.Foundation.Save
     {
         private readonly List<ISaveMigration> _migrations;
 
-        [Inject]
-        public SaveMigrationService([InjectOptional] List<ISaveMigration> migrations = null)
+        public SaveMigrationService(List<ISaveMigration> migrations = null)
         {
             _migrations = migrations ?? new List<ISaveMigration>(0);
         }

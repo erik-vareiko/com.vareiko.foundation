@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.App;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Bootstrap
 {
@@ -18,11 +17,10 @@ namespace Vareiko.Foundation.Bootstrap
         private CancellationTokenSource _lifecycleCts;
         private bool _started;
 
-        [Inject]
         public BootstrapRunner(
-            [InjectOptional] List<IBootstrapTask> tasks = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] IAppStateMachine appStateMachine = null)
+            List<IBootstrapTask> tasks = null,
+            IFoundationSignalBus signalBus = null,
+            IAppStateMachine appStateMachine = null)
         {
             _tasks = tasks ?? new List<IBootstrapTask>(0);
             _signalBus = signalBus;

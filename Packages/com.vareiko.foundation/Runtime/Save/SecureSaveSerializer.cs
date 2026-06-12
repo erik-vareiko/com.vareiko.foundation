@@ -2,7 +2,6 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
@@ -11,8 +10,7 @@ namespace Vareiko.Foundation.Save
         private readonly JsonUnitySaveSerializer _inner;
         private readonly SaveSecurityConfig _config;
 
-        [Inject]
-        public SecureSaveSerializer(JsonUnitySaveSerializer inner, [InjectOptional] SaveSecurityConfig config = null)
+        public SecureSaveSerializer(JsonUnitySaveSerializer inner, SaveSecurityConfig config = null)
         {
             _inner = inner;
             _config = config;

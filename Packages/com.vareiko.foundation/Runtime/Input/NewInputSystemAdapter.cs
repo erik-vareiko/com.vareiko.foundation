@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -26,8 +25,7 @@ namespace Vareiko.Foundation.Input
         private readonly InputAction _cancelAction;
 #endif
 
-        [Inject]
-        public NewInputSystemAdapter([InjectOptional] IInputRebindStorage rebindStorage = null)
+        public NewInputSystemAdapter(IInputRebindStorage rebindStorage = null)
         {
 #if ENABLE_INPUT_SYSTEM
             _rebindStorage = rebindStorage;

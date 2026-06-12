@@ -4,7 +4,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 #if UNITY_PURCHASING
 using UnityEngine.Purchasing;
@@ -37,8 +36,7 @@ namespace Vareiko.Foundation.Iap
         private IExtensionProvider _extensionProvider;
 #endif
 
-        [Inject]
-        public UnityInAppPurchaseService([InjectOptional] IapConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public UnityInAppPurchaseService(IapConfig config = null, IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;

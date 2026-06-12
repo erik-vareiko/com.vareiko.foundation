@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
@@ -16,8 +15,7 @@ namespace Vareiko.Foundation.UI
         private string _currentWindowId = string.Empty;
         private WindowRequest _currentRequest;
 
-        [Inject]
-        public UIWindowManager(IUIService uiService, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public UIWindowManager(IUIService uiService, IFoundationSignalBus signalBus = null)
         {
             _uiService = uiService;
             _signalBus = signalBus;

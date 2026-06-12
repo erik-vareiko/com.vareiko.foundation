@@ -1,16 +1,20 @@
+using MessagePipe;
 using UnityEngine;
-using Zenject;
+using Vareiko.Foundation;
+using VContainer;
+using VContainer.Unity;
 
 namespace {{NAMESPACE}}
 {
-    // Attach this installer to a SceneContext in a sample scene.
-    public sealed class {{MODULE_NAME}}SampleInstaller : MonoInstaller
+    // Attach to a GameObject in a sample scene as the project-scope root.
+    public sealed class {{MODULE_NAME}}SampleInstaller : LifetimeScope
     {
         [SerializeField] private {{MODULE_NAME}}Config _config;
 
-        public override void InstallBindings()
+        protected override void Configure(IContainerBuilder builder)
         {
-            Foundation{{MODULE_NAME}}Installer.Install(Container, _config);
+            MessagePipeOptions signalOptions = FoundationRuntimeInstaller.InstallProjectServices(builder);
+            Foundation{{MODULE_NAME}}Installer.Install(builder, signalOptions, _config);
         }
     }
 }

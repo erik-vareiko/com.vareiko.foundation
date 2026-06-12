@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.AssetManagement
 {
@@ -24,11 +23,10 @@ namespace Vareiko.Foundation.AssetManagement
 
         private int _totalReferenceCount;
 
-        [Inject]
         public AssetService(
-            [InjectOptional] List<IAssetProvider> providers = null,
-            [InjectOptional] AssetServiceConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            List<IAssetProvider> providers = null,
+            AssetServiceConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _providers = providers ?? new List<IAssetProvider>(0);
             _signalBus = signalBus;

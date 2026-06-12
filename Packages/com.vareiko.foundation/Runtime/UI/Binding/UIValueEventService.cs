@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
@@ -18,8 +17,7 @@ namespace Vareiko.Foundation.UI
         private readonly Dictionary<string, ValueStream<bool>> _boolStreams = new Dictionary<string, ValueStream<bool>>(StringComparer.Ordinal);
         private readonly Dictionary<string, ValueStream<string>> _stringStreams = new Dictionary<string, ValueStream<string>>(StringComparer.Ordinal);
 
-        [Inject]
-        public UIValueEventService([InjectOptional] IFoundationSignalBus signalBus = null)
+        public UIValueEventService(IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }

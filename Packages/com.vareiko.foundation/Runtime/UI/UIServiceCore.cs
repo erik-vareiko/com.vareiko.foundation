@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
@@ -11,10 +10,9 @@ namespace Vareiko.Foundation.UI
         private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, UIElement> _elements = new Dictionary<string, UIElement>(StringComparer.Ordinal);
 
-        [Inject]
         public UIService(
-            [InjectOptional] UIRegistry registry = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            UIRegistry registry = null,
+            IFoundationSignalBus signalBus = null)
         {
             _registry = registry;
             _signalBus = signalBus;

@@ -5,7 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
@@ -19,14 +18,13 @@ namespace Vareiko.Foundation.Save
         private readonly string _rootPath;
         private readonly int _schemaVersion;
 
-        [Inject]
         public SaveService(
             ISaveStorage storage,
             ISaveSerializer serializer,
-            [InjectOptional] ISaveMigrationService migrationService = null,
-            [InjectOptional] SaveSchemaConfig schemaConfig = null,
-            [InjectOptional] SaveSecurityConfig securityConfig = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
+            ISaveMigrationService migrationService = null,
+            SaveSchemaConfig schemaConfig = null,
+            SaveSecurityConfig securityConfig = null,
+            IFoundationSignalBus signalBus = null,
             [InjectOptional(Id = "SaveRootPath")] string rootPath = null)
         {
             _storage = storage;

@@ -3,8 +3,7 @@
   "rootNamespace": "Vareiko.Foundation.Tests.PlayMode",
   "references": [
     "Vareiko.Foundation",
-    "UniTask",
-    "Zenject"
+    "UniTask"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

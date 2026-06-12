@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Economy
 {
@@ -14,8 +13,7 @@ namespace Vareiko.Foundation.Economy
         private readonly Dictionary<string, long> _balances = new Dictionary<string, long>();
         private readonly Dictionary<string, int> _inventory = new Dictionary<string, int>();
 
-        [Inject]
-        public InMemoryEconomyService([InjectOptional] EconomyConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public InMemoryEconomyService(EconomyConfig config = null, IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;

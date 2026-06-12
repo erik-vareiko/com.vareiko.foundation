@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Vareiko.Foundation.SceneFlow;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Loading
 {
@@ -17,8 +16,7 @@ namespace Vareiko.Foundation.Loading
         private float _progress;
         private string _activeOperation;
 
-        [Inject]
-        public LoadingService([InjectOptional] IFoundationSignalBus signalBus = null)
+        public LoadingService(IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
         }

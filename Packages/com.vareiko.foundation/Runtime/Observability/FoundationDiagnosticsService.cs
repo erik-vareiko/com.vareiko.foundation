@@ -8,7 +8,6 @@ using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Loading;
 using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -28,17 +27,16 @@ namespace Vareiko.Foundation.Observability
 
         private float _nextUpdateAt;
 
-        [Inject]
         public FoundationDiagnosticsService(
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] IConnectivityService connectivityService = null,
-            [InjectOptional] ILoadingService loadingService = null,
-            [InjectOptional] IBackendService backendService = null,
-            [InjectOptional] IRemoteConfigService remoteConfigService = null,
-            [InjectOptional] IAssetService assetService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] IMonetizationObservabilityService monetizationObservabilityService = null)
+            ObservabilityConfig config = null,
+            IConnectivityService connectivityService = null,
+            ILoadingService loadingService = null,
+            IBackendService backendService = null,
+            IRemoteConfigService remoteConfigService = null,
+            IAssetService assetService = null,
+            IFoundationSignalBus signalBus = null,
+            IMonetizationObservabilityService monetizationObservabilityService = null)
         {
             _timeProvider = timeProvider;
             _config = config;

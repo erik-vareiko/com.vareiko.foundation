@@ -4,7 +4,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
@@ -18,13 +17,12 @@ namespace Vareiko.Foundation.Save
         private readonly IBackendService _backendService;
         private readonly IFoundationSignalBus _signalBus;
 
-        [Inject]
         public CloudSaveSyncService(
             ISaveService saveService,
             ISaveSerializer serializer,
-            [InjectOptional] ISaveConflictResolver conflictResolver = null,
-            [InjectOptional] IBackendService backendService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            ISaveConflictResolver conflictResolver = null,
+            IBackendService backendService = null,
+            IFoundationSignalBus signalBus = null)
         {
             _saveService = saveService;
             _serializer = serializer;

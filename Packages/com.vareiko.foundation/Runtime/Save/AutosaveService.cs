@@ -7,7 +7,6 @@ using Vareiko.Foundation.Settings;
 using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
@@ -27,14 +26,13 @@ namespace Vareiko.Foundation.Save
         private float _nextAutosaveAt;
         private AutosaveLifecycleHook _lifecycleHook;
 
-        [Inject]
         public AutosaveService(
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] AutosaveConfig config = null,
-            [InjectOptional] ISettingsService settingsService = null,
-            [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] IApplicationLifecycleService applicationLifecycleService = null)
+            AutosaveConfig config = null,
+            ISettingsService settingsService = null,
+            IConsentService consentService = null,
+            IFoundationSignalBus signalBus = null,
+            IApplicationLifecycleService applicationLifecycleService = null)
         {
             _timeProvider = timeProvider;
             _config = config;

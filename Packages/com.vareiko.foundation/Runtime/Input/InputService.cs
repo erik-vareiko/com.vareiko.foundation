@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Input
 {
@@ -13,8 +12,7 @@ namespace Vareiko.Foundation.Input
         private InputScheme _preferredScheme = InputScheme.Unknown;
         private InputScheme _activeScheme = InputScheme.Unknown;
 
-        [Inject]
-        public InputService([InjectOptional] List<IInputAdapter> adapters = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public InputService(List<IInputAdapter> adapters = null, IFoundationSignalBus signalBus = null)
         {
             _adapters = adapters ?? new List<IInputAdapter>(0);
             _signalBus = signalBus;

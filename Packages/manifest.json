@@ -5,8 +5,7 @@
       "url": "https://package.openupm.com",
       "scopes": [
         "com.cysharp",
-        "jp.hadashikick",
-        "net.bobbo"
+        "jp.hadashikick"
       ]
     }
   ],
@@ -26,7 +25,6 @@
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.9",
     "jp.hadashikick.vcontainer": "1.18.0",
-    "net.bobbo.extenject": "9.3.2",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.ai": "1.0.0",

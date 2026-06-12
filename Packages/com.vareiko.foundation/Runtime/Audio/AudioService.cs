@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Vareiko.Foundation.Settings;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Audio
 {
@@ -21,8 +20,7 @@ namespace Vareiko.Foundation.Audio
         private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
 
-        [Inject]
-        public AudioService([InjectOptional] ISettingsService settingsService = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public AudioService(ISettingsService settingsService = null, IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
             _settingsService = settingsService;

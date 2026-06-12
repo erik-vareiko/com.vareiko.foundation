@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -13,9 +12,8 @@ namespace Vareiko.Foundation.Backend
         private readonly string _storageKey;
         private readonly string _legacyStorageKey;
 
-        [Inject]
         public PlayerPrefsCloudCommandQueueStore(
-            [InjectOptional] BackendReliabilityConfig reliabilityConfig = null)
+            BackendReliabilityConfig reliabilityConfig = null)
         {
             _storageKey = DefaultStorageKey;
             _legacyStorageKey = reliabilityConfig != null && !string.IsNullOrWhiteSpace(reliabilityConfig.CloudFunctionQueueStorageKey)

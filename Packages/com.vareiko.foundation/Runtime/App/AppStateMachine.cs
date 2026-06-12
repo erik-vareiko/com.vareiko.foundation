@@ -1,7 +1,6 @@
 using System;
 using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.App
 {
@@ -11,7 +10,6 @@ namespace Vareiko.Foundation.App
         private AppState _current = AppState.None;
         private IDisposable _bootFailedSubscription;
 
-        [Inject]
         public AppStateMachine(IFoundationSignalBus signalBus)
         {
             _signalBus = signalBus;

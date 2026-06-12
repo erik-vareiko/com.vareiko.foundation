@@ -4,7 +4,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -16,8 +15,7 @@ namespace Vareiko.Foundation.Backend
         private bool _isAuthenticated;
         private string _playerId;
 
-        [Inject]
-        public PlayFabBackendService([InjectOptional] BackendConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public PlayFabBackendService(BackendConfig config = null, IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;

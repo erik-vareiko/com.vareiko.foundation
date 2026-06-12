@@ -391,7 +391,34 @@ MessagePipe. Remaining before "Done when": UI binder port (12 files) and the Zen
 cleanup (strip `using Zenject;`/attributes from ~73 files, drop Zenject from asmdefs + manifest
 `net.bobbo.extenject` + `package.json`).
 
+## Zenject residue cleanup (2026-06-12) — Zenject fully removed
+
+- Stripped `using Zenject;` + standalone `[Inject]` lines + `[InjectOptional]` prefixes from
+  the 58 remaining Runtime service files (mechanical; VContainer ignored these attributes, so
+  zero behavior change — ctor selection was already attribute-free). `= null` ctor defaults
+  kept for direct-construction ergonomics in tests.
+- `Zenject` removed from all 5 asmdefs; `net.bobbo.extenject` removed from the host
+  `Packages/manifest.json`, `packages-lock.json`, and the package's `package.json`
+  (deps now `jp.hadashikick.vcontainer` 1.18.0 + `com.cysharp.messagepipe(.vcontainer)` 1.8.1
+  — note: OpenUPM-scoped registry required, same as extenject was).
+- `FoundationSceneInstaller` defaults `parentReference` to `FoundationProjectInstaller`
+  (a parentless `LifetimeScope` silently becomes a root and cannot resolve project services;
+  VContainer queues the scene scope until the project scope builds, so creation order is safe).
+- `FoundationRuntimeInstaller.InstallProjectServices` now RETURNS the `MessagePipeOptions`
+  so hosts/scaffolded modules can `RegisterMessageBroker<T>` their own signal types into the
+  same scope (host signals must live in the project scope — `MessagePipeSignalBus` goes
+  through `GlobalMessagePipe`, whose provider is the project container).
+- Editor scaffolding templates (`Installer`/`Service`/`SampleInstaller`) rewritten for
+  VContainer + `IFoundationSignalBus`; BasicSetup sample bootstrap rewritten to create
+  `FoundationProjectInstaller`/`FoundationSceneInstaller` GameObjects directly (the scene
+  scope is created inactive, the `UIRegistry` reference assigned, then activated — a
+  `LifetimeScope` builds in `Awake`).
+- `FoundationProjectValidator` "ProjectContext" wording/option renamed to project-scope terms
+  (`ValidateProjectScopePrefab`).
+
 ## Done when
-- No `Zenject` reference remains in any package asmdef or `using`.
-- `FoundationCompositionTests` (VContainer) and all signal tests are green.
-- Sample scene boots through the new root `LifetimeScope`.
+- ~~No `Zenject` reference remains in any package asmdef or `using`.~~ DONE 2026-06-12.
+- `FoundationCompositionTests` (VContainer) and all signal tests are green — re-run needed
+  after the cleanup (expect ≤27 frozen-baseline failures, zero new).
+- Sample scene boots through the new root `LifetimeScope` — runtime check still pending
+  (verify: bootstrap runs exactly once; UI binders receive deps before first `OnEnable`).

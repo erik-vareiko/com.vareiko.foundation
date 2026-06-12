@@ -1,7 +1,6 @@
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Save;
-using Zenject;
 
 namespace Vareiko.Foundation.Validation
 {
@@ -10,8 +9,7 @@ namespace Vareiko.Foundation.Validation
         private const string DefaultSecretKey = "replace-with-project-secret";
         private readonly SaveSecurityConfig _config;
 
-        [Inject]
-        public SaveSecurityStartupValidationRule([InjectOptional] SaveSecurityConfig config = null)
+        public SaveSecurityStartupValidationRule(SaveSecurityConfig config = null)
         {
             _config = config;
         }
@@ -53,8 +51,7 @@ namespace Vareiko.Foundation.Validation
     {
         private readonly BackendConfig _config;
 
-        [Inject]
-        public BackendStartupValidationRule([InjectOptional] BackendConfig config = null)
+        public BackendStartupValidationRule(BackendConfig config = null)
         {
             _config = config;
         }
@@ -81,8 +78,7 @@ namespace Vareiko.Foundation.Validation
     {
         private readonly ObservabilityConfig _config;
 
-        [Inject]
-        public ObservabilityStartupValidationRule([InjectOptional] ObservabilityConfig config = null)
+        public ObservabilityStartupValidationRule(ObservabilityConfig config = null)
         {
             _config = config;
         }

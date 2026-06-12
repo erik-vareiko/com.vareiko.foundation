@@ -2,7 +2,6 @@
   "name": "Vareiko.Foundation",
   "rootNamespace": "Vareiko.Foundation",
   "references": [
-    "Zenject",
     "UniTask",
     "Unity.InputSystem",
     "VContainer",

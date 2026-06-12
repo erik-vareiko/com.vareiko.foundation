@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Iap
 {
@@ -17,8 +16,7 @@ namespace Vareiko.Foundation.Iap
 
         private bool _initialized;
 
-        [Inject]
-        public SimulatedInAppPurchaseService([InjectOptional] IapConfig config = null, [InjectOptional] IFoundationSignalBus signalBus = null)
+        public SimulatedInAppPurchaseService(IapConfig config = null, IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _signalBus = signalBus;

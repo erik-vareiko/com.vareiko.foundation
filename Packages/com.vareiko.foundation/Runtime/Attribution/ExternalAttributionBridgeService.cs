@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Attribution
 {
@@ -17,11 +16,10 @@ namespace Vareiko.Foundation.Attribution
         private bool _initialized;
         private string _userId = string.Empty;
 
-        [Inject]
         public ExternalAttributionBridgeService(
-            [InjectOptional] AttributionConfig config = null,
-            [InjectOptional] IConsentService consentService = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null)
+            AttributionConfig config = null,
+            IConsentService consentService = null,
+            IFoundationSignalBus signalBus = null)
         {
             _config = config;
             _consentService = consentService;

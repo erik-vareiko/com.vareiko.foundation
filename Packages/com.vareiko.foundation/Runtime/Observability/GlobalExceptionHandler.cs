@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Vareiko.Foundation.App;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -16,13 +15,12 @@ namespace Vareiko.Foundation.Observability
         private readonly ICrashReportingService _crashReportingService;
         private bool _subscribed;
 
-        [Inject]
         public GlobalExceptionHandler(
-            [InjectOptional] IFoundationLogger logger = null,
-            [InjectOptional] IAppStateMachine appStateMachine = null,
-            [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] IFoundationSignalBus signalBus = null,
-            [InjectOptional] ICrashReportingService crashReportingService = null)
+            IFoundationLogger logger = null,
+            IAppStateMachine appStateMachine = null,
+            ObservabilityConfig config = null,
+            IFoundationSignalBus signalBus = null,
+            ICrashReportingService crashReportingService = null)
         {
             _signalBus = signalBus;
             _logger = logger;

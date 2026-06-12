@@ -1,6 +1,6 @@
 # Vareiko Foundation
 
-Reusable Zenject-first runtime architecture package for Unity projects.
+Reusable VContainer-based runtime architecture package for Unity projects (MessagePipe-backed signals behind the `IFoundationSignalBus` facade).
 
 ## Included Modules
 - Bootstrap pipeline (`IBootstrapTask`, `BootstrapRunner`, lifecycle signals).
@@ -103,21 +103,24 @@ Full practical guide: `Documentation~/USAGE_GUIDE.md`.
 Printable PDF guide: `Documentation~/USAGE_GUIDE.pdf`.
 
 ## Dependencies
-- Zenject (`Zenject` asmdef, OpenUPM package `net.bobbo.extenject`)
+- VContainer (`VContainer` asmdef, OpenUPM package `jp.hadashikick.vcontainer`)
+- MessagePipe (`MessagePipe` + `MessagePipe.VContainer` asmdefs, OpenUPM packages `com.cysharp.messagepipe`, `com.cysharp.messagepipe.vcontainer`)
 - UniTask (`UniTask` asmdef, OpenUPM package `com.cysharp.unitask`)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 - Unity Input System (`Unity.InputSystem` asmdef / package `com.unity.inputsystem`)
 - Optional: Unity IAP (`UNITY_PURCHASING` define from package `com.unity.purchasing`)
 - Optional: Unity push notifications adapter (`FOUNDATION_UNITY_NOTIFICATIONS` define + host push SDK integration)
 
-`com.vareiko.foundation` declares Zenject/UniTask as package dependencies.
+`com.vareiko.foundation` declares VContainer/MessagePipe/UniTask as package dependencies.
 Host project must have OpenUPM scoped registry configured.
 
 OpenUPM commands:
 
 ```bash
 openupm add com.cysharp.unitask
-openupm add net.bobbo.extenject
+openupm add jp.hadashikick.vcontainer
+openupm add com.cysharp.messagepipe
+openupm add com.cysharp.messagepipe.vcontainer
 ```
 
 Example `Packages/manifest.json`:
@@ -130,13 +133,15 @@ Example `Packages/manifest.json`:
       "url": "https://package.openupm.com",
       "scopes": [
         "com.cysharp",
-        "net.bobbo"
+        "jp.hadashikick"
       ]
     }
   ],
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
-    "net.bobbo.extenject": "9.3.2"
+    "jp.hadashikick.vcontainer": "1.18.0",
+    "com.cysharp.messagepipe": "1.8.1",
+    "com.cysharp.messagepipe.vcontainer": "1.8.1"
   }
 }
 ```
@@ -404,7 +409,7 @@ Example `Packages/manifest.json`:
   - `UIBoolGameObjectBinder`
   - `UIBoolButtonInteractableBinder`
   - `UIItemCountBinder` (binds item collection size from int key)
-- All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
+- All binder components consume `IUIValueEventService` (or `IFoundationSignalBus`) + key matching, so UI updates are push-based without per-frame polling.
 
 ### Button Actions
 - `UIButtonView`:

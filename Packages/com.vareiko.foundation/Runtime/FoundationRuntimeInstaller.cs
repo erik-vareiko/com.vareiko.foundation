@@ -33,7 +33,9 @@ namespace Vareiko.Foundation
 {
     public static class FoundationRuntimeInstaller
     {
-        public static void InstallProjectServices(
+        // Returns the MessagePipeOptions used for the foundation signal brokers so callers can
+        // register additional message brokers for their own signal types in the same scope.
+        public static MessagePipeOptions InstallProjectServices(
             IContainerBuilder builder,
             AnalyticsConfig analyticsConfig = null,
             AttributionConfig attributionConfig = null,
@@ -95,6 +97,8 @@ namespace Vareiko.Foundation
             FoundationFeatureFlagsInstaller.Install(builder, featureFlagsConfig);
             FoundationValidationInstaller.Install(builder);
             FoundationObservabilityInstaller.Install(builder, observabilityConfig);
+
+            return messagePipeOptions;
         }
     }
 }
