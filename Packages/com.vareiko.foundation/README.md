@@ -5,8 +5,9 @@ Reusable VContainer-based runtime architecture package for Unity projects (Messa
 ## Included Modules
 - Bootstrap pipeline (`IBootstrapTask`, `BootstrapRunner`, lifecycle signals).
 - Common runtime helpers (`RetryPolicy`, health checks).
+- Core primitives: `Result`/`Result<T>`, generic `StateMachine<TState>`, object pooling (`ObjectPool<T>`, `ComponentPool<T>`), central tick service (`ITickService` — ordered listeners, timers, pause), disposable utilities (`DisposableAction`, `CompositeDisposable`).
 - Composition helpers (`FoundationDomainInstaller`).
-- App state machine (`IAppStateMachine`).
+- App state machine (`IAppStateMachine`) with extensible string-backed `AppState` (hosts mint custom states).
 - Application lifecycle service (`IApplicationLifecycleService`) with pause/focus/quit events.
 - Asset management (`IAssetService`, Resources/Addressables providers, reference tracking).
 - Config registry (`IConfigService`, `ConfigRegistry` bootstrap task).
@@ -18,7 +19,7 @@ Reusable VContainer-based runtime architecture package for Unity projects (Messa
 - Scene flow (`ISceneFlowService`).
 - Loading state orchestration (`ILoadingService`) with scene-signal integration.
 - UI loading presenter (`LoadingOverlayPresenter`).
-- Save system (`ISaveService`, PlayerPrefs JSON storage by default, JSON serializer, rolling backups, autosave scheduler; file storage remains available as an alternative backend).
+- Save system (`ISaveService`, PlayerPrefs JSON storage by default, Newtonsoft JSON serializer by default — dictionaries/nullables/polymorphism supported, rolling backups, autosave scheduler; file storage and the JsonUtility serializer remain available as alternatives).
 - Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
@@ -44,11 +45,9 @@ Reusable VContainer-based runtime architecture package for Unity projects (Messa
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
 
 ## Installation
-1. Add a `ProjectContext` in your bootstrap scene.
-2. Attach `FoundationProjectInstaller` to `ProjectContext`.
-3. Add a `SceneContext` in gameplay scenes.
-4. Attach `FoundationSceneInstaller` to `SceneContext`.
-5. Optionally assign:
+1. Add `FoundationProjectInstaller` to your bootstrap scene (it is the project-scope `LifetimeScope`).
+2. Add `FoundationSceneInstaller` to gameplay scenes (a child `LifetimeScope`; parents to the project scope automatically and injects scene MonoBehaviours).
+3. Optionally assign:
 - `AnalyticsConfig`
 - `AttributionConfig`
 - `BackendConfig`
@@ -77,10 +76,10 @@ Reusable VContainer-based runtime architecture package for Unity projects (Messa
 ## Quick Start (First 15 Minutes)
 1. Create one bootstrap scene and one gameplay scene.
 2. In bootstrap scene add:
-- `ProjectContext` + `FoundationProjectInstaller`.
+- `FoundationProjectInstaller`.
 - `EnvironmentConfig` asset with `ApplyStarterPresets()` (`dev/stage/prod`).
 3. In gameplay scene add:
-- `SceneContext` + `FoundationSceneInstaller`.
+- `FoundationSceneInstaller`.
 - UI canvas with loading overlay presenter (optional but recommended).
 4. In `FoundationProjectInstaller` assign only minimum configs first:
 - `EnvironmentConfig`
@@ -98,6 +97,8 @@ Reusable VContainer-based runtime architecture package for Unity projects (Messa
 - no startup validation errors
 - diagnostics snapshot is available from `IFoundationDiagnosticsService`
 
+Package Manager samples: **Basic Setup** (minimal wiring) and **Vertical Slice** (full boot + custom app state + tick/pool gameplay + autosaved progress from one component).
+
 Detailed flow with checklist: `Documentation~/STARTER_FLOW.md`.
 Full practical guide: `Documentation~/USAGE_GUIDE.md`.
 Printable PDF guide: `Documentation~/USAGE_GUIDE.pdf`.
@@ -106,6 +107,7 @@ Printable PDF guide: `Documentation~/USAGE_GUIDE.pdf`.
 - VContainer (`VContainer` asmdef, OpenUPM package `jp.hadashikick.vcontainer`)
 - MessagePipe (`MessagePipe` + `MessagePipe.VContainer` asmdefs, OpenUPM packages `com.cysharp.messagepipe`, `com.cysharp.messagepipe.vcontainer`)
 - UniTask (`UniTask` asmdef, OpenUPM package `com.cysharp.unitask`)
+- Newtonsoft Json (Unity registry package `com.unity.nuget.newtonsoft-json`)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 - Unity Input System (`Unity.InputSystem` asmdef / package `com.unity.inputsystem`)
 - Optional: Unity IAP (`UNITY_PURCHASING` define from package `com.unity.purchasing`)
@@ -141,7 +143,8 @@ Example `Packages/manifest.json`:
     "com.cysharp.unitask": "2.5.10",
     "jp.hadashikick.vcontainer": "1.18.0",
     "com.cysharp.messagepipe": "1.8.1",
-    "com.cysharp.messagepipe.vcontainer": "1.8.1"
+    "com.cysharp.messagepipe.vcontainer": "1.8.1",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }
 ```

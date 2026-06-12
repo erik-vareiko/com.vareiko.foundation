@@ -7,7 +7,7 @@ it opts into, or the `Vareiko.Foundation` umbrella for everything:
 
 | Assembly | Contents | References |
 |---|---|---|
-| `Vareiko.Foundation.Core` | signals facade, Time, Common, App+Bootstrap, Config, Connectivity, Environment, Input, Loading, Rng, SceneFlow, Composition, Validation framework | — |
+| `Vareiko.Foundation.Core` | signals facade, core primitives (`Result<T>`, `StateMachine<TState>`, pooling, `ITickService`, disposables), Time, Common, App+Bootstrap, Config, Connectivity, Environment, Input, Loading, Rng, SceneFlow, Composition, Validation framework | — |
 | `Vareiko.Foundation.Persistence` | Save, Settings, Consent | Core |
 | `Vareiko.Foundation.Audio` | Audio | Core, Persistence |
 | `Vareiko.Foundation.UI` | UI, UINavigation | Core |

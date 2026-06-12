@@ -1,4 +1,4 @@
-# Foundation Usage Guide (`1.1+`)
+# Foundation Usage Guide (`3.0`)
 
 This is a practical, end-to-end guide for using `com.vareiko.foundation` as a starter architecture in Unity.
 
@@ -10,6 +10,8 @@ The package provides:
 - typed cloud command service with idempotency/retry queue contracts;
 - deterministic RNG streams with snapshot/restore support;
 - adapter-oriented integrations (safe null/simulated providers + bridge entry points);
+- core gameplay primitives: object pooling, central tick service, `Result<T>`, generic FSM with extensible app states;
+- modular assemblies — reference `Vareiko.Foundation.Core` plus the modules you need, or the `Vareiko.Foundation` umbrella for everything;
 - built-in runtime tests and validation tooling.
 
 Use it as your baseline layer, then add game-specific domain modules above it.
@@ -38,6 +40,7 @@ Required:
 - `jp.hadashikick.vcontainer`
 - `com.cysharp.messagepipe`
 - `com.cysharp.messagepipe.vcontainer`
+- `com.unity.nuget.newtonsoft-json`
 - `com.unity.inputsystem`
 
 Optional production dependencies:
@@ -51,6 +54,8 @@ The order is documented in `Documentation~/ARCHITECTURE.md`.
 
 `FoundationProjectInstaller` exposes serialized config slots and forwards them to the runtime installer.
 
+Since 3.0 the package ships as 10 assemblies (see `ARCHITECTURE.md`, "Assembly Layout"). A subset host references `Vareiko.Foundation.Core` + chosen modules and composes its own project `LifetimeScope`: `RegisterMessagePipe`, the `IFoundationSignalBus` facade, then each module's `RegisterSignals(builder, options)` + `Install(builder, ...)`. Signal brokers always belong in the project scope.
+
 ## 5. First Play Mode Checklist
 1. Enter Play Mode in bootstrap scene.
 2. Verify zero compile errors.
@@ -62,6 +67,8 @@ The order is documented in `Documentation~/ARCHITECTURE.md`.
 
 ### Save/Load
 `FoundationSaveInstaller` binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default. Each `slot/key` pair is stored as a separate PlayerPrefs string containing the current JSON save envelope; rolling backups use separate `.bakN` PlayerPrefs keys. Projects that need file-backed saves can pre-bind `ISaveStorage` to `FileSaveStorage` before calling the foundation save installer.
+
+Since 3.0 the default payload serializer is `NewtonsoftJsonSaveSerializer` — dictionaries, nullables and polymorphic payloads serialize correctly. It writes the same `{"Value": ...}` envelope as the previous JsonUtility serializer, so older saves keep loading; `JsonUnitySaveSerializer` remains available as a dependency-free fallback.
 
 ```csharp
 using Cysharp.Threading.Tasks;
@@ -216,7 +223,89 @@ public sealed class RunRngFacade
 }
 ```
 
-## 7. Custom Bootstrap Tasks
+## 7. Core Primitives (3.0)
+
+### Tick service
+Central ordered update loop — replaces per-service `Update()` loops and coroutines:
+
+```csharp
+using Vareiko.Foundation;
+using Vareiko.Foundation.Time;
+
+public sealed class SpawnDirector
+{
+    private readonly ITickService _tick;
+    private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
+
+    public SpawnDirector(ITickService tick)
+    {
+        _tick = tick;
+    }
+
+    public void StartRun()
+    {
+        _subscriptions.Add(_tick.RegisterTick(OnTick, order: 0));
+        _subscriptions.Add(_tick.Repeat(1.5f, SpawnWave));
+        _subscriptions.Add(_tick.Delay(60f, FinishRun, useUnscaledTime: true));
+    }
+
+    public void StopRun()
+    {
+        _subscriptions.Clear();
+    }
+
+    private void OnTick(float deltaTime) { /* ... */ }
+    private void SpawnWave() { /* ... */ }
+    private void FinishRun() { /* ... */ }
+}
+```
+
+Listeners run in explicit order; timers accumulate scaled or unscaled time and catch up after long frames; `IsPaused` gates everything. In EditMode tests drive `TickService.Advance(deltaTime, unscaledDeltaTime)` manually.
+
+### Object pooling
+
+```csharp
+using Vareiko.Foundation.Pooling;
+
+ComponentPool<Projectile> pool = new ComponentPool<Projectile>(projectilePrefab, poolRoot, maxSize: 64, prewarmCount: 16);
+Projectile projectile = pool.Get();      // activated instance
+pool.Release(projectile);                // deactivated, reparented, reused
+```
+
+`ObjectPool<T>` pools plain classes (factory + get/release/destroy callbacks, double-release detection); `GetScoped(out item)` returns a `using`-scope that releases automatically.
+
+### Result
+
+```csharp
+public Result<PlayerProfile> ParseProfile(string raw)
+{
+    return _serializer.TryDeserialize(raw, out PlayerProfile profile)
+        ? Result<PlayerProfile>.Success(profile)
+        : Result<PlayerProfile>.Fail("Profile payload is corrupted.");
+}
+```
+
+`Result`/`Result<T>` (namespace `Vareiko.Foundation`) is the default for new APIs. Domain results that carry error codes or retry flags (backend, cloud sync) keep their own types.
+
+### Custom app states and generic FSM
+
+`AppState` is a string-backed struct: the well-known states (`Boot`, `MainMenu`, `Gameplay`, `Error`, ...) are unchanged, and hosts mint their own:
+
+```csharp
+private static readonly AppState MetaShop = new AppState("MetaShop");
+
+_appStateMachine.TryEnter(MetaShop);     // flows through the standard lifecycle rules
+```
+
+For any other state set use `StateMachine<TState>` directly (transition guard + change event):
+
+```csharp
+StateMachine<RunPhase> fsm = new StateMachine<RunPhase>(RunPhase.Warmup, (from, to) => to != RunPhase.Warmup);
+fsm.StateChanged += (from, to) => Debug.Log($"{from} -> {to}");
+fsm.TryEnter(RunPhase.Combat);
+```
+
+## 8. Custom Bootstrap Tasks
 Add game-specific boot logic by implementing `IBootstrapTask`.
 
 ```csharp
@@ -246,7 +335,7 @@ public sealed class LoadProfileBootstrapTask : IBootstrapTask
 
 Bind it in your project installer or a domain installer.
 
-## 8. Monetization and Comms Stack
+## 9. Monetization and Comms Stack
 
 ### IAP
 Main contract: `IInAppPurchaseService`
@@ -271,7 +360,7 @@ Main contract: `IPushNotificationService`
 - `SubscribeAsync(topic)`
 - `UnsubscribeAsync(topic)`
 
-## 9. External Bridge Integrations
+## 10. External Bridge Integrations
 
 ### External Ads Bridge
 For non-Unity mediation SDKs:
@@ -323,7 +412,7 @@ At shutdown/domain reload call:
 - `ExternalAdsBridge.ClearHandlers()`
 - `ExternalAttributionBridge.ClearHandlers()`
 
-## 10. Observability and Diagnostics
+## 11. Observability and Diagnostics
 Use:
 - `IDiagnosticsService` for live snapshot access;
 - `IDiagnosticsSnapshotExportService.ExportAsync(label)` for QA/support exports.
@@ -334,7 +423,7 @@ Monitor key signals in `SignalBus` for:
 - push permission/topic flow;
 - attribution and ads bridge failures.
 
-## 11. Testing Strategy
+## 12. Testing Strategy
 Recommended levels:
 1. Runtime unit tests per module (service contracts + provider mapping).
 2. Integration smoke tests for bootstrap + scene flow + save/settings.
@@ -342,7 +431,7 @@ Recommended levels:
 
 Use package test assembly `Tests/Runtime` as the default pattern for new modules.
 
-## 12. Release Checklist
+## 13. Release Checklist
 1. Run `Tools/Vareiko/Foundation/Validate Project`.
 2. Ensure package version and changelog are aligned.
 3. Fix all UI registry errors before release:
@@ -357,7 +446,7 @@ Use package test assembly `Tests/Runtime` as the default pattern for new modules
 6. Ensure required runtime/editor tests pass.
 7. Tag release (`vX.Y.Z`) after commit.
 
-## 13. Common Pitfalls
+## 14. Common Pitfalls
 - Missing provider define/sdks with production provider selected.
 - Enabling consent-required modules without loaded consent state.
 - Registering bridge handlers too late (after provider init).

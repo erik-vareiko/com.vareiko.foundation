@@ -17,6 +17,7 @@ This guide is the shortest path to a clean first run with `com.vareiko.foundatio
 - `jp.hadashikick.vcontainer`
 - `com.cysharp.messagepipe`
 - `com.cysharp.messagepipe.vcontainer`
+- `com.unity.nuget.newtonsoft-json`
 - `com.unity.inputsystem`
 
 ## 2) Scene Wiring
