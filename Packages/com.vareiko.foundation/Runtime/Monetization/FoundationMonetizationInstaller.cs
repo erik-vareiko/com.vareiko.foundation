@@ -1,4 +1,5 @@
 using UnityEngine;
+using Vareiko.Foundation.Observability;
 using VContainer;
 using VContainer.Unity;
 using MessagePipe;
@@ -11,6 +12,10 @@ namespace Vareiko.Foundation.Monetization
         {
             builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<MonetizationPolicyConfig>());
             builder.RegisterEntryPoint<MonetizationPolicyService>(Lifetime.Singleton).As<IMonetizationPolicyService>().AsSelf();
+            // Registered here (not in Observability) because the service subscribes to the
+            // Ads/Iap/Push signals; the IMonetizationObservabilityService contract stays in
+            // Observability so diagnostics can consume it without referencing monetization.
+            builder.RegisterEntryPoint<MonetizationObservabilityService>(Lifetime.Singleton).As<IMonetizationObservabilityService>().AsSelf();
         }
 
         // Message brokers live in the project scope (GlobalMessagePipe provider), so the

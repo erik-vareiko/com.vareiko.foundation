@@ -28,7 +28,6 @@ namespace Vareiko.Foundation.Observability
                     new List<IFoundationLogSink>(resolver.Resolve<IEnumerable<IFoundationLogSink>>())),
                 Lifetime.Singleton)
                 .As<IFoundationLogger>();
-            builder.RegisterEntryPoint<MonetizationObservabilityService>(Lifetime.Singleton).As<IMonetizationObservabilityService>().AsSelf();
             builder.RegisterEntryPoint<FoundationDiagnosticsService>(Lifetime.Singleton).As<IDiagnosticsService>().AsSelf();
             builder.Register<DiagnosticsSnapshotExportService>(Lifetime.Singleton).As<IDiagnosticsSnapshotExportService>().WithParameter<string>(exportRootPath);
 

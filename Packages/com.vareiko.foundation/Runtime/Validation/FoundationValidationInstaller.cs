@@ -10,9 +10,9 @@ namespace Vareiko.Foundation.Validation
     {
         public static void Install(IContainerBuilder builder)
         {
-            builder.Register<SaveSecurityStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
-            builder.Register<BackendStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
-            builder.Register<ObservabilityStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
+            // Only the rule framework lives here; the foundation's cross-module rules
+            // (save security, backend, observability) are registered by the composition
+            // root, and hosts add their own IStartupValidationRule bindings the same way.
             builder.RegisterEntryPoint<StartupValidationRunner>(resolver => new StartupValidationRunner(
                     new List<IStartupValidationRule>(resolver.Resolve<IEnumerable<IStartupValidationRule>>()),
                     resolver.Resolve<IFoundationSignalBus>()),

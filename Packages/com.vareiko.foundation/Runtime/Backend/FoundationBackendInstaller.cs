@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Vareiko.Foundation.Connectivity;
+using Vareiko.Foundation.Save;
 using Vareiko.Foundation.Signals;
 using Vareiko.Foundation.Time;
 using VContainer;
@@ -104,6 +105,10 @@ namespace Vareiko.Foundation.Backend
                     r.Resolve<IFoundationSignalBus>()),
                 Lifetime.Singleton)
                 .AsSelf();
+
+            // Cloud save sync bridges Save onto IBackendService player-data storage; it lives in
+            // the backend module so the save module stays backend-free.
+            builder.Register<CloudSaveSyncService>(Lifetime.Singleton).As<ICloudSaveSyncService>();
         }
 
         // Message brokers live in the project scope (GlobalMessagePipe provider), so the

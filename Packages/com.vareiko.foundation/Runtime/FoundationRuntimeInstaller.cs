@@ -128,6 +128,11 @@ namespace Vareiko.Foundation
             FoundationAttributionInstaller.Install(builder, attributionConfig);
             FoundationBackendInstaller.Install(builder, backendConfig, backendReliabilityConfig, backendCommandConfig, remoteConfigCacheConfig);
             FoundationFeatureFlagsInstaller.Install(builder, featureFlagsConfig);
+            // Cross-module startup rules (they read Save/Backend/Observability configs) are
+            // composition-root concerns; the validation module only ships the framework.
+            builder.Register<SaveSecurityStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
+            builder.Register<BackendStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
+            builder.Register<ObservabilityStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
             FoundationValidationInstaller.Install(builder);
             FoundationObservabilityInstaller.Install(builder, observabilityConfig);
 

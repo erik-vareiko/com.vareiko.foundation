@@ -33,7 +33,6 @@ namespace Vareiko.Foundation.Save
                 .As<ISaveMigrationService>();
             builder.Register<PreferLocalSaveConflictResolver>(Lifetime.Singleton).As<ISaveConflictResolver>();
             builder.Register<SaveService>(Lifetime.Singleton).As<ISaveService>().WithParameter<string>(saveRootPath);
-            builder.Register<CloudSaveSyncService>(Lifetime.Singleton).As<ICloudSaveSyncService>();
             builder.RegisterEntryPoint<AutosaveService>(Lifetime.Singleton).AsSelf();
         }
 
