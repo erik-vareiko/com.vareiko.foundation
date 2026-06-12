@@ -15,8 +15,13 @@ Unity: host project runs `6000.3.10f1` (Unity 6.3 LTS); the package declares
 
 ## Source layout
 
-- `Packages/com.vareiko.foundation/Runtime/` — all runtime code (~296 .cs files),
-  one folder per module (App, Bootstrap, Save, UI, Backend, Ads, Iap, Analytics, …).
+- `Packages/com.vareiko.foundation/Runtime/` — all runtime code (~300 .cs files),
+  split into 10 assemblies (see `Documentation~/ARCHITECTURE.md` "Assembly Layout"):
+  `Core/`, `Persistence/` (Save+Settings+Consent), `Audio/`, `UI/`, `AssetManagement/`,
+  `Backend/`, `Features/`, `Monetization/` (Ads/Iap/Push/Attribution/Analytics/Economy),
+  `Observability/`, plus the root `Vareiko.Foundation` umbrella (composition root).
+  New module code goes inside the owning assembly's folder; check the assembly
+  reference graph before adding cross-module type references.
 - `Packages/com.vareiko.foundation/Editor/` — scaffolding + project validator.
 - `Packages/com.vareiko.foundation/Documentation~/` — architecture & roadmap docs.
 - `Packages/com.vareiko.foundation/Samples~/BasicSetup/` — onboarding sample.
