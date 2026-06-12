@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Features
 {
-    public sealed class FeatureFlagService : IFeatureFlagService, IInitializable
+    public sealed class FeatureFlagService : IFeatureFlagService, VContainer.Unity.IInitializable
     {
         private readonly IRemoteConfigService _remoteConfigService;
         private readonly FeatureFlagsConfig _config;

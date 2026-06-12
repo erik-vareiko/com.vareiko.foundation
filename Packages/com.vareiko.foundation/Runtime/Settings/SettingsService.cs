@@ -8,7 +8,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Settings
 {
-    public sealed class SettingsService : ISettingsService, IInitializable
+    public sealed class SettingsService : ISettingsService, VContainer.Unity.IInitializable
     {
         private const string Slot = "global";
         private const string Key = "settings";

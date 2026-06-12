@@ -6,7 +6,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Localization
 {
-    public sealed class LocalizationService : ILocalizationService, IInitializable
+    public sealed class LocalizationService : ILocalizationService, VContainer.Unity.IInitializable
     {
         private readonly LocalizationConfig _config;
         private readonly IFoundationSignalBus _signalBus;

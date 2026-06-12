@@ -4,31 +4,32 @@ using Vareiko.Foundation.Config;
 using Vareiko.Foundation.UINavigation;
 using Vareiko.Foundation.UI;
 using UnityEngine;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Installers
 {
-    public sealed class FoundationSceneInstaller : MonoInstaller
+    public sealed class FoundationSceneInstaller : LifetimeScope
     {
         [SerializeField] private UIRegistry _uiRegistry;
         [SerializeField] private MonoBehaviour[] _bootstrapTasks;
         [SerializeField] private ConfigRegistry[] _configRegistries;
 
-        public override void InstallBindings()
+        protected override void Configure(IContainerBuilder builder)
         {
-            FoundationBootstrapInstaller.Install(Container);
-            FoundationUIInstaller.Install(Container);
-            FoundationUINavigationInstaller.Install(Container);
+            FoundationBootstrapInstaller.Install(builder);
+            FoundationUIInstaller.Install(builder);
+            FoundationUINavigationInstaller.Install(builder);
 
             if (_uiRegistry != null)
             {
-                Container.BindInstance(_uiRegistry).IfNotBound();
+                builder.RegisterInstance(_uiRegistry);
             }
 
-            BindBootstrapTasks();
+            RegisterBootstrapTasks(builder);
         }
 
-        private void BindBootstrapTasks()
+        private void RegisterBootstrapTasks(IContainerBuilder builder)
         {
             bool hasBootstrapTasks = _bootstrapTasks != null && _bootstrapTasks.Length > 0;
             bool hasConfigRegistries = _configRegistries != null && _configRegistries.Length > 0;
@@ -54,7 +55,11 @@ namespace Vareiko.Foundation.Installers
                         continue;
                     }
 
-                    Container.Bind<IBootstrapTask>().FromInstance(task);
+                    // RegisterComponent (not RegisterInstance) so VContainer injects the task's
+                    // [Inject] Construct method — RegisterInstance assumes a fully-built object and
+                    // skips injection, which would leave required deps (e.g. ConfigRegistry's
+                    // IConfigService) null and silently no-op the task at boot.
+                    builder.RegisterComponent(task);
                 }
             }
 
@@ -74,7 +79,11 @@ namespace Vareiko.Foundation.Installers
                         continue;
                     }
 
-                    Container.Bind<IBootstrapTask>().FromInstance(task);
+                    // RegisterComponent (not RegisterInstance) so VContainer injects the task's
+                    // [Inject] Construct method — RegisterInstance assumes a fully-built object and
+                    // skips injection, which would leave required deps (e.g. ConfigRegistry's
+                    // IConfigService) null and silently no-op the task at boot.
+                    builder.RegisterComponent(task);
                 }
             }
         }

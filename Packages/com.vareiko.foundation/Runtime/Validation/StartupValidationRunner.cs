@@ -5,7 +5,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Validation
 {
-    public sealed class StartupValidationRunner : IInitializable
+    public sealed class StartupValidationRunner : VContainer.Unity.IInitializable
     {
         private readonly List<IStartupValidationRule> _rules;
         private readonly IFoundationSignalBus _signalBus;

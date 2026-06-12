@@ -1,17 +1,12 @@
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Time
 {
     public static class FoundationTimeInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<IFoundationTimeProvider>())
-            {
-                return;
-            }
-
-            container.Bind<IFoundationTimeProvider>().To<UnityFoundationTimeProvider>().AsSingle();
+            builder.Register<UnityFoundationTimeProvider>(Lifetime.Singleton).As<IFoundationTimeProvider>();
         }
     }
 }

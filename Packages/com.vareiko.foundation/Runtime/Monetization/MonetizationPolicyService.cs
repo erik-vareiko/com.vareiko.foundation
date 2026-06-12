@@ -9,7 +9,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Monetization
 {
-    public sealed class MonetizationPolicyService : IMonetizationPolicyService, IInitializable
+    public sealed class MonetizationPolicyService : IMonetizationPolicyService, VContainer.Unity.IInitializable
     {
         private readonly MonetizationPolicyConfig _config;
         private readonly IFoundationTimeProvider _timeProvider;

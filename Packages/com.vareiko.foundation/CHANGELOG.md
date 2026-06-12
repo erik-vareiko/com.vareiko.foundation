@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- DI migration Phase 1c — VContainer/MessagePipe cutover (composition now runs on VContainer):
+  - all 31 module installers converted `DiContainer` → `IContainerBuilder`; `FoundationRuntimeInstaller` registers MessagePipe + the `IFoundationSignalBus` facade (`MessagePipeSignalBus`) + every signal broker once at the root
+  - root `FoundationProjectInstaller` / `FoundationSceneInstaller` / `FoundationDomainInstaller` are now VContainer `LifetimeScope`s (`Configure(IContainerBuilder)`)
+  - lifecycle services register via `RegisterEntryPoint`; `IInitializable`/`ITickable` fully-qualified to `VContainer.Unity.*`
+  - ex-`[InjectOptional]` parity: configs always bound (real or default), `List<T>` collection deps resolved via `IEnumerable<T>` factory registration, host-optional deps (`IApplicationLifecycleSource`, `ICrashReportingService`, `UIRegistry`, input adapter) resolved with `TryResolve`
+  - Backend decorator chains rebuilt with delegate registration; transitional `ZenjectFoundationSignalBus` removed; composition tests rewritten against VContainer
+  - follow-up (deferred): strip remaining Zenject `[Inject]`/`[InjectOptional]` attributes + asmdef reference, and port UI `Construct(...)` MonoBehaviour method-injection binders to VContainer
 - Changed default save storage:
   - `FoundationSaveInstaller` now binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default
   - `PlayerPrefsSaveStorage` stores one JSON payload per `slot/key` pair using stable relative PlayerPrefs keys

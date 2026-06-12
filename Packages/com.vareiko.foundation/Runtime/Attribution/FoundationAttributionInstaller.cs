@@ -1,39 +1,22 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Attribution
 {
     public static class FoundationAttributionInstaller
     {
-        public static void Install(DiContainer container, AttributionConfig config = null)
+        public static void Install(IContainerBuilder builder, AttributionConfig config = null)
         {
-            if (container.HasBinding<IAttributionService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            container.DeclareSignal<AttributionInitializedSignal>();
-            container.DeclareSignal<AttributionEventTrackedSignal>();
-            container.DeclareSignal<AttributionEventTrackFailedSignal>();
-            container.DeclareSignal<AttributionRevenueTrackedSignal>();
-            container.DeclareSignal<AttributionRevenueTrackFailedSignal>();
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<AttributionConfig>());
 
             if (config != null && config.Provider == AttributionProviderType.ExternalBridge)
             {
-                container.BindInterfacesAndSelfTo<ExternalAttributionBridgeService>().AsSingle().NonLazy();
+                builder.RegisterEntryPoint<ExternalAttributionBridgeService>(Lifetime.Singleton).As<IAttributionService>().AsSelf();
             }
             else
             {
-                container.Bind<IAttributionService>().To<NullAttributionService>().AsSingle();
+                builder.Register<NullAttributionService>(Lifetime.Singleton).As<IAttributionService>();
             }
         }
     }

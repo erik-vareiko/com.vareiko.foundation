@@ -4,7 +4,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.App
 {
-    public sealed class ApplicationLifecycleService : IApplicationLifecycleService, IInitializable, IDisposable
+    public sealed class ApplicationLifecycleService : IApplicationLifecycleService, VContainer.Unity.IInitializable, IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
         private readonly IApplicationLifecycleSource _source;

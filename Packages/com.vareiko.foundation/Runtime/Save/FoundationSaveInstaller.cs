@@ -1,67 +1,39 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Save
 {
     public static class FoundationSaveInstaller
     {
         public static void Install(
-            DiContainer container,
+            IContainerBuilder builder,
             SaveSchemaConfig schemaConfig = null,
             SaveSecurityConfig securityConfig = null,
             AutosaveConfig autosaveConfig = null)
         {
-            if (container.HasBinding<ISaveService>())
-            {
-                return;
-            }
+            builder.RegisterInstance(schemaConfig != null ? schemaConfig : ScriptableObject.CreateInstance<SaveSchemaConfig>());
+            builder.RegisterInstance(securityConfig != null ? securityConfig : ScriptableObject.CreateInstance<SaveSecurityConfig>());
+            builder.RegisterInstance(autosaveConfig != null ? autosaveConfig : ScriptableObject.CreateInstance<AutosaveConfig>());
 
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
+            string saveRootPath = Path.Combine(Application.persistentDataPath, "saves");
 
-            container.DeclareSignal<SaveWrittenSignal>();
-            container.DeclareSignal<SaveDeletedSignal>();
-            container.DeclareSignal<SaveMigratedSignal>();
-            container.DeclareSignal<SaveLoadFailedSignal>();
-            container.DeclareSignal<SaveBackupWrittenSignal>();
-            container.DeclareSignal<SaveRestoredFromBackupSignal>();
-            container.DeclareSignal<SaveCloudPushedSignal>();
-            container.DeclareSignal<SaveCloudPulledSignal>();
-            container.DeclareSignal<SaveCloudConflictResolvedSignal>();
-            container.DeclareSignal<SaveCloudSyncFailedSignal>();
-            container.DeclareSignal<AutosaveTriggeredSignal>();
-            container.DeclareSignal<AutosaveCompletedSignal>();
-            container.DeclareSignal<AutosaveFailedSignal>();
-
-            if (schemaConfig != null)
-            {
-                container.BindInstance(schemaConfig).IfNotBound();
-            }
-
-            if (securityConfig != null)
-            {
-                container.BindInstance(securityConfig).IfNotBound();
-            }
-
-            if (autosaveConfig != null)
-            {
-                container.BindInstance(autosaveConfig).IfNotBound();
-            }
-
-            container.BindInstance(Path.Combine(Application.persistentDataPath, "saves"))
-                .WithId("SaveRootPath");
-
-            container.Bind<ISaveStorage>().To<PlayerPrefsSaveStorage>().AsSingle();
-            container.Bind<JsonUnitySaveSerializer>().AsSingle();
-            container.Bind<ISaveSerializer>().To<SecureSaveSerializer>().AsSingle();
-            container.Bind<ISaveMigrationService>().To<SaveMigrationService>().AsSingle();
-            container.Bind<ISaveConflictResolver>().To<PreferLocalSaveConflictResolver>().AsSingle();
-            container.Bind<ISaveService>().To<SaveService>().AsSingle();
-            container.Bind<ICloudSaveSyncService>().To<CloudSaveSyncService>().AsSingle();
-            container.BindInterfacesAndSelfTo<AutosaveService>().AsSingle().NonLazy();
+            // PlayerPrefsSaveStorage has two string ctor params (rootPath, keyPrefix). WithParameter<string>
+            // matches by type and would feed saveRootPath to BOTH, corrupting the key prefix. Build via a
+            // factory so keyPrefix keeps its baked default.
+            builder.Register<ISaveStorage>(_ => new PlayerPrefsSaveStorage(saveRootPath), Lifetime.Singleton);
+            builder.Register<JsonUnitySaveSerializer>(Lifetime.Singleton);
+            builder.Register<SecureSaveSerializer>(Lifetime.Singleton).As<ISaveSerializer>();
+            builder.Register<SaveMigrationService>(resolver => new SaveMigrationService(
+                    new List<ISaveMigration>(resolver.Resolve<IEnumerable<ISaveMigration>>())),
+                Lifetime.Singleton)
+                .As<ISaveMigrationService>();
+            builder.Register<PreferLocalSaveConflictResolver>(Lifetime.Singleton).As<ISaveConflictResolver>();
+            builder.Register<SaveService>(Lifetime.Singleton).As<ISaveService>().WithParameter<string>(saveRootPath);
+            builder.Register<CloudSaveSyncService>(Lifetime.Singleton).As<ICloudSaveSyncService>();
+            builder.RegisterEntryPoint<AutosaveService>(Lifetime.Singleton).AsSelf();
         }
     }
 }

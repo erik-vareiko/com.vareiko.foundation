@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Ads
 {
-    public sealed class ExternalAdsBridgeService : IAdsService, IInitializable
+    public sealed class ExternalAdsBridgeService : IAdsService, VContainer.Unity.IInitializable
     {
         private readonly AdsConfig _config;
         private readonly IConsentService _consentService;

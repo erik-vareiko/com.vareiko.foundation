@@ -63,7 +63,12 @@ namespace Vareiko.Foundation.App
                 }
 
                 GameObject host = new GameObject("[Foundation] ApplicationLifecycleHook");
-                UnityEngine.Object.DontDestroyOnLoad(host);
+                // DontDestroyOnLoad is play-mode only; guarding it lets the container build during
+                // EditMode tests (where entry-point Initialize runs at Build time) without throwing.
+                if (Application.isPlaying)
+                {
+                    UnityEngine.Object.DontDestroyOnLoad(host);
+                }
                 _instance = host.AddComponent<ApplicationLifecycleHook>();
                 return _instance;
             }

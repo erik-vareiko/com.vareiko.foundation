@@ -1,29 +1,15 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Localization
 {
     public static class FoundationLocalizationInstaller
     {
-        public static void Install(DiContainer container, LocalizationConfig config = null)
+        public static void Install(IContainerBuilder builder, LocalizationConfig config = null)
         {
-            if (container.HasBinding<ILocalizationService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<LanguageChangedSignal>();
-            container.DeclareSignal<LocalizationKeyMissingSignal>();
-            container.BindInterfacesAndSelfTo<LocalizationService>().AsSingle().NonLazy();
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<LocalizationConfig>());
+            builder.RegisterEntryPoint<LocalizationService>(Lifetime.Singleton).As<ILocalizationService>().AsSelf();
         }
     }
 }

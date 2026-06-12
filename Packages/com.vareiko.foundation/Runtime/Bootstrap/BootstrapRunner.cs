@@ -9,7 +9,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Bootstrap
 {
-    public sealed class BootstrapRunner : IInitializable, IDisposable
+    public sealed class BootstrapRunner : VContainer.Unity.IInitializable, IDisposable
     {
         private readonly List<IBootstrapTask> _tasks;
         private readonly IFoundationSignalBus _signalBus;

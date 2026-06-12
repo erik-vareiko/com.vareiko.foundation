@@ -1,30 +1,15 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Economy
 {
     public static class FoundationEconomyInstaller
     {
-        public static void Install(DiContainer container, EconomyConfig config = null)
+        public static void Install(IContainerBuilder builder, EconomyConfig config = null)
         {
-            if (container.HasBinding<IEconomyService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<CurrencyBalanceChangedSignal>();
-            container.DeclareSignal<InventoryItemChangedSignal>();
-            container.DeclareSignal<EconomyOperationFailedSignal>();
-            container.BindInterfacesAndSelfTo<InMemoryEconomyService>().AsSingle().NonLazy();
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<EconomyConfig>());
+            builder.RegisterEntryPoint<InMemoryEconomyService>(Lifetime.Singleton).As<IEconomyService>().AsSelf();
         }
     }
 }

@@ -1,5 +1,5 @@
+using MessagePipe;
 using NUnit.Framework;
-using Vareiko.Foundation;
 using Vareiko.Foundation.Analytics;
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.Connectivity;
@@ -8,33 +8,43 @@ using Vareiko.Foundation.Environment;
 using Vareiko.Foundation.Features;
 using Vareiko.Foundation.Rng;
 using Vareiko.Foundation.Save;
+using Vareiko.Foundation.Signals;
 using Vareiko.Foundation.Time;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Tests.Composition
 {
     /// <summary>
-    /// Composition regression net for the DI migration (Phase 1).
-    /// When the container is swapped to VContainer this file is rewritten against
-    /// the new API and must keep resolving the same core surface — proving parity.
+    /// Composition regression net for the DI migration (Phase 1). Rewritten against VContainer +
+    /// MessagePipe in Phase 1c: the same core surface must keep resolving, proving parity with the
+    /// Zenject composition it replaced.
     /// </summary>
     public sealed class FoundationCompositionTests
     {
+        private static IObjectResolver BuildContainer()
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+            FoundationRuntimeInstaller.InstallProjectServices(builder);
+            IObjectResolver container = builder.Build();
+            GlobalMessagePipe.SetProvider(container.AsServiceProvider());
+            return container;
+        }
+
         [Test]
         public void InstallProjectServices_DoesNotThrow()
         {
-            DiContainer container = new DiContainer();
-
-            Assert.DoesNotThrow(() => FoundationRuntimeInstaller.InstallProjectServices(container));
+            Assert.DoesNotThrow(() =>
+            {
+                using IObjectResolver container = BuildContainer();
+            });
         }
 
         [Test]
         public void InstallProjectServices_ResolvesCoreServices()
         {
-            DiContainer container = new DiContainer();
-            FoundationRuntimeInstaller.InstallProjectServices(container);
+            using IObjectResolver container = BuildContainer();
 
-            Assert.That(container.Resolve<SignalBus>(), Is.Not.Null, "SignalBus");
+            Assert.That(container.Resolve<IFoundationSignalBus>(), Is.Not.Null, "IFoundationSignalBus");
             Assert.That(container.Resolve<IAppStateMachine>(), Is.Not.Null, "IAppStateMachine");
             Assert.That(container.Resolve<ISaveService>(), Is.Not.Null, "ISaveService");
             Assert.That(container.Resolve<IConsentService>(), Is.Not.Null, "IConsentService");
@@ -49,8 +59,7 @@ namespace Vareiko.Foundation.Tests.Composition
         [Test]
         public void CoreServices_AreSingletons()
         {
-            DiContainer container = new DiContainer();
-            FoundationRuntimeInstaller.InstallProjectServices(container);
+            using IObjectResolver container = BuildContainer();
 
             IAppStateMachine first = container.Resolve<IAppStateMachine>();
             IAppStateMachine second = container.Resolve<IAppStateMachine>();

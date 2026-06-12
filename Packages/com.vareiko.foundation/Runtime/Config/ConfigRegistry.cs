@@ -5,7 +5,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Bootstrap;
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Config
 {

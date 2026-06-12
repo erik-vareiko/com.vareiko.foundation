@@ -228,6 +228,24 @@ are the parity proof.**
   `VContainer.Unity`, delete `ZenjectFoundationSignalBus`, rewrite the composition/signal
   tests against VContainer, then swap asmdef references and `package.json` deps and remove
   `net.bobbo.extenject`. Full composition test green against the frozen `TEST_BASELINE.md` = done.
+  - Status (Phase 1c implemented, pending Unity verification): composition cut over to
+    VContainer. All 31 module installers + `FoundationRuntimeInstaller` take `IContainerBuilder`;
+    `FoundationProjectInstaller`/`FoundationSceneInstaller`/`FoundationDomainInstaller` are
+    `LifetimeScope`s. Lifecycle services register via `RegisterEntryPoint` (factory overload for
+    `List<T>`/optional-dep cases — Bootstrap, App lifecycle, UI, the three Backend wrappers,
+    Validation, GlobalExceptionHandler); `IInitializable`/`ITickable` fully-qualified to
+    `VContainer.Unity.*` on all 29 services. Parity decisions realized: configs always bound
+    (real-or-default), `List<T>` deps via `IEnumerable<T>` factory, host-optional deps
+    (`IApplicationLifecycleSource`, `ICrashReportingService`, `UIRegistry`, `NewInputSystemAdapter`)
+    via `TryResolve`. `ZenjectFoundationSignalBus` deleted; `FoundationCompositionTests` +
+    Push/Iap installer tests rewritten against `ContainerBuilder`/`GlobalMessagePipe`.
+  - **Minimal-cutover residue still referencing Zenject (deferred cleanup):** service files keep
+    `using Zenject;` + `[Inject]`/`[InjectOptional]` attributes (ignored by VContainer), and the
+    runtime/tests asmdefs keep the `Zenject` reference so they compile. Strip both in the cleanup pass.
+  - **Known gap — UI MonoBehaviour binders:** the 15 `[Inject] public void Construct(...)` binders
+    (UI value/window/button binders) use Zenject method injection, which VContainer does not invoke.
+    They compile but are not auto-injected at scene instantiation. Port to VContainer method
+    injection (or constructor/`IObjectResolver.Inject`) as part of the Zenject-removal follow-up.
 
 ## Validated VContainer patterns (proven green in `VContainerPilotTests`, 2026-06-08)
 
@@ -271,6 +289,99 @@ implement lifecycle interfaces to fully-qualified `VContainer.Unity.IInitializab
 params still need their dependency registered — register config defaults / Null services in the
 installers. Strip Zenject attributes/usings and remove the package entirely in a later cleanup
 pass once composition runs on VContainer.
+
+## Pre-flight review (2026-06-09, static — no Unity build yet)
+
+Static read-through of the uncommitted Phase 1c diff against VContainer 1.18.0 source
+(`Library/PackageCache/jp.hadashikick.vcontainer@7ec84530`). Verified the contentious
+edges directly in source, so two suspected blockers were cleared and two real ones found.
+
+**Cleared (NOT blockers — verified in source).** The factory overload
+`RegisterEntryPoint<T>(Func<IObjectResolver,T>, Lifetime)` builds a `FuncRegistrationBuilder`
+with `ImplementationType = typeof(T)` and calls `.AsImplementedInterfaces()`, so `T`'s real
+interfaces ARE registered. Therefore `ApplicationLifecycleService` exposes
+`IApplicationLifecycleService` and `CachedRemoteConfigService` exposes `IRemoteConfigService`
+— `ConnectivityService` and `FeatureFlagService` resolve fine. Also confirmed:
+`IEnumerable<T>`/`IReadOnlyList<T>` with zero registered elements returns empty (no throw),
+so the `List<T>`-via-`IEnumerable<T>` factories are safe.
+
+**Fixed in this pass:**
+- **(BLOCKER) `Input/FoundationInputInstaller`** — `PlayerPrefsInputRebindStorage` was
+  plain-registered but its ctor needs an unresolvable `string storageKey` (VContainer ignores
+  C# default values; no `[InjectOptional]`). Resolving `IInputService` → `IEnumerable<IInputAdapter>`
+  → `NewInputSystemAdapter` → `IInputRebindStorage` would throw. Now built via factory
+  `_ => new PlayerPrefsInputRebindStorage()` (keeps the default key).
+- **(WARNING) `Save/FoundationSaveInstaller`** — `PlayerPrefsSaveStorage` has two `string`
+  ctor params; `WithParameter<string>` matches by type and fed `saveRootPath` to BOTH,
+  corrupting the PlayerPrefs key prefix. Now built via factory `_ => new PlayerPrefsSaveStorage(saveRootPath)`.
+- **(WARNING) Tests** — `GlobalMessagePipe.SetProvider` left a disposed provider installed
+  process-globally between tests. Added `[TearDown] => SetProvider(null)` to the Composition,
+  Iap, and Push fixtures.
+- **(Functional BLOCKER) Bootstrap-task injection** — `ConfigRegistry`,
+  `AssetWarmupBootstrapTask`, `RefreshFeatureFlagsBootstrapTask` were registered via
+  `RegisterInstance` (VContainer does NOT inject instances), leaving their `[Inject] Construct`
+  deps null — `ConfigRegistry`'s `IConfigService` is required, so **no configs would register
+  at boot** (silent). Ported their `using Zenject;` → `using VContainer;` (so `[Inject]` is
+  VContainer's attribute) and switched the scene installer to `RegisterComponent(task)`, which
+  injects at resolve time (no Awake-ordering risk).
+
+**Still open — needs Unity to validate:**
+- **UI MonoBehaviour binders (12 files).** `UI/Binding/*`, `UIWindow*ButtonAction`,
+  `UIConfirmDialogPresenter`, `LoadingOverlayPresenter`, `DiagnosticsOverlayView` use Zenject
+  `[Inject] Construct(...)`. VContainer (a) only honors its OWN `[Inject]` attribute and (b)
+  does not auto-inject scene MonoBehaviours it didn't create. They are scene-placed children of
+  UI windows (discovered by `UIRegistry` via `GetComponentsInChildren`), so per-type
+  `RegisterComponentInHierarchy` won't work (it injects only the first instance of a type via
+  `FindComponentProvider`). Required port: swap each file's `using Zenject;` → `using VContainer;`
+  (drop `[InjectOptional]`; all their deps are registered), then add an explicit
+  `IObjectResolver.Inject`/`InjectGameObject` pass over each registered UI element's hierarchy —
+  cleanest hook is `UIService` (already an entry point) holding the `IObjectResolver` from its
+  factory and injecting element hierarchies in `Initialize()`. The Awake(`UIRegistry.BuildMap`)
+  vs entry-point `Initialize()` ordering must be confirmed at runtime.
+- **Scope topology / double bootstrap install — RESOLVED 2026-06-09.** `FoundationBootstrapInstaller.Install`
+  ran in BOTH the project scope (`FoundationRuntimeInstaller`) and the scene scope
+  (`FoundationSceneInstaller:20`), registering `BootstrapRunner` twice (the project-scope one with
+  an empty task list, since tasks are scene-registered). Decision: bootstrap lives in the **scene
+  scope only** (tasks are scene objects); the project-scope install was removed from
+  `FoundationRuntimeInstaller`. `BootstrapRunner`'s deps (`IAppStateMachine`, `IFoundationSignalBus`)
+  resolve from the parent project scope. Confirm at runtime that bootstrap runs exactly once.
+
+## First Unity run (2026-06-09) — 205 passed / 36 failed → fixes applied
+
+Ran EditMode against the `dash-survival` host. 27 of the 36 failures are the frozen
+`TEST_BASELINE.md` set (same names). The **9 new failures were migration regressions**,
+all now fixed:
+
+- **Editor compile error (CS0012/CS0311).** `Vareiko.Foundation.Editor.asmdef` referenced
+  the installer types (now `LifetimeScope` subclasses) but not the `VContainer` assembly.
+  Added `"VContainer"` to its references. (The 1c cutover updated the Runtime asmdef but
+  missed the Editor one.)
+- **KEY FINDING — entry-point `Initialize()` runs at `Build()`, not only under a runtime
+  `LifetimeScope`.** `EntryPointsBuilder.EnsureDispatcherRegistered` (called by every
+  `RegisterEntryPoint`) adds a build callback `container.Resolve<EntryPointDispatcher>().Dispatch()`,
+  and `EntryPointDispatcher`'s ctor calls `Initialize()` on all `IInitializable` synchronously.
+  So `ContainerBuilder.Build()` dispatches Initialize for the whole graph. (The Phase 1a pilot
+  missed this because it used `Register().AsImplementedInterfaces()`, not `RegisterEntryPoint`.)
+  Consequence: any entry-point `Initialize()` doing play-mode-only work throws during EditMode
+  test builds. Three services created `DontDestroyOnLoad` GameObjects in their Initialize path:
+  `UnityApplicationLifecycleSource`, `AudioService`, `AutosaveService` — all three now guard
+  `DontDestroyOnLoad` with `if (Application.isPlaying)` (no runtime behaviour change; play mode
+  still persists the object). This unblocked the 3 `FoundationCompositionTests` + the Iap/Push
+  installer tests, and likely also clears the pre-existing `Audio.Setters_ClampValues` baseline fail.
+- **Test teardown reverted.** The defensive `[TearDown] GlobalMessagePipe.SetProvider(null)`
+  added earlier NRE'd — `SetProvider` immediately calls `provider.GetRequiredService<EventFactory>()`,
+  so `null` is unsupported and there is no public reset. Removed from all three fixtures; each
+  facade-using test already sets its own provider before use, so the cross-test leak is benign.
+
+After these, EditMode should match the frozen baseline (≤27 failures, same names) — the
+migration gate. Re-run to confirm before committing 1c.
+
+**Second run (2026-06-09): 214 passed / 27 failed — GATE MET.** All 27 failures are the
+frozen `TEST_BASELINE.md` set (A:5 + B:3 + C:3 + D:2 + E:14), zero new failures. Passed rose
+205 → 214 (the 9 regressions fixed). Phase 1c composition is verified green on VContainer +
+MessagePipe. Remaining before "Done when": UI binder port (12 files) and the Zenject-residue
+cleanup (strip `using Zenject;`/attributes from ~73 files, drop Zenject from asmdefs + manifest
+`net.bobbo.extenject` + `package.json`).
 
 ## Done when
 - No `Zenject` reference remains in any package asmdef or `using`.

@@ -8,7 +8,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
-    public sealed class MonetizationObservabilityService : IMonetizationObservabilityService, IInitializable, System.IDisposable
+    public sealed class MonetizationObservabilityService : IMonetizationObservabilityService, VContainer.Unity.IInitializable, System.IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
         private readonly MonetizationObservabilitySnapshot _snapshot = new MonetizationObservabilitySnapshot();

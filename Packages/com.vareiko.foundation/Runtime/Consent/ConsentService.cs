@@ -8,7 +8,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Consent
 {
-    public sealed class ConsentService : IConsentService, IInitializable
+    public sealed class ConsentService : IConsentService, VContainer.Unity.IInitializable
     {
         private const string Slot = "global";
         private const string Key = "consent";

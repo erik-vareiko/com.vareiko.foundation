@@ -11,7 +11,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class CloudCommandService : ICloudCommandService, IInitializable, IDisposable
+    public sealed class CloudCommandService : ICloudCommandService, VContainer.Unity.IInitializable, IDisposable
     {
         private readonly ICloudFunctionService _transport;
         private readonly BackendReliabilityConfig _reliabilityConfig;

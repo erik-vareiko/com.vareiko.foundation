@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
+using MessagePipe;
 using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Tests.Push
 {
@@ -54,8 +55,10 @@ namespace Vareiko.Foundation.Tests.Push
             PushNotificationConfig config = CreateUnityConfig();
             try
             {
-                DiContainer container = new DiContainer();
-                FoundationPushNotificationInstaller.Install(container, config);
+                ContainerBuilder builder = new ContainerBuilder();
+                FoundationRuntimeInstaller.InstallProjectServices(builder, pushNotificationConfig: config);
+                using IObjectResolver container = builder.Build();
+                GlobalMessagePipe.SetProvider(container.AsServiceProvider());
 
                 IPushNotificationService service = container.Resolve<IPushNotificationService>();
                 Assert.That(service, Is.TypeOf<UnityPushNotificationService>());

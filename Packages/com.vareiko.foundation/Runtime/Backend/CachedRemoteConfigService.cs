@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class CachedRemoteConfigService : IRemoteConfigService, IRemoteConfigCacheService, IInitializable, ITickable
+    public sealed class CachedRemoteConfigService : IRemoteConfigService, IRemoteConfigCacheService, VContainer.Unity.IInitializable, VContainer.Unity.ITickable
     {
         private readonly IRemoteConfigService _inner;
         private readonly IFoundationTimeProvider _timeProvider;

@@ -1,28 +1,21 @@
-using Zenject;
+using System.Collections.Generic;
+using Vareiko.Foundation.App;
+using Vareiko.Foundation.Signals;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Bootstrap
 {
     public static class FoundationBootstrapInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBindingId(typeof(BootstrapRunner), null, InjectSources.Local))
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            container.DeclareSignal<ApplicationBootStartedSignal>();
-            container.DeclareSignal<ApplicationBootTaskStartedSignal>();
-            container.DeclareSignal<ApplicationBootTaskCompletedSignal>();
-            container.DeclareSignal<ApplicationBootCompletedSignal>();
-            container.DeclareSignal<ApplicationBootFailedSignal>();
-
-            container.BindInterfacesAndSelfTo<BootstrapRunner>().AsSingle().NonLazy();
+            builder.RegisterEntryPoint<BootstrapRunner>(resolver => new BootstrapRunner(
+                    new List<IBootstrapTask>(resolver.Resolve<IEnumerable<IBootstrapTask>>()),
+                    resolver.Resolve<IFoundationSignalBus>(),
+                    resolver.Resolve<IAppStateMachine>()),
+                Lifetime.Singleton)
+                .AsSelf();
         }
     }
 }

@@ -1,29 +1,15 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Environment
 {
     public static class FoundationEnvironmentInstaller
     {
-        public static void Install(DiContainer container, EnvironmentConfig config = null)
+        public static void Install(IContainerBuilder builder, EnvironmentConfig config = null)
         {
-            if (container.HasBinding<IEnvironmentService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<EnvironmentProfileChangedSignal>();
-            container.DeclareSignal<EnvironmentValueMissingSignal>();
-            container.BindInterfacesAndSelfTo<EnvironmentService>().AsSingle().NonLazy();
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<EnvironmentConfig>());
+            builder.RegisterEntryPoint<EnvironmentService>(Lifetime.Singleton).As<IEnvironmentService>().AsSelf();
         }
     }
 }

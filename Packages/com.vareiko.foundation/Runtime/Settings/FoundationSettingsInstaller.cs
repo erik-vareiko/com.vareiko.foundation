@@ -1,30 +1,13 @@
-using Vareiko.Foundation.Save;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Settings
 {
     public static class FoundationSettingsInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<ISettingsService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<ISaveService>())
-            {
-                FoundationSaveInstaller.Install(container);
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            container.DeclareSignal<SettingsLoadedSignal>();
-            container.DeclareSignal<SettingsChangedSignal>();
-            container.BindInterfacesAndSelfTo<SettingsService>().AsSingle().NonLazy();
+            builder.RegisterEntryPoint<SettingsService>(Lifetime.Singleton).As<ISettingsService>().AsSelf();
         }
     }
 }

@@ -5,7 +5,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
-    public class UIService : IUIService, IInitializable
+    public class UIService : IUIService, VContainer.Unity.IInitializable
     {
         private readonly UIRegistry _registry;
         private readonly IFoundationSignalBus _signalBus;

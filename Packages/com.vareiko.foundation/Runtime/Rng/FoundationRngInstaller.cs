@@ -1,22 +1,14 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
 
 namespace Vareiko.Foundation.Rng
 {
     public static class FoundationRngInstaller
     {
-        public static void Install(DiContainer container, DeterministicRngConfig config = null)
+        public static void Install(IContainerBuilder builder, DeterministicRngConfig config = null)
         {
-            if (container.HasBinding<IDeterministicRngService>())
-            {
-                return;
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.Bind<IDeterministicRngService>().To<DeterministicRngService>().AsSingle();
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<DeterministicRngConfig>());
+            builder.Register<DeterministicRngService>(Lifetime.Singleton).As<IDeterministicRngService>();
         }
     }
 }

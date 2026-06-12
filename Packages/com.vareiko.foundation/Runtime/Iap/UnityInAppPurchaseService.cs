@@ -13,7 +13,7 @@ using UnityEngine.Purchasing.Extension;
 
 namespace Vareiko.Foundation.Iap
 {
-    public sealed class UnityInAppPurchaseService : IInAppPurchaseService, IInitializable
+    public sealed class UnityInAppPurchaseService : IInAppPurchaseService, VContainer.Unity.IInitializable
 #if UNITY_PURCHASING
         , IStoreListener
 #endif

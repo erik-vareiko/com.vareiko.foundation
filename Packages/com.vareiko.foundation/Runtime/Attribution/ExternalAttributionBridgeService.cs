@@ -8,7 +8,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Attribution
 {
-    public sealed class ExternalAttributionBridgeService : IAttributionService, IInitializable
+    public sealed class ExternalAttributionBridgeService : IAttributionService, VContainer.Unity.IInitializable
     {
         private readonly AttributionConfig _config;
         private readonly IConsentService _consentService;

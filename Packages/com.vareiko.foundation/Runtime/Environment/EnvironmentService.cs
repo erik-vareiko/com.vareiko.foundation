@@ -6,7 +6,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Environment
 {
-    public sealed class EnvironmentService : IEnvironmentService, IInitializable
+    public sealed class EnvironmentService : IEnvironmentService, VContainer.Unity.IInitializable
     {
         private readonly EnvironmentConfig _config;
         private readonly IFoundationSignalBus _signalBus;

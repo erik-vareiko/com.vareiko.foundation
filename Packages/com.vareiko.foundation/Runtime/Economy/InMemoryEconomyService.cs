@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Economy
 {
-    public sealed class InMemoryEconomyService : IEconomyService, IInitializable
+    public sealed class InMemoryEconomyService : IEconomyService, VContainer.Unity.IInitializable
     {
         private readonly EconomyConfig _config;
         private readonly IFoundationSignalBus _signalBus;

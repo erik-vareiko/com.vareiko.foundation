@@ -1,29 +1,22 @@
-using Zenject;
+using System.Collections.Generic;
+using Vareiko.Foundation.Signals;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Validation
 {
     public static class FoundationValidationInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<StartupValidationRunner>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            container.DeclareSignal<StartupValidationPassedSignal>();
-            container.DeclareSignal<StartupValidationFailedSignal>();
-            container.DeclareSignal<StartupValidationWarningSignal>();
-            container.DeclareSignal<StartupValidationCompletedSignal>();
-            container.Bind<IStartupValidationRule>().To<SaveSecurityStartupValidationRule>().AsSingle();
-            container.Bind<IStartupValidationRule>().To<BackendStartupValidationRule>().AsSingle();
-            container.Bind<IStartupValidationRule>().To<ObservabilityStartupValidationRule>().AsSingle();
-            container.BindInterfacesAndSelfTo<StartupValidationRunner>().AsSingle().NonLazy();
+            builder.Register<SaveSecurityStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
+            builder.Register<BackendStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
+            builder.Register<ObservabilityStartupValidationRule>(Lifetime.Singleton).As<IStartupValidationRule>();
+            builder.RegisterEntryPoint<StartupValidationRunner>(resolver => new StartupValidationRunner(
+                    new List<IStartupValidationRule>(resolver.Resolve<IEnumerable<IStartupValidationRule>>()),
+                    resolver.Resolve<IFoundationSignalBus>()),
+                Lifetime.Singleton)
+                .AsSelf();
         }
     }
 }

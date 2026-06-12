@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
-    public sealed class GlobalExceptionHandler : IInitializable, IDisposable
+    public sealed class GlobalExceptionHandler : VContainer.Unity.IInitializable, IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
         private readonly IFoundationLogger _logger;

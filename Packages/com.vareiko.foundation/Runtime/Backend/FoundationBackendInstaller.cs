@@ -1,89 +1,108 @@
-using Zenject;
+using System;
+using UnityEngine;
+using Vareiko.Foundation.Connectivity;
+using Vareiko.Foundation.Signals;
+using Vareiko.Foundation.Time;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Backend
 {
     public static class FoundationBackendInstaller
     {
         public static void Install(
-            DiContainer container,
+            IContainerBuilder builder,
             BackendConfig config = null,
             BackendReliabilityConfig reliabilityConfig = null,
             BackendCommandConfig commandConfig = null,
             RemoteConfigCacheConfig remoteConfigCacheConfig = null)
         {
-            if (container.HasBinding<IBackendService>())
-            {
-                return;
-            }
+            BackendReliabilityConfig resolvedReliability = reliabilityConfig != null ? reliabilityConfig : ScriptableObject.CreateInstance<BackendReliabilityConfig>();
+            BackendCommandConfig resolvedCommand = commandConfig != null ? commandConfig : ScriptableObject.CreateInstance<BackendCommandConfig>();
+            RemoteConfigCacheConfig resolvedRemoteCache = remoteConfigCacheConfig != null ? remoteConfigCacheConfig : ScriptableObject.CreateInstance<RemoteConfigCacheConfig>();
 
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<BackendConfig>());
+            builder.RegisterInstance(resolvedReliability);
+            builder.RegisterInstance(resolvedCommand);
+            builder.RegisterInstance(resolvedRemoteCache);
 
-            container.DeclareSignal<BackendAuthStateChangedSignal>();
-            container.DeclareSignal<BackendOperationRetriedSignal>();
-            container.DeclareSignal<CloudFunctionQueuedSignal>();
-            container.DeclareSignal<CloudFunctionQueueFlushedSignal>();
-            container.DeclareSignal<CloudFunctionQueueRestoredSignal>();
-            container.DeclareSignal<RemoteConfigRefreshedSignal>();
-            container.DeclareSignal<RemoteConfigRefreshFailedSignal>();
-            container.DeclareSignal<RemoteConfigCacheInvalidatedSignal>();
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            if (reliabilityConfig != null)
-            {
-                container.BindInstance(reliabilityConfig).IfNotBound();
-            }
-
-            if (commandConfig != null)
-            {
-                container.BindInstance(commandConfig).IfNotBound();
-            }
-
-            if (remoteConfigCacheConfig != null)
-            {
-                container.BindInstance(remoteConfigCacheConfig).IfNotBound();
-            }
-
+            // Inner providers are registered as their concrete type only (never as the public
+            // interface) so the decorator wrappers below can resolve them without a cycle.
+            Func<IObjectResolver, IBackendService> resolveBackendInner;
             if (config != null && config.Provider == BackendProviderType.PlayFab)
             {
-                container.Bind<IBackendService>().WithId("BackendInner").To<PlayFabBackendService>().AsSingle();
+                builder.Register<PlayFabBackendService>(Lifetime.Singleton);
+                resolveBackendInner = r => r.Resolve<PlayFabBackendService>();
             }
             else
             {
-                container.Bind<IBackendService>().WithId("BackendInner").To<NullBackendService>().AsSingle();
+                builder.Register<NullBackendService>(Lifetime.Singleton);
+                resolveBackendInner = r => r.Resolve<NullBackendService>();
             }
 
+            Func<IObjectResolver, ICloudFunctionService> resolveCloudFunctionInner;
             if (config != null && config.Provider == BackendProviderType.PlayFab && config.EnableCloudFunctions)
             {
-                container.Bind<ICloudFunctionService>().WithId("CloudFunctionInner").To<PlayFabCloudFunctionService>().AsSingle();
+                builder.Register<PlayFabCloudFunctionService>(Lifetime.Singleton);
+                resolveCloudFunctionInner = r => r.Resolve<PlayFabCloudFunctionService>();
             }
             else
             {
-                container.Bind<ICloudFunctionService>().WithId("CloudFunctionInner").To<NullCloudFunctionService>().AsSingle();
+                builder.Register<NullCloudFunctionService>(Lifetime.Singleton);
+                resolveCloudFunctionInner = r => r.Resolve<NullCloudFunctionService>();
             }
 
+            Func<IObjectResolver, IRemoteConfigService> resolveRemoteConfigInner;
             if (config != null && config.Provider == BackendProviderType.PlayFab && config.EnableRemoteConfig)
             {
-                container.Bind<IRemoteConfigService>().WithId("RemoteConfigInner").To<PlayFabRemoteConfigService>().AsSingle();
+                builder.Register<PlayFabRemoteConfigService>(Lifetime.Singleton);
+                resolveRemoteConfigInner = r => r.Resolve<PlayFabRemoteConfigService>();
             }
             else
             {
-                container.Bind<IRemoteConfigService>().WithId("RemoteConfigInner").To<NullRemoteConfigService>().AsSingle();
+                builder.Register<NullRemoteConfigService>(Lifetime.Singleton);
+                resolveRemoteConfigInner = r => r.Resolve<NullRemoteConfigService>();
             }
 
-            container.Bind<IBackendService>().To<RetryingBackendService>().AsSingle();
-            container.Bind<ICloudFunctionQueueStore>().To<PlayerPrefsCloudFunctionQueueStore>().AsSingle().IfNotBound();
-            container.Bind<ICloudCommandQueueStore>().To<PlayerPrefsCloudCommandQueueStore>().AsSingle().IfNotBound();
-            container.Bind<ICloudCommandRetryClassifier>().To<CloudCommandRetryClassifier>().AsSingle().IfNotBound();
-            container.BindInterfacesAndSelfTo<CachedRemoteConfigService>().AsSingle().NonLazy();
-            container.BindInterfacesAndSelfTo<ReliableCloudFunctionService>().AsSingle().NonLazy();
-            container.BindInterfacesAndSelfTo<CloudCommandService>().AsSingle().NonLazy();
+            builder.Register<PlayerPrefsCloudFunctionQueueStore>(Lifetime.Singleton).As<ICloudFunctionQueueStore>();
+            builder.Register<PlayerPrefsCloudCommandQueueStore>(Lifetime.Singleton).As<ICloudCommandQueueStore>();
+            builder.Register<CloudCommandRetryClassifier>(Lifetime.Singleton).As<ICloudCommandRetryClassifier>();
+
+            builder.Register<IBackendService>(r => new RetryingBackendService(
+                    resolveBackendInner(r),
+                    resolvedReliability,
+                    r.Resolve<IFoundationSignalBus>()),
+                Lifetime.Singleton);
+
+            // Decorator wrappers that drive lifecycle (IInitializable/ITickable) are entry points;
+            // RegisterEntryPoint's AsImplementedInterfaces exposes their public service interfaces.
+            builder.RegisterEntryPoint<CachedRemoteConfigService>(r => new CachedRemoteConfigService(
+                    resolveRemoteConfigInner(r),
+                    r.Resolve<IFoundationTimeProvider>(),
+                    resolvedRemoteCache,
+                    r.Resolve<IFoundationSignalBus>()),
+                Lifetime.Singleton)
+                .AsSelf();
+
+            builder.RegisterEntryPoint<ReliableCloudFunctionService>(r => new ReliableCloudFunctionService(
+                    resolveCloudFunctionInner(r),
+                    r.Resolve<IConnectivityService>(),
+                    resolvedReliability,
+                    r.Resolve<IFoundationSignalBus>(),
+                    r.Resolve<ICloudFunctionQueueStore>()),
+                Lifetime.Singleton)
+                .AsSelf();
+
+            builder.RegisterEntryPoint<CloudCommandService>(r => new CloudCommandService(
+                    resolveCloudFunctionInner(r),
+                    resolvedReliability,
+                    resolvedCommand,
+                    r.Resolve<ICloudCommandRetryClassifier>(),
+                    r.Resolve<ICloudCommandQueueStore>(),
+                    r.Resolve<IConnectivityService>(),
+                    r.Resolve<IFoundationSignalBus>()),
+                Lifetime.Singleton)
+                .AsSelf();
         }
     }
 }

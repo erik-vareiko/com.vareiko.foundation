@@ -10,7 +10,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class ReliableCloudFunctionService : ICloudFunctionService, IInitializable, System.IDisposable
+    public sealed class ReliableCloudFunctionService : ICloudFunctionService, VContainer.Unity.IInitializable, System.IDisposable
     {
         private readonly ICloudFunctionService _inner;
         private readonly IConnectivityService _connectivityService;

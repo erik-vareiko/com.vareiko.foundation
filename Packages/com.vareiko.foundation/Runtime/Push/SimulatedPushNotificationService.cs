@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Push
 {
-    public sealed class SimulatedPushNotificationService : IPushNotificationService, IInitializable
+    public sealed class SimulatedPushNotificationService : IPushNotificationService, VContainer.Unity.IInitializable
     {
         private readonly PushNotificationConfig _config;
         private readonly IConsentService _consentService;

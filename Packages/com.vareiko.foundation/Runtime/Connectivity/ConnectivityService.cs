@@ -6,7 +6,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Connectivity
 {
-    public sealed class ConnectivityService : IConnectivityService, IInitializable, ITickable, System.IDisposable
+    public sealed class ConnectivityService : IConnectivityService, VContainer.Unity.IInitializable, VContainer.Unity.ITickable, System.IDisposable
     {
         private readonly IFoundationTimeProvider _timeProvider;
         private readonly ConnectivityConfig _config;

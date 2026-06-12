@@ -1,23 +1,13 @@
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Loading
 {
     public static class FoundationLoadingInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<ILoadingService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            container.DeclareSignal<LoadingStateChangedSignal>();
-            container.BindInterfacesAndSelfTo<LoadingService>().AsSingle().NonLazy();
+            builder.RegisterEntryPoint<LoadingService>(Lifetime.Singleton).As<ILoadingService>().AsSelf();
         }
     }
 }

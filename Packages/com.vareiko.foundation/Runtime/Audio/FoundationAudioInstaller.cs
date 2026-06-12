@@ -1,29 +1,13 @@
-using Vareiko.Foundation.Settings;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Audio
 {
     public static class FoundationAudioInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<IAudioService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (!container.HasBinding<ISettingsService>())
-            {
-                FoundationSettingsInstaller.Install(container);
-            }
-
-            container.DeclareSignal<AudioVolumesChangedSignal>();
-            container.BindInterfacesAndSelfTo<AudioService>().AsSingle().NonLazy();
+            builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
         }
     }
 }

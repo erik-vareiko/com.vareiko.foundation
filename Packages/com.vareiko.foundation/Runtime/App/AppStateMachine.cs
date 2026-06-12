@@ -5,7 +5,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.App
 {
-    public sealed class AppStateMachine : IAppStateMachine, IInitializable, IDisposable
+    public sealed class AppStateMachine : IAppStateMachine, VContainer.Unity.IInitializable, IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
         private AppState _current = AppState.None;

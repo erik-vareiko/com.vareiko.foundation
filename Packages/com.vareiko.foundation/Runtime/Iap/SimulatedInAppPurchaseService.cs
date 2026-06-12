@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Iap
 {
-    public sealed class SimulatedInAppPurchaseService : IInAppPurchaseService, IInitializable
+    public sealed class SimulatedInAppPurchaseService : IInAppPurchaseService, VContainer.Unity.IInitializable
     {
         private readonly IapConfig _config;
         private readonly IFoundationSignalBus _signalBus;

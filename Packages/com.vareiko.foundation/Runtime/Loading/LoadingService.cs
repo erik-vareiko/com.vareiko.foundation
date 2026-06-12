@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Loading
 {
-    public sealed class LoadingService : ILoadingService, IInitializable, System.IDisposable
+    public sealed class LoadingService : ILoadingService, VContainer.Unity.IInitializable, System.IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
         private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();

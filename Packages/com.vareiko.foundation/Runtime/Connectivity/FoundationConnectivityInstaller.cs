@@ -1,29 +1,16 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Connectivity
 {
     public static class FoundationConnectivityInstaller
     {
-        public static void Install(DiContainer container, ConnectivityConfig config = null)
+        public static void Install(IContainerBuilder builder, ConnectivityConfig config = null)
         {
-            if (container.HasBinding<IConnectivityService>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<ConnectivityChangedSignal>();
-            container.Bind<INetworkReachabilityProvider>().To<UnityNetworkReachabilityProvider>().AsSingle().IfNotBound();
-            container.BindInterfacesAndSelfTo<ConnectivityService>().AsSingle().NonLazy();
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<ConnectivityConfig>());
+            builder.Register<UnityNetworkReachabilityProvider>(Lifetime.Singleton).As<INetworkReachabilityProvider>();
+            builder.RegisterEntryPoint<ConnectivityService>(Lifetime.Singleton).As<IConnectivityService>().AsSelf();
         }
     }
 }

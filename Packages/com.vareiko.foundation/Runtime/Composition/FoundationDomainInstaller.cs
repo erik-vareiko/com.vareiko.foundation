@@ -1,25 +1,26 @@
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Composition
 {
-    public abstract class FoundationDomainInstaller : MonoInstaller
+    public abstract class FoundationDomainInstaller : LifetimeScope
     {
-        public sealed override void InstallBindings()
+        protected sealed override void Configure(IContainerBuilder builder)
         {
-            InstallDomainBindings();
-            InstallDomainSystems();
-            InstallDomainPresentation();
+            InstallDomainBindings(builder);
+            InstallDomainSystems(builder);
+            InstallDomainPresentation(builder);
         }
 
-        protected virtual void InstallDomainBindings()
-        {
-        }
-
-        protected virtual void InstallDomainSystems()
+        protected virtual void InstallDomainBindings(IContainerBuilder builder)
         {
         }
 
-        protected virtual void InstallDomainPresentation()
+        protected virtual void InstallDomainSystems(IContainerBuilder builder)
+        {
+        }
+
+        protected virtual void InstallDomainPresentation(IContainerBuilder builder)
         {
         }
     }

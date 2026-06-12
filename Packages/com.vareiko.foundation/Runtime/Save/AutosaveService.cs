@@ -11,7 +11,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Save
 {
-    public sealed class AutosaveService : IInitializable, ITickable, System.IDisposable
+    public sealed class AutosaveService : VContainer.Unity.IInitializable, VContainer.Unity.ITickable, System.IDisposable
     {
         private readonly AutosaveConfig _config;
         private readonly IFoundationTimeProvider _timeProvider;
@@ -235,7 +235,12 @@ namespace Vareiko.Foundation.Save
                 }
 
                 GameObject host = new GameObject("[Foundation] AutosaveLifecycleHook");
-                UnityEngine.Object.DontDestroyOnLoad(host);
+                // DontDestroyOnLoad is play-mode only; guard it so the container build (which runs
+                // entry-point Initialize) doesn't throw under EditMode tests.
+                if (Application.isPlaying)
+                {
+                    UnityEngine.Object.DontDestroyOnLoad(host);
+                }
                 _instance = host.AddComponent<AutosaveLifecycleHook>();
                 return _instance;
             }

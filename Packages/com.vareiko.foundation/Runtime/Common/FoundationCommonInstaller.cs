@@ -1,27 +1,18 @@
+using System.Collections.Generic;
 using Vareiko.Foundation.Signals;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Common
 {
     public static class FoundationCommonInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<IHealthCheckRunner>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            container.Bind<IFoundationSignalBus>().To<ZenjectFoundationSignalBus>().AsSingle().IfNotBound();
-
-            container.DeclareSignal<HealthCheckPassedSignal>();
-            container.DeclareSignal<HealthCheckFailedSignal>();
-            container.Bind<IHealthCheckRunner>().To<HealthCheckRunner>().AsSingle();
+            builder.Register<HealthCheckRunner>(resolver => new HealthCheckRunner(
+                    new List<IHealthCheck>(resolver.Resolve<IEnumerable<IHealthCheck>>()),
+                    resolver.Resolve<IFoundationSignalBus>()),
+                Lifetime.Singleton)
+                .As<IHealthCheckRunner>();
         }
     }
 }

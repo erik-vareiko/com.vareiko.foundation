@@ -1,50 +1,49 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Zenject;
+using Vareiko.Foundation.App;
+using Vareiko.Foundation.Signals;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Observability
 {
     public static class FoundationObservabilityInstaller
     {
-        public static void Install(DiContainer container, ObservabilityConfig config = null)
+        public static void Install(IContainerBuilder builder, ObservabilityConfig config = null)
         {
-            if (container.HasBinding<IFoundationLogger>())
-            {
-                return;
-            }
-
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<LogMessageEmittedSignal>();
-            container.DeclareSignal<DiagnosticsSnapshotUpdatedSignal>();
-            container.DeclareSignal<DiagnosticsSnapshotExportedSignal>();
-            container.DeclareSignal<DiagnosticsSnapshotExportFailedSignal>();
-            container.DeclareSignal<UnhandledExceptionCapturedSignal>();
-            container.DeclareSignal<CrashReportSubmittedSignal>();
-            container.DeclareSignal<CrashReportSubmissionFailedSignal>();
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<ObservabilityConfig>());
 
             if (config == null || config.LogToUnityConsole)
             {
-                container.Bind<IFoundationLogSink>().To<UnityConsoleLogSink>().AsSingle().IfNotBound();
+                builder.Register<UnityConsoleLogSink>(Lifetime.Singleton).As<IFoundationLogSink>();
             }
 
-            container.BindInstance(Path.Combine(Application.persistentDataPath, "foundation-diagnostics"))
-                .WithId("DiagnosticsExportRootPath")
-                .IfNotBound();
+            string exportRootPath = Path.Combine(Application.persistentDataPath, "foundation-diagnostics");
 
-            container.Bind<IFoundationLogger>().To<UnityFoundationLogger>().AsSingle();
-            container.BindInterfacesAndSelfTo<MonetizationObservabilityService>().AsSingle().NonLazy();
-            container.BindInterfacesAndSelfTo<FoundationDiagnosticsService>().AsSingle().NonLazy();
-            container.Bind<IDiagnosticsSnapshotExportService>().To<DiagnosticsSnapshotExportService>().AsSingle();
-            container.BindInterfacesAndSelfTo<GlobalExceptionHandler>().AsSingle().NonLazy();
+            builder.Register<UnityFoundationLogger>(resolver => new UnityFoundationLogger(
+                    resolver.Resolve<ObservabilityConfig>(),
+                    resolver.Resolve<IFoundationSignalBus>(),
+                    new List<IFoundationLogSink>(resolver.Resolve<IEnumerable<IFoundationLogSink>>())),
+                Lifetime.Singleton)
+                .As<IFoundationLogger>();
+            builder.RegisterEntryPoint<MonetizationObservabilityService>(Lifetime.Singleton).As<IMonetizationObservabilityService>().AsSelf();
+            builder.RegisterEntryPoint<FoundationDiagnosticsService>(Lifetime.Singleton).As<IDiagnosticsService>().AsSelf();
+            builder.Register<DiagnosticsSnapshotExportService>(Lifetime.Singleton).As<IDiagnosticsSnapshotExportService>().WithParameter<string>(exportRootPath);
+
+            // ICrashReportingService has no foundation implementation (host-provided); resolve it
+            // leniently so the global exception handler still composes when none is bound.
+            builder.RegisterEntryPoint<GlobalExceptionHandler>(resolver =>
+                {
+                    resolver.TryResolve<ICrashReportingService>(out ICrashReportingService crashReportingService);
+                    return new GlobalExceptionHandler(
+                        resolver.Resolve<IFoundationLogger>(),
+                        resolver.Resolve<IAppStateMachine>(),
+                        resolver.Resolve<ObservabilityConfig>(),
+                        resolver.Resolve<IFoundationSignalBus>(),
+                        crashReportingService);
+                }, Lifetime.Singleton)
+                .AsSelf();
         }
     }
 }

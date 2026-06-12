@@ -1,3 +1,4 @@
+using MessagePipe;
 using Vareiko.Foundation.Analytics;
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.Ads;
@@ -5,7 +6,6 @@ using Vareiko.Foundation.AssetManagement;
 using Vareiko.Foundation.Attribution;
 using Vareiko.Foundation.Audio;
 using Vareiko.Foundation.Backend;
-using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Common;
 using Vareiko.Foundation.Config;
 using Vareiko.Foundation.Connectivity;
@@ -24,16 +24,17 @@ using Vareiko.Foundation.Rng;
 using Vareiko.Foundation.Save;
 using Vareiko.Foundation.SceneFlow;
 using Vareiko.Foundation.Settings;
+using Vareiko.Foundation.Signals;
 using Vareiko.Foundation.Time;
 using Vareiko.Foundation.Validation;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation
 {
     public static class FoundationRuntimeInstaller
     {
         public static void InstallProjectServices(
-            DiContainer container,
+            IContainerBuilder builder,
             AnalyticsConfig analyticsConfig = null,
             AttributionConfig attributionConfig = null,
             BackendConfig backendConfig = null,
@@ -56,34 +57,44 @@ namespace Vareiko.Foundation
             ObservabilityConfig observabilityConfig = null,
             DeterministicRngConfig deterministicRngConfig = null)
         {
-            FoundationTimeInstaller.Install(container);
-            FoundationCommonInstaller.Install(container);
-            FoundationRngInstaller.Install(container, deterministicRngConfig);
-            FoundationEnvironmentInstaller.Install(container, environmentConfig);
-            FoundationAppInstaller.Install(container);
-            FoundationBootstrapInstaller.Install(container);
-            FoundationConfigInstaller.Install(container);
-            FoundationAssetInstaller.Install(container, assetConfig);
-            FoundationConnectivityInstaller.Install(container, connectivityConfig);
-            FoundationInputInstaller.Install(container);
-            FoundationSceneFlowInstaller.Install(container);
-            FoundationLoadingInstaller.Install(container);
-            FoundationSaveInstaller.Install(container, saveSchemaConfig, saveSecurityConfig, autosaveConfig);
-            FoundationConsentInstaller.Install(container);
-            FoundationSettingsInstaller.Install(container);
-            FoundationLocalizationInstaller.Install(container, localizationConfig);
-            FoundationEconomyInstaller.Install(container, economyConfig);
-            FoundationIapInstaller.Install(container, iapConfig);
-            FoundationAdsInstaller.Install(container, adsConfig);
-            FoundationPushNotificationInstaller.Install(container, pushNotificationConfig);
-            FoundationMonetizationInstaller.Install(container, monetizationPolicyConfig);
-            FoundationAudioInstaller.Install(container);
-            FoundationAnalyticsInstaller.Install(container, analyticsConfig);
-            FoundationAttributionInstaller.Install(container, attributionConfig);
-            FoundationBackendInstaller.Install(container, backendConfig, backendReliabilityConfig, backendCommandConfig, remoteConfigCacheConfig);
-            FoundationFeatureFlagsInstaller.Install(container, featureFlagsConfig);
-            FoundationValidationInstaller.Install(container);
-            FoundationObservabilityInstaller.Install(container, observabilityConfig);
+            // MessagePipe + the IFoundationSignalBus facade + every foundation signal broker are
+            // registered once here, at the composition root, replacing Zenject's scattered
+            // SignalBusInstaller / DeclareSignal calls.
+            MessagePipeOptions messagePipeOptions = builder.RegisterMessagePipe();
+            builder.RegisterBuildCallback(container => GlobalMessagePipe.SetProvider(container.AsServiceProvider()));
+            builder.Register<MessagePipeSignalBus>(Lifetime.Singleton).As<IFoundationSignalBus>();
+            FoundationSignalBrokers.Register(builder, messagePipeOptions);
+
+            FoundationTimeInstaller.Install(builder);
+            FoundationCommonInstaller.Install(builder);
+            FoundationRngInstaller.Install(builder, deterministicRngConfig);
+            FoundationEnvironmentInstaller.Install(builder, environmentConfig);
+            FoundationAppInstaller.Install(builder);
+            // Bootstrap is installed in the scene scope (FoundationSceneInstaller), where the
+            // IBootstrapTask scene objects live, so BootstrapRunner resolves a populated task list.
+            // Installing it here too would create a second runner with an empty task list.
+            FoundationConfigInstaller.Install(builder);
+            FoundationAssetInstaller.Install(builder, assetConfig);
+            FoundationConnectivityInstaller.Install(builder, connectivityConfig);
+            FoundationInputInstaller.Install(builder);
+            FoundationSceneFlowInstaller.Install(builder);
+            FoundationLoadingInstaller.Install(builder);
+            FoundationSaveInstaller.Install(builder, saveSchemaConfig, saveSecurityConfig, autosaveConfig);
+            FoundationConsentInstaller.Install(builder);
+            FoundationSettingsInstaller.Install(builder);
+            FoundationLocalizationInstaller.Install(builder, localizationConfig);
+            FoundationEconomyInstaller.Install(builder, economyConfig);
+            FoundationIapInstaller.Install(builder, iapConfig);
+            FoundationAdsInstaller.Install(builder, adsConfig);
+            FoundationPushNotificationInstaller.Install(builder, pushNotificationConfig);
+            FoundationMonetizationInstaller.Install(builder, monetizationPolicyConfig);
+            FoundationAudioInstaller.Install(builder);
+            FoundationAnalyticsInstaller.Install(builder, analyticsConfig);
+            FoundationAttributionInstaller.Install(builder, attributionConfig);
+            FoundationBackendInstaller.Install(builder, backendConfig, backendReliabilityConfig, backendCommandConfig, remoteConfigCacheConfig);
+            FoundationFeatureFlagsInstaller.Install(builder, featureFlagsConfig);
+            FoundationValidationInstaller.Install(builder);
+            FoundationObservabilityInstaller.Install(builder, observabilityConfig);
         }
     }
 }

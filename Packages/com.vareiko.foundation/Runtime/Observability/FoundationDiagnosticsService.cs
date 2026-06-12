@@ -12,7 +12,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Observability
 {
-    public sealed class FoundationDiagnosticsService : IDiagnosticsService, IInitializable, ITickable, System.IDisposable
+    public sealed class FoundationDiagnosticsService : IDiagnosticsService, VContainer.Unity.IInitializable, VContainer.Unity.ITickable, System.IDisposable
     {
         private readonly IFoundationTimeProvider _timeProvider;
         private readonly ObservabilityConfig _config;

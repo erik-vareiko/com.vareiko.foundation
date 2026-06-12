@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Vareiko.Foundation.Audio
 {
-    public sealed class AudioService : IAudioService, IInitializable, IDisposable
+    public sealed class AudioService : IAudioService, VContainer.Unity.IInitializable, IDisposable
     {
         private readonly IFoundationSignalBus _signalBus;
         private readonly ISettingsService _settingsService;
@@ -134,7 +134,12 @@ namespace Vareiko.Foundation.Audio
             }
 
             _root = new GameObject("[Foundation] AudioService");
-            UnityEngine.Object.DontDestroyOnLoad(_root);
+            // DontDestroyOnLoad is play-mode only; guard it so the container build (which runs
+            // entry-point Initialize) doesn't throw under EditMode tests.
+            if (Application.isPlaying)
+            {
+                UnityEngine.Object.DontDestroyOnLoad(_root);
+            }
 
             _musicSource = _root.AddComponent<AudioSource>();
             _musicSource.playOnAwake = false;
