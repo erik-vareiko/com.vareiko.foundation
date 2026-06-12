@@ -15,10 +15,17 @@ namespace Vareiko.Foundation.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator AudioService_CreatesAndDisposesRuntimeRoot()
+        public IEnumerator AudioService_CreatesRuntimeRootLazily_AndDisposesIt()
         {
             AudioService service = new AudioService(null, null);
             service.Initialize();
+
+            yield return null;
+            Assert.That(GameObject.Find("[Foundation] AudioService"), Is.Null,
+                "Initialize must not create the runtime root eagerly (lazy since 2.0).");
+
+            AudioClip clip = AudioClip.Create("test-clip", 44100, 1, 44100, false);
+            service.PlaySfx(clip);
 
             yield return null;
             Assert.That(GameObject.Find("[Foundation] AudioService"), Is.Not.Null);

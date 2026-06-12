@@ -16,6 +16,10 @@
   - removed the `Zenject` reference from all asmdefs and `net.bobbo.extenject` from `package.json` (replaced by `jp.hadashikick.vcontainer` + `com.cysharp.messagepipe`)
   - `FoundationRuntimeInstaller.InstallProjectServices` now returns the `MessagePipeOptions` so hosts can register message brokers for their own signal types
   - module scaffolding templates and the BasicSetup sample rewritten for VContainer (`LifetimeScope` roots instead of `ProjectContext`/`SceneContext`)
+- DI migration — verification closed (Phase 1 done):
+  - EditMode: 214 passed / 27 failed, all 27 the frozen `TEST_BASELINE.md` set, zero new failures
+  - new `FoundationCompositionPlayModeTests` boots the real project + scene scopes in play mode and asserts single bootstrap run, scene-wide injection (incl. inactive objects), and parent-scope resolution
+  - `AudioServicePlayModeSmokeTests` updated to the 2.0 lazy audio-root behavior (was stale)
 - Changed default save storage:
   - `FoundationSaveInstaller` now binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default
   - `PlayerPrefsSaveStorage` stores one JSON payload per `slot/key` pair using stable relative PlayerPrefs keys

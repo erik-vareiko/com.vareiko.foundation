@@ -416,9 +416,20 @@ cleanup (strip `using Zenject;`/attributes from ~73 files, drop Zenject from asm
 - `FoundationProjectValidator` "ProjectContext" wording/option renamed to project-scope terms
   (`ValidateProjectScopePrefab`).
 
-## Done when
-- ~~No `Zenject` reference remains in any package asmdef or `using`.~~ DONE 2026-06-12.
-- `FoundationCompositionTests` (VContainer) and all signal tests are green — re-run needed
-  after the cleanup (expect ≤27 frozen-baseline failures, zero new).
-- Sample scene boots through the new root `LifetimeScope` — runtime check still pending
-  (verify: bootstrap runs exactly once; UI binders receive deps before first `OnEnable`).
+## Done when — ALL MET, Phase 1 closed 2026-06-12
+- ~~No `Zenject` reference remains in any package asmdef or `using`.~~ DONE 2026-06-12
+  (headless EditMode run first caught 9 missed parameterized `[Inject(Id=...)]` forms — fixed).
+- ~~`FoundationCompositionTests` (VContainer) and all signal tests are green.~~ DONE:
+  headless EditMode batch run 2026-06-12 — 214 passed / 27 failed, all 27 the frozen
+  `TEST_BASELINE.md` set, zero new.
+- ~~Sample scene boots through the new root `LifetimeScope`.~~ DONE via
+  `FoundationCompositionPlayModeTests` (PlayMode, green): boots the real
+  `FoundationProjectInstaller` + `FoundationSceneInstaller` scopes and asserts
+  (a) bootstrap publishes `ApplicationBootStartedSignal` exactly once,
+  (b) the scene-wide inject pass reaches scene MonoBehaviours including inactive ones,
+  (c) the scene scope resolves project-scope singletons through its default parent.
+  (The stale `AudioServicePlayModeSmokeTests` was also fixed to match the 2.0 lazy
+  audio-root behavior; PlayMode suite 2/2 green.)
+
+Headless test invocation (no editor open):
+`<UnityEditor>/Unity -batchmode -projectPath <repo> -runTests -testPlatform EditMode|PlayMode -testResults <xml> -logFile <log>`
