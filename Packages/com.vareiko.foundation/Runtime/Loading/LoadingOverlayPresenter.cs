@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Loading
 {
@@ -18,7 +18,7 @@ namespace Vareiko.Foundation.Loading
         private bool _subscribed;
 
         [Inject]
-        public void Construct([InjectOptional] IFoundationSignalBus signalBus = null)
+        public void Construct(IFoundationSignalBus signalBus)
         {
             _signalBus = signalBus;
         }

@@ -326,18 +326,26 @@ so the `List<T>`-via-`IEnumerable<T>` factories are safe.
   injects at resolve time (no Awake-ordering risk).
 
 **Still open — needs Unity to validate:**
-- **UI MonoBehaviour binders (12 files).** `UI/Binding/*`, `UIWindow*ButtonAction`,
-  `UIConfirmDialogPresenter`, `LoadingOverlayPresenter`, `DiagnosticsOverlayView` use Zenject
-  `[Inject] Construct(...)`. VContainer (a) only honors its OWN `[Inject]` attribute and (b)
-  does not auto-inject scene MonoBehaviours it didn't create. They are scene-placed children of
-  UI windows (discovered by `UIRegistry` via `GetComponentsInChildren`), so per-type
-  `RegisterComponentInHierarchy` won't work (it injects only the first instance of a type via
-  `FindComponentProvider`). Required port: swap each file's `using Zenject;` → `using VContainer;`
-  (drop `[InjectOptional]`; all their deps are registered), then add an explicit
-  `IObjectResolver.Inject`/`InjectGameObject` pass over each registered UI element's hierarchy —
-  cleanest hook is `UIService` (already an entry point) holding the `IObjectResolver` from its
-  factory and injecting element hierarchies in `Initialize()`. The Awake(`UIRegistry.BuildMap`)
-  vs entry-point `Initialize()` ordering must be confirmed at runtime.
+- **UI MonoBehaviour binders (12 files) — PORTED 2026-06-12, needs runtime confirmation.**
+  `UI/Binding/*`, `UIWindow*ButtonAction`, `UIConfirmDialogPresenter`, `LoadingOverlayPresenter`,
+  `DiagnosticsOverlayView` used Zenject `[Inject] Construct(...)`, which VContainer silently
+  ignores. All 12 swapped to `using VContainer;` with required `Construct` params (deps are
+  always registered; runtime null-guards kept for non-DI scenes where `Construct` never runs).
+  Injection hook: **scene-wide inject pass in `FoundationSceneInstaller`**, not the
+  UIService-held-resolver approach originally sketched — `Configure` registers a
+  `RegisterBuildCallback` that walks `gameObject.scene.GetRootGameObjects()` and calls
+  `resolver.InjectGameObject(root)` on each (Zenject `SceneContext` parity; also covers
+  `LoadingOverlayPresenter`/`DiagnosticsOverlayView`, which may live outside the `UIRegistry`
+  hierarchy). Opt-out via serialized `_injectSceneObjects`. Ordering is guaranteed, not hoped:
+  (a) `LifetimeScope` is `[DefaultExecutionOrder(-5000)]`, so the scene scope builds (and
+  injects) before any default-order script's `Awake`/`OnEnable` — binders are injected before
+  their first `OnEnable` subscription, and `DiagnosticsOverlayView._config` is set before its
+  `Awake` reads it; (b) the callback is registered at the TOP of `Configure`, before the first
+  `RegisterEntryPoint`, and build callbacks run in registration order — so scene injection
+  precedes the entry-point dispatcher (`UIService.Initialize`, `BootstrapRunner`).
+  `InjectGameObject` recurses children including inactive; types without VContainer `[Inject]`
+  members are cheap cached no-ops. Limitation: additively-loaded scenes need their own
+  `FoundationSceneInstaller` (same as Zenject needed a `SceneContext` per scene).
 - **Scope topology / double bootstrap install — RESOLVED 2026-06-09.** `FoundationBootstrapInstaller.Install`
   ran in BOTH the project scope (`FoundationRuntimeInstaller`) and the scene scope
   (`FoundationSceneInstaller:20`), registering `BootstrapRunner` twice (the project-scope one with

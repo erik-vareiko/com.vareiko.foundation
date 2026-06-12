@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.UI
 {
@@ -25,7 +25,7 @@ namespace Vareiko.Foundation.UI
         private string _defaultCancelLabel = string.Empty;
 
         [Inject]
-        public void Construct([InjectOptional] IUIWindowResultService windowResultService = null)
+        public void Construct(IUIWindowResultService windowResultService)
         {
             _windowResultService = windowResultService;
         }

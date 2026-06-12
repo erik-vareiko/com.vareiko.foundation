@@ -14,9 +14,21 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private UIRegistry _uiRegistry;
         [SerializeField] private MonoBehaviour[] _bootstrapTasks;
         [SerializeField] private ConfigRegistry[] _configRegistries;
+        [SerializeField] private bool _injectSceneObjects = true;
 
         protected override void Configure(IContainerBuilder builder)
         {
+            // Zenject's SceneContext injected every MonoBehaviour in the scene; VContainer does not.
+            // This callback replays that behaviour for scene-placed components with VContainer
+            // [Inject] methods (UI binders, button actions, overlay presenters). It MUST be
+            // registered before the first RegisterEntryPoint below: build callbacks run in
+            // registration order, and the entry-point dispatcher (which runs Initialize, including
+            // UIService and BootstrapRunner) is itself a build callback added by RegisterEntryPoint.
+            if (_injectSceneObjects)
+            {
+                builder.RegisterBuildCallback(InjectSceneObjects);
+            }
+
             FoundationBootstrapInstaller.Install(builder);
             FoundationUIInstaller.Install(builder);
             FoundationUINavigationInstaller.Install(builder);
@@ -27,6 +39,16 @@ namespace Vareiko.Foundation.Installers
             }
 
             RegisterBootstrapTasks(builder);
+        }
+
+        private void InjectSceneObjects(IObjectResolver resolver)
+        {
+            List<GameObject> roots = new List<GameObject>();
+            gameObject.scene.GetRootGameObjects(roots);
+            for (int i = 0; i < roots.Count; i++)
+            {
+                resolver.InjectGameObject(roots[i]);
+            }
         }
 
         private void RegisterBootstrapTasks(IContainerBuilder builder)

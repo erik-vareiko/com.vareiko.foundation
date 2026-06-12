@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using Vareiko.Foundation.Signals;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.UI
 {
@@ -18,7 +18,7 @@ namespace Vareiko.Foundation.UI
         private IDisposable _subscription;
 
         [Inject]
-        public void Construct([InjectOptional] IFoundationSignalBus signalBus = null, [InjectOptional] IUIValueEventService valueService = null)
+        public void Construct(IFoundationSignalBus signalBus, IUIValueEventService valueService)
         {
             _signalBus = signalBus;
             _valueService = valueService;

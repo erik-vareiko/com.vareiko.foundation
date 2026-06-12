@@ -1,5 +1,5 @@
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.UI
 {
@@ -14,7 +14,7 @@ namespace Vareiko.Foundation.UI
         private IUIWindowManager _windowManager;
 
         [Inject]
-        public void Construct([InjectOptional] IUIWindowManager windowManager = null)
+        public void Construct(IUIWindowManager windowManager)
         {
             _windowManager = windowManager;
         }
