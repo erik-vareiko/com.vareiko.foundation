@@ -139,8 +139,15 @@ the owner: grouped granularity, Observability via direct refs):
 
 ### Phase 3 — Core primitives (extended scope)
 - `Result<T>` / error primitive; migrate ad-hoc result types onto it. (G5)
-- Generic object pool (`IPool<T>`, prefab pool, auto-return). (G2)
-- `ITickService` — ordered update/pause + timers/deferred calls; upgrade `Time`. (G3)
+- ~~Generic object pool (`IPool<T>`, prefab pool, auto-return). (G2)~~ DONE 2026-06-12:
+  `Vareiko.Foundation.Pooling` in Core — `IObjectPool<T>`, `ObjectPool<T>` (callbacks,
+  maxSize, prewarm, double-release detection), `ComponentPool<T>` (prefab lifecycle,
+  overflow destruction), `GetScoped` auto-return. Covered by EditMode tests.
+- ~~`ITickService` — ordered update/pause + timers/deferred calls; upgrade `Time`. (G3)~~
+  DONE 2026-06-12: `TickService` in `Vareiko.Foundation.Time` — ordered listeners,
+  `Delay`/`Repeat`/`NextFrame` (scaled/unscaled), pause, per-listener exception
+  isolation; container player-loop entry point in play mode, manual `Advance` in
+  tests. Registered in `FoundationTimeInstaller`; part of the composition spec.
 - Generic FSM + extensible app states replacing the hardcoded `AppState` enum. (G4)
 - Core utility layer. (G6)
 

@@ -49,6 +49,7 @@ namespace Vareiko.Foundation.Tests.Composition
             Assert.That(container.Resolve<ISaveService>(), Is.Not.Null, "ISaveService");
             Assert.That(container.Resolve<IConsentService>(), Is.Not.Null, "IConsentService");
             Assert.That(container.Resolve<IFoundationTimeProvider>(), Is.Not.Null, "IFoundationTimeProvider");
+            Assert.That(container.Resolve<ITickService>(), Is.Not.Null, "ITickService");
             Assert.That(container.Resolve<IDeterministicRngService>(), Is.Not.Null, "IDeterministicRngService");
             Assert.That(container.Resolve<IEnvironmentService>(), Is.Not.Null, "IEnvironmentService");
             Assert.That(container.Resolve<IFeatureFlagService>(), Is.Not.Null, "IFeatureFlagService");

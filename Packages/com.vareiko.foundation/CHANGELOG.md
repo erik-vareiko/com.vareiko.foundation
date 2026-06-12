@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Core primitives (Phase 3 of the 3.0 refactor, first batch):
+  - `ITickService` / `TickService` (`Vareiko.Foundation.Time`) — central ordered update loop: per-frame listeners with explicit ordering, `Delay`/`Repeat`/`NextFrame` timers (scaled or unscaled time), pause support, exception isolation per listener, `IDisposable` handles everywhere; driven by the container player-loop in play mode, manually via `Advance` in tests. Registered by `FoundationTimeInstaller` and resolvable from the project scope.
+  - Object pooling (`Vareiko.Foundation.Pooling`) — `IObjectPool<T>` with `ObjectPool<T>` for plain classes (factory, get/release/destroy callbacks, max size, prewarm, double-release detection) and `ComponentPool<T>` for prefab instances (activate/deactivate lifecycle, reparenting, overflow destruction, tolerance to externally destroyed instances), plus a `using`-scoped `GetScoped` helper.
 - Asmdef modularization (Phase 2 of the 3.0 refactor) — the monolithic `Vareiko.Foundation` assembly is split into 10 runtime assemblies:
   - `Vareiko.Foundation.Core` (signals facade, time, common, app+bootstrap, config, connectivity, environment, input, loading, RNG, scene flow, validation framework), `…Persistence` (save+settings+consent), `…Audio`, `…UI` (incl. UINavigation), `…Assets`, `…Backend`, `…Features`, `…Monetization` (ads/IAP/push/attribution/analytics/economy/policy), `…Observability`, and the `Vareiko.Foundation` umbrella (composition root; references all modules)
   - a host can now reference Core + a subset of modules and compile without the rest; the umbrella keeps the all-in `InstallProjectServices` path working unchanged
