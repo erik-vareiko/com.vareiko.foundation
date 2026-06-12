@@ -7,10 +7,10 @@ namespace Vareiko.Foundation.Save
 {
     public sealed class SecureSaveSerializer : ISaveSerializer
     {
-        private readonly JsonUnitySaveSerializer _inner;
+        private readonly ISaveSerializer _inner;
         private readonly SaveSecurityConfig _config;
 
-        public SecureSaveSerializer(JsonUnitySaveSerializer inner, SaveSecurityConfig config = null)
+        public SecureSaveSerializer(ISaveSerializer inner, SaveSecurityConfig config = null)
         {
             _inner = inner;
             _config = config;

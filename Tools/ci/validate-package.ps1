@@ -31,7 +31,7 @@ Assert-Condition $versionMatch.Success "Unable to find top changelog version hea
 $changelogVersion = $versionMatch.Groups[1].Value
 Assert-Condition ($changelogVersion -eq $packageVersion) "Version mismatch: package.json=$packageVersion, changelog=$changelogVersion."
 
-$requiredDependencies = @("com.cysharp.unitask", "jp.hadashikick.vcontainer", "com.cysharp.messagepipe")
+$requiredDependencies = @("com.cysharp.unitask", "jp.hadashikick.vcontainer", "com.cysharp.messagepipe", "com.unity.nuget.newtonsoft-json")
 $declaredDependencies = @($packageJson.dependencies.PSObject.Properties | ForEach-Object { $_.Name })
 foreach ($dependency in $requiredDependencies) {
     Assert-Condition ($declaredDependencies -contains $dependency) "Missing required dependency '$dependency' in package.json."

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Save serializer default swap (Phase 4, G9): `NewtonsoftJsonSaveSerializer` is the new default payload serializer behind `SecureSaveSerializer` — dictionaries, nullables and polymorphic payloads now serialize correctly. It writes the same `{"Value": ...}` envelope as the old JsonUtility serializer, so pre-3.0 saves keep loading; `JsonUnitySaveSerializer` stays available as a dependency-free fallback. New package dependency: `com.unity.nuget.newtonsoft-json` 3.2.1 (added to validator/CI required-deps). `SecureSaveSerializer` now composes over `ISaveSerializer` instead of the concrete JsonUtility type.
 - Core primitives (Phase 3, second batch):
   - `Result` / `Result<T>` (`Vareiko.Foundation`) — canonical success/failure primitive (factories, `TryGetValue`, `GetValueOrDefault`, `AsResult`); the default for new foundation APIs. `IDiagnosticsSnapshotExportService.ExportAsync` migrated from its ad-hoc result struct to `Result<string>` (breaking); domain results carrying codes/flags (backend, cloud sync) intentionally keep their shapes.
   - `StateMachine<TState>` (`Vareiko.Foundation`) — minimal generic FSM (transition guard, `TryEnter`/`ForceEnter`, change event, custom comparer).

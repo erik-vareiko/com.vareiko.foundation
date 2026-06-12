@@ -167,8 +167,14 @@ the owner: grouped granularity, Observability via direct refs):
 
 ### Phase 4 — Maturity
 - Vertical-slice sample (dogfood). (G8)
-- Swap `JsonUtility` default in `ISaveSerializer`. (G9)
-- Backfill tests for new Core modules.
+- ~~Swap `JsonUtility` default in `ISaveSerializer`. (G9)~~ DONE 2026-06-12:
+  `NewtonsoftJsonSaveSerializer` (com.unity.nuget.newtonsoft-json 3.2.1) is the
+  default behind `SecureSaveSerializer`; same `{"Value": ...}` envelope as the
+  JsonUtility serializer so pre-3.0 saves keep loading (cross-compat covered by
+  tests both directions). `JsonUnitySaveSerializer` remains as fallback;
+  `SecureSaveSerializer` now composes over `ISaveSerializer`.
+- ~~Backfill tests for new Core modules.~~ Covered as the primitives landed
+  (Phase 3 shipped with 50 tests: pooling, tick, result, FSM, disposables).
 
 ## Out of scope (explicitly)
 - Gameplay frameworks (entity/component models, gameplay loops) beyond the generic

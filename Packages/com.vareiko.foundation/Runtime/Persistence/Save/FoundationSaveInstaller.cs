@@ -25,8 +25,16 @@ namespace Vareiko.Foundation.Save
             // matches by type and would feed saveRootPath to BOTH, corrupting the key prefix. Build via a
             // factory so keyPrefix keeps its baked default.
             builder.Register<ISaveStorage>(_ => new PlayerPrefsSaveStorage(saveRootPath), Lifetime.Singleton);
+            // Newtonsoft is the default payload serializer since 3.0 (handles dictionaries,
+            // nullables, polymorphism); it writes the same {"Value": ...} envelope as the
+            // JsonUtility serializer, so pre-3.0 saves keep loading. JsonUnitySaveSerializer
+            // stays registered for hosts that want the dependency-free fallback.
             builder.Register<JsonUnitySaveSerializer>(Lifetime.Singleton);
-            builder.Register<SecureSaveSerializer>(Lifetime.Singleton).As<ISaveSerializer>();
+            builder.Register<NewtonsoftJsonSaveSerializer>(Lifetime.Singleton);
+            builder.Register<ISaveSerializer>(resolver => new SecureSaveSerializer(
+                    resolver.Resolve<NewtonsoftJsonSaveSerializer>(),
+                    resolver.Resolve<SaveSecurityConfig>()),
+                Lifetime.Singleton);
             builder.Register<SaveMigrationService>(resolver => new SaveMigrationService(
                     new List<ISaveMigration>(resolver.Resolve<IEnumerable<ISaveMigration>>())),
                 Lifetime.Singleton)
