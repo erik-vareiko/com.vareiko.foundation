@@ -3,6 +3,7 @@ using System.IO;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Save
 {
@@ -34,6 +35,26 @@ namespace Vareiko.Foundation.Save
             builder.Register<SaveService>(Lifetime.Singleton).As<ISaveService>().WithParameter<string>(saveRootPath);
             builder.Register<CloudSaveSyncService>(Lifetime.Singleton).As<ICloudSaveSyncService>();
             builder.RegisterEntryPoint<AutosaveService>(Lifetime.Singleton).AsSelf();
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<SaveWrittenSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveDeletedSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveLoadFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveBackupWrittenSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveRestoredFromBackupSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveMigratedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AutosaveTriggeredSignal>(signalOptions);
+            builder.RegisterMessageBroker<AutosaveCompletedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AutosaveFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveCloudPushedSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveCloudPulledSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveCloudConflictResolvedSignal>(signalOptions);
+            builder.RegisterMessageBroker<SaveCloudSyncFailedSignal>(signalOptions);
         }
     }
 }

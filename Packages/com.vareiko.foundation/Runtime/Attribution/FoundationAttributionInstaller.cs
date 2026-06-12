@@ -1,6 +1,7 @@
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Attribution
 {
@@ -18,6 +19,18 @@ namespace Vareiko.Foundation.Attribution
             {
                 builder.Register<NullAttributionService>(Lifetime.Singleton).As<IAttributionService>();
             }
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<AttributionInitializedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AttributionEventTrackedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AttributionEventTrackFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AttributionRevenueTrackedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AttributionRevenueTrackFailedSignal>(signalOptions);
         }
     }
 }

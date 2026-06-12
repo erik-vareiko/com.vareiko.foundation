@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Vareiko.Foundation.Signals;
 using VContainer;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Input
 {
@@ -31,6 +32,14 @@ namespace Vareiko.Foundation.Input
                     resolver.Resolve<IFoundationSignalBus>()),
                 Lifetime.Singleton)
                 .As<IInputService>();
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<InputSchemeChangedSignal>(signalOptions);
         }
     }
 }

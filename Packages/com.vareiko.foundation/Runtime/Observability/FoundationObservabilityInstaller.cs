@@ -5,6 +5,7 @@ using Vareiko.Foundation.App;
 using Vareiko.Foundation.Signals;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -44,6 +45,20 @@ namespace Vareiko.Foundation.Observability
                         crashReportingService);
                 }, Lifetime.Singleton)
                 .AsSelf();
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<LogMessageEmittedSignal>(signalOptions);
+            builder.RegisterMessageBroker<DiagnosticsSnapshotUpdatedSignal>(signalOptions);
+            builder.RegisterMessageBroker<DiagnosticsSnapshotExportedSignal>(signalOptions);
+            builder.RegisterMessageBroker<DiagnosticsSnapshotExportFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<UnhandledExceptionCapturedSignal>(signalOptions);
+            builder.RegisterMessageBroker<CrashReportSubmittedSignal>(signalOptions);
+            builder.RegisterMessageBroker<CrashReportSubmissionFailedSignal>(signalOptions);
         }
     }
 }

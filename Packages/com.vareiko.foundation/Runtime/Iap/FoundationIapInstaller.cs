@@ -1,6 +1,7 @@
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Iap
 {
@@ -22,6 +23,19 @@ namespace Vareiko.Foundation.Iap
             {
                 builder.Register<NullInAppPurchaseService>(Lifetime.Singleton).As<IInAppPurchaseService>();
             }
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<IapInitializedSignal>(signalOptions);
+            builder.RegisterMessageBroker<IapPurchaseSucceededSignal>(signalOptions);
+            builder.RegisterMessageBroker<IapPurchaseFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<IapRestoreCompletedSignal>(signalOptions);
+            builder.RegisterMessageBroker<IapRestoreFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<IapOperationTelemetrySignal>(signalOptions);
         }
     }
 }

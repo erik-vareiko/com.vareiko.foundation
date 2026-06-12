@@ -1,6 +1,7 @@
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Push
 {
@@ -22,6 +23,21 @@ namespace Vareiko.Foundation.Push
             {
                 builder.Register<NullPushNotificationService>(Lifetime.Singleton).As<IPushNotificationService>();
             }
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<PushInitializedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushPermissionChangedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushTokenUpdatedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushTopicSubscribedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushTopicUnsubscribedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushTopicSubscriptionFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushTopicUnsubscriptionFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<PushOperationTelemetrySignal>(signalOptions);
         }
     }
 }

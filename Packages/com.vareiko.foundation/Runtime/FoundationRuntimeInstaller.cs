@@ -6,6 +6,7 @@ using Vareiko.Foundation.AssetManagement;
 using Vareiko.Foundation.Attribution;
 using Vareiko.Foundation.Audio;
 using Vareiko.Foundation.Backend;
+using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Common;
 using Vareiko.Foundation.Config;
 using Vareiko.Foundation.Connectivity;
@@ -26,6 +27,8 @@ using Vareiko.Foundation.SceneFlow;
 using Vareiko.Foundation.Settings;
 using Vareiko.Foundation.Signals;
 using Vareiko.Foundation.Time;
+using Vareiko.Foundation.UI;
+using Vareiko.Foundation.UINavigation;
 using Vareiko.Foundation.Validation;
 using VContainer;
 
@@ -59,13 +62,43 @@ namespace Vareiko.Foundation
             ObservabilityConfig observabilityConfig = null,
             DeterministicRngConfig deterministicRngConfig = null)
         {
-            // MessagePipe + the IFoundationSignalBus facade + every foundation signal broker are
-            // registered once here, at the composition root, replacing Zenject's scattered
-            // SignalBusInstaller / DeclareSignal calls.
+            // MessagePipe + the IFoundationSignalBus facade are registered once here, at the
+            // composition root. Each module owns its broker registrations (RegisterSignals),
+            // but they all land in THIS scope: the facade publishes through GlobalMessagePipe,
+            // whose provider is the project container — that's also why scene-scope modules
+            // (Bootstrap, UI, UINavigation) register their signals here, not in the scene scope.
             MessagePipeOptions messagePipeOptions = builder.RegisterMessagePipe();
             builder.RegisterBuildCallback(container => GlobalMessagePipe.SetProvider(container.AsServiceProvider()));
             builder.Register<MessagePipeSignalBus>(Lifetime.Singleton).As<IFoundationSignalBus>();
-            FoundationSignalBrokers.Register(builder, messagePipeOptions);
+
+            FoundationAppInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationBootstrapInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationCommonInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationConfigInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationEnvironmentInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationConnectivityInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationConsentInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationSettingsInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationLocalizationInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationSaveInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationAssetInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationSceneFlowInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationLoadingInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationInputInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationEconomyInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationAnalyticsInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationAttributionInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationIapInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationAdsInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationPushNotificationInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationMonetizationInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationBackendInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationFeatureFlagsInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationObservabilityInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationAudioInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationValidationInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationUIInstaller.RegisterSignals(builder, messagePipeOptions);
+            FoundationUINavigationInstaller.RegisterSignals(builder, messagePipeOptions);
 
             FoundationTimeInstaller.Install(builder);
             FoundationCommonInstaller.Install(builder);

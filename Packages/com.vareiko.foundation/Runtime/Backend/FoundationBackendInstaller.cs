@@ -5,6 +5,7 @@ using Vareiko.Foundation.Signals;
 using Vareiko.Foundation.Time;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -103,6 +104,21 @@ namespace Vareiko.Foundation.Backend
                     r.Resolve<IFoundationSignalBus>()),
                 Lifetime.Singleton)
                 .AsSelf();
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<BackendAuthStateChangedSignal>(signalOptions);
+            builder.RegisterMessageBroker<BackendOperationRetriedSignal>(signalOptions);
+            builder.RegisterMessageBroker<CloudFunctionQueuedSignal>(signalOptions);
+            builder.RegisterMessageBroker<CloudFunctionQueueFlushedSignal>(signalOptions);
+            builder.RegisterMessageBroker<CloudFunctionQueueRestoredSignal>(signalOptions);
+            builder.RegisterMessageBroker<RemoteConfigRefreshedSignal>(signalOptions);
+            builder.RegisterMessageBroker<RemoteConfigRefreshFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<RemoteConfigCacheInvalidatedSignal>(signalOptions);
         }
     }
 }

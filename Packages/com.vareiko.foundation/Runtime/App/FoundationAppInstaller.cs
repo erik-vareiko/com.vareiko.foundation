@@ -1,6 +1,7 @@
 using Vareiko.Foundation.Signals;
 using VContainer;
 using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.App
 {
@@ -18,6 +19,17 @@ namespace Vareiko.Foundation.App
                     return new ApplicationLifecycleService(resolver.Resolve<IFoundationSignalBus>(), source);
                 }, Lifetime.Singleton)
                 .AsSelf();
+        }
+
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<AppStateChangedSignal>(signalOptions);
+            builder.RegisterMessageBroker<ApplicationPauseChangedSignal>(signalOptions);
+            builder.RegisterMessageBroker<ApplicationFocusChangedSignal>(signalOptions);
+            builder.RegisterMessageBroker<ApplicationQuitSignal>(signalOptions);
         }
     }
 }
