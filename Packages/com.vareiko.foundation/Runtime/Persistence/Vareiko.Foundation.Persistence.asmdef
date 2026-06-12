@@ -1,16 +1,8 @@
 {
-  "name": "Vareiko.Foundation",
+  "name": "Vareiko.Foundation.Persistence",
   "rootNamespace": "Vareiko.Foundation",
   "references": [
     "Vareiko.Foundation.Core",
-    "Vareiko.Foundation.Persistence",
-    "Vareiko.Foundation.Audio",
-    "Vareiko.Foundation.UI",
-    "Vareiko.Foundation.Assets",
-    "Vareiko.Foundation.Backend",
-    "Vareiko.Foundation.Features",
-    "Vareiko.Foundation.Monetization",
-    "Vareiko.Foundation.Observability",
     "UniTask",
     "VContainer",
     "MessagePipe",

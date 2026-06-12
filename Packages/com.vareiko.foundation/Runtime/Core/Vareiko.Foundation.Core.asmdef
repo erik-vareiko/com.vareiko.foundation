@@ -1,15 +1,14 @@
 {
-  "name": "Vareiko.Foundation.Editor",
-  "rootNamespace": "Vareiko.Foundation.Editor",
+  "name": "Vareiko.Foundation.Core",
+  "rootNamespace": "Vareiko.Foundation",
   "references": [
-    "Vareiko.Foundation",
-    "Vareiko.Foundation.Core",
-    "Vareiko.Foundation.UI",
-    "VContainer"
+    "UniTask",
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer",
+    "Unity.InputSystem"
   ],
-  "includePlatforms": [
-    "Editor"
-  ],
+  "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,

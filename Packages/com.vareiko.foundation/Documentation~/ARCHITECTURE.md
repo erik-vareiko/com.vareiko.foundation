@@ -1,5 +1,30 @@
 # Foundation Architecture
 
+## Assembly Layout (since 3.0)
+
+10 runtime assemblies; a host references `Vareiko.Foundation.Core` plus the modules
+it opts into, or the `Vareiko.Foundation` umbrella for everything:
+
+| Assembly | Contents | References |
+|---|---|---|
+| `Vareiko.Foundation.Core` | signals facade, Time, Common, App+Bootstrap, Config, Connectivity, Environment, Input, Loading, Rng, SceneFlow, Composition, Validation framework | — |
+| `Vareiko.Foundation.Persistence` | Save, Settings, Consent | Core |
+| `Vareiko.Foundation.Audio` | Audio | Core, Persistence |
+| `Vareiko.Foundation.UI` | UI, UINavigation | Core |
+| `Vareiko.Foundation.Assets` | AssetManagement (`FOUNDATION_ADDRESSABLES` auto-defined via versionDefines) | Core |
+| `Vareiko.Foundation.Backend` | backend abstractions, reliability/queues, remote-config cache, cloud save sync, PlayFab stubs | Core, Persistence |
+| `Vareiko.Foundation.Features` | feature flags | Core, Backend |
+| `Vareiko.Foundation.Monetization` | Ads, Iap, Push, Attribution, Analytics, Economy, policy, monetization observability | Core, Persistence, Observability |
+| `Vareiko.Foundation.Observability` | logger, diagnostics, export, exception handler | Core, Assets, Backend |
+| `Vareiko.Foundation` (umbrella) | `FoundationRuntimeInstaller`, Project/Scene installers, cross-module startup rules | all of the above |
+
+Each module installer exposes `Install(IContainerBuilder, …)` plus
+`RegisterSignals(IContainerBuilder, MessagePipeOptions)`; signal brokers always
+register in the **project scope** (the `IFoundationSignalBus` facade publishes
+through `GlobalMessagePipe`, whose provider is the project container). A subset
+host composes its own project `LifetimeScope`: `RegisterMessagePipe`, facade,
+then per-module `RegisterSignals` + `Install`.
+
 ## Composition Model
 - `FoundationProjectInstaller` (a VContainer `LifetimeScope`): global runtime services.
 - `FoundationSceneInstaller` (a child `LifetimeScope`, auto-parented to the project scope): scene-local UI and startup tasks; injects scene-placed MonoBehaviours at container build.

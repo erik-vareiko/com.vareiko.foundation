@@ -111,6 +111,32 @@ Done on the current monolith — a sweeping change is simpler in one assembly.
 - Closes G1.
 - **Done when:** a host can reference Core + a subset and compile without the rest.
 
+Status (2026-06-12): **landed** as 10 runtime assemblies (decisions confirmed with
+the owner: grouped granularity, Observability via direct refs):
+- `Vareiko.Foundation.Core` — Signals facade, Time, Common, App+Bootstrap (cyclic
+  pair), Config, Connectivity, Environment, Input, Loading, Rng, SceneFlow,
+  Composition, Validation framework.
+- `Vareiko.Foundation.Persistence` — Save+Settings+Consent (mutually cyclic by
+  design: settings/consent persist through saves).
+- `Vareiko.Foundation.Audio` (→ Persistence), `…UI` (incl. UINavigation),
+  `…Assets` (versionDefines: `FOUNDATION_ADDRESSABLES` auto-set from
+  `com.unity.addressables`; refs `Unity.Addressables`/`Unity.ResourceManager`,
+  ignored when absent), `…Backend` (incl. CloudSaveSync + PlayFab stubs),
+  `…Features` (→ Backend), `…Monetization` (Ads/Iap/Push/Attribution/Analytics/
+  Economy/policy, → Persistence + Observability), `…Observability`
+  (→ Assets + Backend).
+- `Vareiko.Foundation` (umbrella) — `FoundationRuntimeInstaller`, the
+  Project/Scene installers, cross-module startup rules; refs all modules.
+  Hosts wanting a subset compose their own `LifetimeScope` from module
+  installers (`RegisterSignals` + `Install`) instead of `InstallProjectServices`.
+- Deviation from the sketch: no `Foundation.Backend.PlayFab` — the PlayFab
+  "impl" is a stub behind `#if PLAYFAB_SDK` with no SDK reference today; split
+  it out when a real SDK integration lands.
+- Enablers landed earlier the same day: per-module `RegisterSignals` (the
+  central broker registry would have made Core depend on every module) and the
+  cross-module ownership moves (CloudSaveSync→Backend,
+  MonetizationObservability→Monetization, startup rules→composition root).
+
 ### Phase 3 — Core primitives (extended scope)
 - `Result<T>` / error primitive; migrate ad-hoc result types onto it. (G5)
 - Generic object pool (`IPool<T>`, prefab pool, auto-return). (G2)

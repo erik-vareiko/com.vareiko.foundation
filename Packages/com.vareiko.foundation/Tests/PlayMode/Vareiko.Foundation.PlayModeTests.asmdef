@@ -3,6 +3,10 @@
   "rootNamespace": "Vareiko.Foundation.Tests.PlayMode",
   "references": [
     "Vareiko.Foundation",
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.Persistence",
+    "Vareiko.Foundation.UI",
+    "Vareiko.Foundation.Audio",
     "UniTask",
     "VContainer"
   ],

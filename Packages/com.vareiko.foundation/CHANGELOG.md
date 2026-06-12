@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- Asmdef modularization (Phase 2 of the 3.0 refactor) — the monolithic `Vareiko.Foundation` assembly is split into 10 runtime assemblies:
+  - `Vareiko.Foundation.Core` (signals facade, time, common, app+bootstrap, config, connectivity, environment, input, loading, RNG, scene flow, validation framework), `…Persistence` (save+settings+consent), `…Audio`, `…UI` (incl. UINavigation), `…Assets`, `…Backend`, `…Features`, `…Monetization` (ads/IAP/push/attribution/analytics/economy/policy), `…Observability`, and the `Vareiko.Foundation` umbrella (composition root; references all modules)
+  - a host can now reference Core + a subset of modules and compile without the rest; the umbrella keeps the all-in `InstallProjectServices` path working unchanged
+  - `FOUNDATION_ADDRESSABLES` is now auto-defined via asmdef `versionDefines` when `com.unity.addressables` is installed (previously the define could not work in package form — the assembly had no Addressables reference)
+  - signal brokers are registered per module (`Foundation<Module>Installer.RegisterSignals`); the central `FoundationSignalBrokers` registry is removed
+  - ownership moves to keep the assembly graph acyclic: `CloudSaveSyncService` → backend module, `MonetizationObservabilityService` → monetization module (contract stays in observability), cross-module startup validation rules → composition root
+  - namespaces are unchanged — consumer code keeps compiling after adding the module references; hosts referencing the `Vareiko.Foundation` asmdef by name keep working via the umbrella
 - DI migration Phase 1c — VContainer/MessagePipe cutover (composition now runs on VContainer):
   - all 31 module installers converted `DiContainer` → `IContainerBuilder`; `FoundationRuntimeInstaller` registers MessagePipe + the `IFoundationSignalBus` facade (`MessagePipeSignalBus`) + every signal broker once at the root
   - root `FoundationProjectInstaller` / `FoundationSceneInstaller` / `FoundationDomainInstaller` are now VContainer `LifetimeScope`s (`Configure(IContainerBuilder)`)

@@ -3,7 +3,9 @@
   "rootNamespace": "Vareiko.Foundation.EditorTests",
   "references": [
     "Vareiko.Foundation",
-    "Vareiko.Foundation.Editor"
+    "Vareiko.Foundation.Editor",
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.UI"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"
