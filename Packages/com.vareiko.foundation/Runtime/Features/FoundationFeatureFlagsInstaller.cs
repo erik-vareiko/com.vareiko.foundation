@@ -1,29 +1,25 @@
-using Zenject;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Features
 {
     public static class FoundationFeatureFlagsInstaller
     {
-        public static void Install(DiContainer container, FeatureFlagsConfig config = null)
+        public static void Install(IContainerBuilder builder, FeatureFlagsConfig config = null)
         {
-            if (container.HasBinding<IFeatureFlagService>())
-            {
-                return;
-            }
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<FeatureFlagsConfig>());
+            builder.RegisterEntryPoint<FeatureFlagService>(Lifetime.Singleton).As<IFeatureFlagService>().AsSelf();
+        }
 
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<FeatureFlagsRefreshedSignal>();
-            container.DeclareSignal<FeatureFlagOverriddenSignal>();
-            container.BindInterfacesAndSelfTo<FeatureFlagService>().AsSingle().NonLazy();
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<FeatureFlagsRefreshedSignal>(signalOptions);
+            builder.RegisterMessageBroker<FeatureFlagOverriddenSignal>(signalOptions);
         }
     }
 }

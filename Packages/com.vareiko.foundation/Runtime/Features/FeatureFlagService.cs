@@ -2,23 +2,22 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Backend;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.Features
 {
-    public sealed class FeatureFlagService : IFeatureFlagService, IInitializable
+    public sealed class FeatureFlagService : IFeatureFlagService, VContainer.Unity.IInitializable
     {
         private readonly IRemoteConfigService _remoteConfigService;
         private readonly FeatureFlagsConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly Dictionary<string, bool> _defaultBools = new Dictionary<string, bool>(System.StringComparer.Ordinal);
         private readonly Dictionary<string, bool> _overrides = new Dictionary<string, bool>(System.StringComparer.Ordinal);
 
-        [Inject]
         public FeatureFlagService(
-            [InjectOptional] IRemoteConfigService remoteConfigService = null,
-            [InjectOptional] FeatureFlagsConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            IRemoteConfigService remoteConfigService = null,
+            FeatureFlagsConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _remoteConfigService = remoteConfigService;
             _config = config;
@@ -109,7 +108,7 @@ namespace Vareiko.Foundation.Features
             }
 
             _overrides[key] = value;
-            _signalBus?.Fire(new FeatureFlagOverriddenSignal(key, value));
+            _signalBus?.Publish(new FeatureFlagOverriddenSignal(key, value));
         }
 
         public void ClearLocalOverrides()
@@ -121,14 +120,14 @@ namespace Vareiko.Foundation.Features
         {
             if (_remoteConfigService == null)
             {
-                _signalBus?.Fire(new FeatureFlagsRefreshedSignal(0));
+                _signalBus?.Publish(new FeatureFlagsRefreshedSignal(0));
                 return;
             }
 
             await _remoteConfigService.RefreshAsync(cancellationToken);
             IReadOnlyDictionary<string, string> snapshot = _remoteConfigService.Snapshot();
             int count = snapshot != null ? snapshot.Count : 0;
-            _signalBus?.Fire(new FeatureFlagsRefreshedSignal(count));
+            _signalBus?.Publish(new FeatureFlagsRefreshedSignal(count));
         }
 
         private async UniTaskVoid RefreshSafeAsync()

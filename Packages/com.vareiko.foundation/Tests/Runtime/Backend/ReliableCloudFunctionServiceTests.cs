@@ -7,7 +7,6 @@ using UnityEngine;
 using Vareiko.Foundation.Backend;
 using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Backend
 {
@@ -48,13 +47,13 @@ namespace Vareiko.Foundation.Tests.Backend
             {
                 new CloudFunctionQueueItem("fn.restore", "{\"id\":1}")
             });
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
 
             ReliableCloudFunctionService service = new ReliableCloudFunctionService(inner, connectivity, config, signalBus, queueStore);
             service.Initialize();
 
             connectivity.SetOnline(true, NetworkReachability.ReachableViaLocalAreaNetwork);
-            signalBus.Fire(new ConnectivityChangedSignal(true, connectivity.Reachability));
+            signalBus.Publish(new ConnectivityChangedSignal(true, connectivity.Reachability));
             await UniTask.DelayFrame(2);
 
             Assert.That(inner.ExecutedFunctionNames.Count, Is.EqualTo(1));
@@ -95,18 +94,6 @@ namespace Vareiko.Foundation.Tests.Backend
             ReflectionTestUtil.SetPrivateField(config, "_enablePersistentCloudFunctionQueue", persistentQueue);
             ReflectionTestUtil.SetPrivateField(config, "_maxQueuedCloudFunctions", 16);
             return config;
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<ConnectivityChangedSignal>();
-            container.DeclareSignal<BackendOperationRetriedSignal>();
-            container.DeclareSignal<CloudFunctionQueuedSignal>();
-            container.DeclareSignal<CloudFunctionQueueFlushedSignal>();
-            container.DeclareSignal<CloudFunctionQueueRestoredSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class FakeCloudFunctionService : ICloudFunctionService

@@ -1,15 +1,16 @@
 {
   "name": "com.vareiko.foundation",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "displayName": "Vareiko Foundation",
-  "description": "Zenject-first foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
+  "description": "VContainer-based foundation architecture for Unity projects: app state, bootstrap, scene flow, save/settings, UI, audio, analytics and backend abstractions.",
   "unity": "2022.3",
   "license": "MIT",
   "author": {
     "name": "Vareiko"
   },
   "keywords": [
-    "zenject",
+    "vcontainer",
+    "messagepipe",
     "architecture",
     "foundation",
     "analytics",
@@ -19,6 +20,21 @@
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
     "com.unity.inputsystem": "1.7.0",
-    "net.bobbo.extenject": "9.3.2"
-  }
+    "jp.hadashikick.vcontainer": "1.18.0",
+    "com.cysharp.messagepipe": "1.8.1",
+    "com.cysharp.messagepipe.vcontainer": "1.8.1",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "samples": [
+    {
+      "displayName": "Basic Setup",
+      "description": "Minimal scene wiring: ensures the project/scene scopes and a UI registry from one component.",
+      "path": "Samples~/BasicSetup"
+    },
+    {
+      "displayName": "Vertical Slice",
+      "description": "Level-0 dogfood: boot pipeline, custom app state, tick-driven pooled gameplay and autosaved progress from a single component in an empty scene.",
+      "path": "Samples~/VerticalSlice"
+    }
+  ]
 }

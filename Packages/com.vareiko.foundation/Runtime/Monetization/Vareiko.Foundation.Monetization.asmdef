@@ -1,0 +1,22 @@
+{
+  "name": "Vareiko.Foundation.Monetization",
+  "rootNamespace": "Vareiko.Foundation",
+  "references": [
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.Persistence",
+    "Vareiko.Foundation.Observability",
+    "UniTask",
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

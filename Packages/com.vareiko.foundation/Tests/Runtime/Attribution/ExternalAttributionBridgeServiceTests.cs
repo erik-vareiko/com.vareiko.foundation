@@ -6,7 +6,6 @@ using UnityEngine;
 using Vareiko.Foundation.Attribution;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Attribution
 {
@@ -75,7 +74,7 @@ namespace Vareiko.Foundation.Tests.Attribution
         public async Task TrackEvent_WhenSucceeded_FiresSignal_AndInjectsUserIdProperty()
         {
             AttributionConfig config = CreateConfig(requireTrackingConsent: false);
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int trackedCount = 0;
             signalBus.Subscribe<AttributionEventTrackedSignal>(_ => trackedCount++);
 
@@ -172,18 +171,6 @@ namespace Vareiko.Foundation.Tests.Attribution
             Assert.That(track.Success, Is.False);
             Assert.That(revenue.Success, Is.False);
             Assert.That(revenue.ErrorCode, Is.EqualTo(AttributionErrorCode.ProviderUnavailable));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<AttributionInitializedSignal>();
-            container.DeclareSignal<AttributionEventTrackedSignal>();
-            container.DeclareSignal<AttributionEventTrackFailedSignal>();
-            container.DeclareSignal<AttributionRevenueTrackedSignal>();
-            container.DeclareSignal<AttributionRevenueTrackFailedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static AttributionConfig CreateConfig(bool requireTrackingConsent)

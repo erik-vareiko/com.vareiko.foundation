@@ -2,27 +2,26 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Time;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class CachedRemoteConfigService : IRemoteConfigService, IRemoteConfigCacheService, IInitializable, ITickable
+    public sealed class CachedRemoteConfigService : IRemoteConfigService, IRemoteConfigCacheService, VContainer.Unity.IInitializable, VContainer.Unity.ITickable
     {
         private readonly IRemoteConfigService _inner;
         private readonly IFoundationTimeProvider _timeProvider;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly RemoteConfigCacheConfig _config;
 
         private Dictionary<string, string> _cache = new Dictionary<string, string>(0, System.StringComparer.Ordinal);
         private float _nextRefreshAt;
         private bool _isRefreshing;
 
-        [Inject]
         public CachedRemoteConfigService(
-            [Inject(Id = "RemoteConfigInner")] IRemoteConfigService inner,
+            IRemoteConfigService inner,
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] RemoteConfigCacheConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            RemoteConfigCacheConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _inner = inner;
             _timeProvider = timeProvider;
@@ -78,7 +77,7 @@ namespace Vareiko.Foundation.Backend
             int cleared = _cache.Count;
             _cache.Clear();
             _nextRefreshAt = _timeProvider.Time;
-            _signalBus?.Fire(new RemoteConfigCacheInvalidatedSignal(cleared, reason ?? string.Empty));
+            _signalBus?.Publish(new RemoteConfigCacheInvalidatedSignal(cleared, reason ?? string.Empty));
         }
 
         private async UniTask RefreshCoreAsync(string source, CancellationToken cancellationToken)
@@ -95,14 +94,14 @@ namespace Vareiko.Foundation.Backend
                 {
                     CopySnapshot(null);
                     _nextRefreshAt = _timeProvider.Time + GetRefreshIntervalSeconds();
-                    _signalBus?.Fire(new RemoteConfigRefreshedSignal(0, source ?? string.Empty));
+                    _signalBus?.Publish(new RemoteConfigRefreshedSignal(0, source ?? string.Empty));
                     return;
                 }
 
                 await _inner.RefreshAsync(cancellationToken);
                 CopySnapshot(_inner.Snapshot());
                 _nextRefreshAt = _timeProvider.Time + GetRefreshIntervalSeconds();
-                _signalBus?.Fire(new RemoteConfigRefreshedSignal(_cache.Count, source ?? string.Empty));
+                _signalBus?.Publish(new RemoteConfigRefreshedSignal(_cache.Count, source ?? string.Empty));
             }
             finally
             {
@@ -161,7 +160,7 @@ namespace Vareiko.Foundation.Backend
             }
             catch (System.Exception exception)
             {
-                _signalBus?.Fire(new RemoteConfigRefreshFailedSignal(exception.Message));
+                _signalBus?.Publish(new RemoteConfigRefreshFailedSignal(exception.Message));
             }
         }
 

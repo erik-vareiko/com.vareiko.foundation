@@ -5,7 +5,6 @@ using UnityEngine;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Push
 {
@@ -61,7 +60,7 @@ namespace Vareiko.Foundation.Tests.Push
         public async Task Subscribe_WhenPermissionGranted_FiresTopicSignal()
         {
             PushNotificationConfig config = CreateConfig(requireConsent: false, autoRequestPermission: false, autoSubscribeDefaults: false);
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             string subscribedTopic = string.Empty;
             signalBus.Subscribe<PushTopicSubscribedSignal>(signal => subscribedTopic = signal.Topic);
 
@@ -117,20 +116,6 @@ namespace Vareiko.Foundation.Tests.Push
             Assert.That(token.Success, Is.False);
             Assert.That(subscribe.Success, Is.False);
             Assert.That(token.ErrorCode, Is.EqualTo(PushNotificationErrorCode.ProviderUnavailable));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<PushInitializedSignal>();
-            container.DeclareSignal<PushPermissionChangedSignal>();
-            container.DeclareSignal<PushTokenUpdatedSignal>();
-            container.DeclareSignal<PushTopicSubscribedSignal>();
-            container.DeclareSignal<PushTopicSubscriptionFailedSignal>();
-            container.DeclareSignal<PushTopicUnsubscribedSignal>();
-            container.DeclareSignal<PushTopicUnsubscriptionFailedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static PushNotificationConfig CreateConfig(bool requireConsent, bool autoRequestPermission, bool autoSubscribeDefaults)

@@ -1,12 +1,13 @@
 # Vareiko Foundation
 
-Reusable Zenject-first runtime architecture package for Unity projects.
+Reusable VContainer-based runtime architecture package for Unity projects (MessagePipe-backed signals behind the `IFoundationSignalBus` facade).
 
 ## Included Modules
 - Bootstrap pipeline (`IBootstrapTask`, `BootstrapRunner`, lifecycle signals).
 - Common runtime helpers (`RetryPolicy`, health checks).
+- Core primitives: `Result`/`Result<T>`, generic `StateMachine<TState>`, object pooling (`ObjectPool<T>`, `ComponentPool<T>`), central tick service (`ITickService` — ordered listeners, timers, pause), disposable utilities (`DisposableAction`, `CompositeDisposable`).
 - Composition helpers (`FoundationDomainInstaller`).
-- App state machine (`IAppStateMachine`).
+- App state machine (`IAppStateMachine`) with extensible string-backed `AppState` (hosts mint custom states).
 - Application lifecycle service (`IApplicationLifecycleService`) with pause/focus/quit events.
 - Asset management (`IAssetService`, Resources/Addressables providers, reference tracking).
 - Config registry (`IConfigService`, `ConfigRegistry` bootstrap task).
@@ -18,7 +19,7 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Scene flow (`ISceneFlowService`).
 - Loading state orchestration (`ILoadingService`) with scene-signal integration.
 - UI loading presenter (`LoadingOverlayPresenter`).
-- Save system (`ISaveService`, PlayerPrefs JSON storage by default, JSON serializer, rolling backups, autosave scheduler; file storage remains available as an alternative backend).
+- Save system (`ISaveService`, PlayerPrefs JSON storage by default, Newtonsoft JSON serializer by default — dictionaries/nullables/polymorphism supported, rolling backups, autosave scheduler; file storage and the JsonUtility serializer remain available as alternatives).
 - Cloud save sync (`ICloudSaveSyncService`) with conflict resolution over backend player-data storage.
 - Save schema versioning/migration contracts (`ISaveMigration`) and security layer (`SaveSecurityConfig` + `SecureSaveSerializer`).
 - IAP abstraction (`IInAppPurchaseService`) with simulated and null providers baseline.
@@ -44,11 +45,9 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - Editor tooling: module scaffolder (`Tools/Vareiko/Foundation/Create Runtime Module`).
 
 ## Installation
-1. Add a `ProjectContext` in your bootstrap scene.
-2. Attach `FoundationProjectInstaller` to `ProjectContext`.
-3. Add a `SceneContext` in gameplay scenes.
-4. Attach `FoundationSceneInstaller` to `SceneContext`.
-5. Optionally assign:
+1. Add `FoundationProjectInstaller` to your bootstrap scene (it is the project-scope `LifetimeScope`).
+2. Add `FoundationSceneInstaller` to gameplay scenes (a child `LifetimeScope`; parents to the project scope automatically and injects scene MonoBehaviours).
+3. Optionally assign:
 - `AnalyticsConfig`
 - `AttributionConfig`
 - `BackendConfig`
@@ -77,10 +76,10 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 ## Quick Start (First 15 Minutes)
 1. Create one bootstrap scene and one gameplay scene.
 2. In bootstrap scene add:
-- `ProjectContext` + `FoundationProjectInstaller`.
+- `FoundationProjectInstaller`.
 - `EnvironmentConfig` asset with `ApplyStarterPresets()` (`dev/stage/prod`).
 3. In gameplay scene add:
-- `SceneContext` + `FoundationSceneInstaller`.
+- `FoundationSceneInstaller`.
 - UI canvas with loading overlay presenter (optional but recommended).
 4. In `FoundationProjectInstaller` assign only minimum configs first:
 - `EnvironmentConfig`
@@ -98,26 +97,32 @@ Reusable Zenject-first runtime architecture package for Unity projects.
 - no startup validation errors
 - diagnostics snapshot is available from `IFoundationDiagnosticsService`
 
+Package Manager samples: **Basic Setup** (minimal wiring) and **Vertical Slice** (full boot + custom app state + tick/pool gameplay + autosaved progress from one component).
+
 Detailed flow with checklist: `Documentation~/STARTER_FLOW.md`.
 Full practical guide: `Documentation~/USAGE_GUIDE.md`.
 Printable PDF guide: `Documentation~/USAGE_GUIDE.pdf`.
 
 ## Dependencies
-- Zenject (`Zenject` asmdef, OpenUPM package `net.bobbo.extenject`)
+- VContainer (`VContainer` asmdef, OpenUPM package `jp.hadashikick.vcontainer`)
+- MessagePipe (`MessagePipe` + `MessagePipe.VContainer` asmdefs, OpenUPM packages `com.cysharp.messagepipe`, `com.cysharp.messagepipe.vcontainer`)
 - UniTask (`UniTask` asmdef, OpenUPM package `com.cysharp.unitask`)
+- Newtonsoft Json (Unity registry package `com.unity.nuget.newtonsoft-json`)
 - Optional: Addressables (`FOUNDATION_ADDRESSABLES` define to enable provider)
 - Unity Input System (`Unity.InputSystem` asmdef / package `com.unity.inputsystem`)
 - Optional: Unity IAP (`UNITY_PURCHASING` define from package `com.unity.purchasing`)
 - Optional: Unity push notifications adapter (`FOUNDATION_UNITY_NOTIFICATIONS` define + host push SDK integration)
 
-`com.vareiko.foundation` declares Zenject/UniTask as package dependencies.
+`com.vareiko.foundation` declares VContainer/MessagePipe/UniTask as package dependencies.
 Host project must have OpenUPM scoped registry configured.
 
 OpenUPM commands:
 
 ```bash
 openupm add com.cysharp.unitask
-openupm add net.bobbo.extenject
+openupm add jp.hadashikick.vcontainer
+openupm add com.cysharp.messagepipe
+openupm add com.cysharp.messagepipe.vcontainer
 ```
 
 Example `Packages/manifest.json`:
@@ -130,13 +135,16 @@ Example `Packages/manifest.json`:
       "url": "https://package.openupm.com",
       "scopes": [
         "com.cysharp",
-        "net.bobbo"
+        "jp.hadashikick"
       ]
     }
   ],
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
-    "net.bobbo.extenject": "9.3.2"
+    "jp.hadashikick.vcontainer": "1.18.0",
+    "com.cysharp.messagepipe": "1.8.1",
+    "com.cysharp.messagepipe.vcontainer": "1.8.1",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }
 ```
@@ -404,7 +412,7 @@ Example `Packages/manifest.json`:
   - `UIBoolGameObjectBinder`
   - `UIBoolButtonInteractableBinder`
   - `UIItemCountBinder` (binds item collection size from int key)
-- All binder components consume `SignalBus` + key matching, so UI updates are push-based without per-frame polling.
+- All binder components consume `IUIValueEventService` (or `IFoundationSignalBus`) + key matching, so UI updates are push-based without per-frame polling.
 
 ### Button Actions
 - `UIButtonView`:

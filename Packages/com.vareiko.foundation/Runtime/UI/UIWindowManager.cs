@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.UI
 {
     public sealed class UIWindowManager : IUIWindowManager, IUIWindowResultService
     {
         private readonly IUIService _uiService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly List<WindowRequest> _queue = new List<WindowRequest>();
 
         private long _requestSequence;
         private string _currentWindowId = string.Empty;
         private WindowRequest _currentRequest;
 
-        [Inject]
-        public UIWindowManager(IUIService uiService, [InjectOptional] SignalBus signalBus = null)
+        public UIWindowManager(IUIService uiService, IFoundationSignalBus signalBus = null)
         {
             _uiService = uiService;
             _signalBus = signalBus;
@@ -131,7 +130,7 @@ namespace Vareiko.Foundation.UI
             _queue.Clear();
             if (string.IsNullOrEmpty(_currentWindowId))
             {
-                _signalBus?.Fire(new UIWindowQueueDrainedSignal());
+                _signalBus?.Publish(new UIWindowQueueDrainedSignal());
             }
         }
 
@@ -174,7 +173,7 @@ namespace Vareiko.Foundation.UI
 
             _queue.Add(request);
             _queue.Sort(WindowRequestComparer.Instance);
-            _signalBus?.Fire(new UIWindowQueuedSignal(request.WindowId, _queue.Count, request.Priority));
+            _signalBus?.Publish(new UIWindowQueuedSignal(request.WindowId, _queue.Count, request.Priority));
             return true;
         }
 
@@ -187,7 +186,7 @@ namespace Vareiko.Foundation.UI
 
             _currentRequest = request;
             _currentWindowId = request.WindowId;
-            _signalBus?.Fire(new UIWindowShownSignal(request.WindowId));
+            _signalBus?.Publish(new UIWindowShownSignal(request.WindowId));
             return true;
         }
 
@@ -199,7 +198,7 @@ namespace Vareiko.Foundation.UI
             _currentWindowId = string.Empty;
             _currentRequest = null;
             bool hasNext = _queue.Count > 0;
-            _signalBus?.Fire(new UIWindowClosedSignal(closingId, hasNext));
+            _signalBus?.Publish(new UIWindowClosedSignal(closingId, hasNext));
             CompleteRequest(request, status, payload);
 
             TryShowNextQueued();
@@ -213,7 +212,7 @@ namespace Vareiko.Foundation.UI
                 return;
             }
 
-            _signalBus?.Fire(new UIWindowResolvedSignal(request.WindowId, status, payload));
+            _signalBus?.Publish(new UIWindowResolvedSignal(request.WindowId, status, payload));
             request.Completion?.TrySetResult(new UIWindowResult(request.WindowId, status, payload));
         }
 
@@ -231,7 +230,7 @@ namespace Vareiko.Foundation.UI
                 CompleteRequest(request, UIWindowResultStatus.Rejected, "Failed to show window.");
             }
 
-            _signalBus?.Fire(new UIWindowQueueDrainedSignal());
+            _signalBus?.Publish(new UIWindowQueueDrainedSignal());
         }
 
         private sealed class WindowRequest

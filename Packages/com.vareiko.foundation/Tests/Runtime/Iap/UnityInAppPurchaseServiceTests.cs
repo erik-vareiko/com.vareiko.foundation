@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
+using MessagePipe;
 using Vareiko.Foundation.Iap;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Tests.Iap
 {
@@ -56,9 +57,10 @@ namespace Vareiko.Foundation.Tests.Iap
             IapConfig config = CreateUnityIapConfig();
             try
             {
-                DiContainer container = new DiContainer();
-
-                FoundationIapInstaller.Install(container, config);
+                ContainerBuilder builder = new ContainerBuilder();
+                FoundationRuntimeInstaller.InstallProjectServices(builder, iapConfig: config);
+                using IObjectResolver container = builder.Build();
+                GlobalMessagePipe.SetProvider(container.AsServiceProvider());
 
                 IInAppPurchaseService service = container.Resolve<IInAppPurchaseService>();
                 Assert.That(service, Is.TypeOf<UnityInAppPurchaseService>());

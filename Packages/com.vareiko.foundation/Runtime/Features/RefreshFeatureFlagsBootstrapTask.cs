@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Vareiko.Foundation.Bootstrap;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Features
 {

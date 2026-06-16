@@ -1,33 +1,33 @@
-using Zenject;
+using UnityEngine;
+using Vareiko.Foundation.Observability;
+using VContainer;
+using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Monetization
 {
     public static class FoundationMonetizationInstaller
     {
-        public static void Install(DiContainer container, MonetizationPolicyConfig config = null)
+        public static void Install(IContainerBuilder builder, MonetizationPolicyConfig config = null)
         {
-            if (container.HasBinding<IMonetizationPolicyService>())
-            {
-                return;
-            }
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<MonetizationPolicyConfig>());
+            builder.RegisterEntryPoint<MonetizationPolicyService>(Lifetime.Singleton).As<IMonetizationPolicyService>().AsSelf();
+            // Registered here (not in Observability) because the service subscribes to the
+            // Ads/Iap/Push signals; the IMonetizationObservabilityService contract stays in
+            // Observability so diagnostics can consume it without referencing monetization.
+            builder.RegisterEntryPoint<MonetizationObservabilityService>(Lifetime.Singleton).As<IMonetizationObservabilityService>().AsSelf();
+        }
 
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<MonetizationAdBlockedSignal>();
-            container.DeclareSignal<MonetizationAdRecordedSignal>();
-            container.DeclareSignal<MonetizationIapBlockedSignal>();
-            container.DeclareSignal<MonetizationIapRecordedSignal>();
-            container.DeclareSignal<MonetizationSessionResetSignal>();
-
-            container.BindInterfacesAndSelfTo<MonetizationPolicyService>().AsSingle().NonLazy();
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<MonetizationAdRecordedSignal>(signalOptions);
+            builder.RegisterMessageBroker<MonetizationIapRecordedSignal>(signalOptions);
+            builder.RegisterMessageBroker<MonetizationSessionResetSignal>(signalOptions);
+            builder.RegisterMessageBroker<MonetizationAdBlockedSignal>(signalOptions);
+            builder.RegisterMessageBroker<MonetizationIapBlockedSignal>(signalOptions);
         }
     }
 }

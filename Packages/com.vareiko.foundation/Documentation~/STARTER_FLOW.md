@@ -11,19 +11,20 @@ This guide is the shortest path to a clean first run with `com.vareiko.foundatio
 1. Unity `2022.3+`.
 2. OpenUPM scoped registry for:
 - `com.cysharp`
-- `net.bobbo`
+- `jp.hadashikick`
 3. Install required dependencies:
 - `com.cysharp.unitask`
-- `net.bobbo.extenject`
+- `jp.hadashikick.vcontainer`
+- `com.cysharp.messagepipe`
+- `com.cysharp.messagepipe.vcontainer`
+- `com.unity.nuget.newtonsoft-json`
 - `com.unity.inputsystem`
 
 ## 2) Scene Wiring
 1. Create `Bootstrap` scene:
-- add `ProjectContext`
-- add `FoundationProjectInstaller`
+- add `FoundationProjectInstaller` (it is the project-scope `LifetimeScope` itself; no extra context object needed)
 2. Create `Gameplay` scene:
-- add `SceneContext`
-- add `FoundationSceneInstaller`
+- add `FoundationSceneInstaller` (scene-scope `LifetimeScope`; parents to the project scope automatically)
 3. Optional but recommended:
 - add `LoadingOverlayPresenter` on a UI canvas in gameplay scene
 

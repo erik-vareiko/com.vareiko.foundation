@@ -2,9 +2,19 @@
   "name": "Vareiko.Foundation",
   "rootNamespace": "Vareiko.Foundation",
   "references": [
-    "Zenject",
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.Persistence",
+    "Vareiko.Foundation.Audio",
+    "Vareiko.Foundation.UI",
+    "Vareiko.Foundation.Assets",
+    "Vareiko.Foundation.Backend",
+    "Vareiko.Foundation.Features",
+    "Vareiko.Foundation.Monetization",
+    "Vareiko.Foundation.Observability",
     "UniTask",
-    "Unity.InputSystem"
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

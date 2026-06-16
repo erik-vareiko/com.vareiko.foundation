@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -12,8 +11,7 @@ namespace Vareiko.Foundation.Backend
         private readonly BackendConfig _config;
         private bool _isReady;
 
-        [Inject]
-        public PlayFabRemoteConfigService([InjectOptional] BackendConfig config = null)
+        public PlayFabRemoteConfigService(BackendConfig config = null)
         {
             _config = config;
         }

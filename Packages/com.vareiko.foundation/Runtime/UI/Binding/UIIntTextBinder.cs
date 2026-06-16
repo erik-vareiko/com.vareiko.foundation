@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
+using Vareiko.Foundation.Signals;
+using VContainer;
 
 namespace Vareiko.Foundation.UI
 {
@@ -11,13 +12,12 @@ namespace Vareiko.Foundation.UI
         [SerializeField] private Text _target;
         [SerializeField] private string _format = "{0}";
 
-        private SignalBus _signalBus;
+        private IFoundationSignalBus _signalBus;
         private IUIValueEventService _valueService;
         private IDisposable _subscription;
-        private bool _usesSignalBusSubscription;
 
         [Inject]
-        public void Construct([InjectOptional] SignalBus signalBus = null, [InjectOptional] IUIValueEventService valueService = null)
+        public void Construct(IFoundationSignalBus signalBus, IUIValueEventService valueService)
         {
             _signalBus = signalBus;
             _valueService = valueService;
@@ -35,12 +35,10 @@ namespace Vareiko.Foundation.UI
             {
                 IReadOnlyValueStream<int> stream = _valueService.ObserveInt(key);
                 _subscription = stream.Subscribe(Apply, true);
-                _usesSignalBusSubscription = false;
             }
             else if (_signalBus != null)
             {
-                _signalBus.Subscribe<UIIntValueChangedSignal>(OnValueChanged);
-                _usesSignalBusSubscription = true;
+                _subscription = _signalBus.Subscribe<UIIntValueChangedSignal>(OnValueChanged);
             }
         }
 
@@ -53,13 +51,6 @@ namespace Vareiko.Foundation.UI
         {
             _subscription?.Dispose();
             _subscription = null;
-
-            if (_signalBus != null && _usesSignalBusSubscription)
-            {
-                _signalBus.Unsubscribe<UIIntValueChangedSignal>(OnValueChanged);
-            }
-
-            _usesSignalBusSubscription = false;
         }
 
         private void OnValueChanged(UIIntValueChangedSignal signal)

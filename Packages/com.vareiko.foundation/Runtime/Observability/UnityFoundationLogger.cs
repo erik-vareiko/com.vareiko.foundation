@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.Observability
 {
     public sealed class UnityFoundationLogger : IFoundationLogger
     {
         private readonly ObservabilityConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly List<IFoundationLogSink> _sinks;
 
-        [Inject]
         public UnityFoundationLogger(
-            [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null,
-            [InjectOptional] List<IFoundationLogSink> sinks = null)
+            ObservabilityConfig config = null,
+            IFoundationSignalBus signalBus = null,
+            List<IFoundationLogSink> sinks = null)
         {
             _config = config;
             _signalBus = signalBus;
@@ -49,7 +48,7 @@ namespace Vareiko.Foundation.Observability
                 WriteToUnityConsole(entry);
             }
 
-            _signalBus?.Fire(new LogMessageEmittedSignal(level, safeMessage, scope));
+            _signalBus?.Publish(new LogMessageEmittedSignal(level, safeMessage, scope));
         }
 
         public void Debug(string message, string category = null)

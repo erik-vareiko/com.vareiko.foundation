@@ -1,29 +1,22 @@
-using Vareiko.Foundation.Settings;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
+using MessagePipe;
 
 namespace Vareiko.Foundation.Audio
 {
     public static class FoundationAudioInstaller
     {
-        public static void Install(DiContainer container)
+        public static void Install(IContainerBuilder builder)
         {
-            if (container.HasBinding<IAudioService>())
-            {
-                return;
-            }
+            builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
+        }
 
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (!container.HasBinding<ISettingsService>())
-            {
-                FoundationSettingsInstaller.Install(container);
-            }
-
-            container.DeclareSignal<AudioVolumesChangedSignal>();
-            container.BindInterfacesAndSelfTo<AudioService>().AsSingle().NonLazy();
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<AudioVolumesChangedSignal>(signalOptions);
         }
     }
 }

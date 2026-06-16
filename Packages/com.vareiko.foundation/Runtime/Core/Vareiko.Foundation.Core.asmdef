@@ -1,0 +1,20 @@
+{
+  "name": "Vareiko.Foundation.Core",
+  "rootNamespace": "Vareiko.Foundation",
+  "references": [
+    "UniTask",
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer",
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

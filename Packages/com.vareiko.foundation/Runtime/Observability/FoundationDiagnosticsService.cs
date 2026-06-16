@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.AssetManagement;
@@ -6,11 +7,11 @@ using Vareiko.Foundation.Bootstrap;
 using Vareiko.Foundation.Connectivity;
 using Vareiko.Foundation.Loading;
 using Vareiko.Foundation.Time;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.Observability
 {
-    public sealed class FoundationDiagnosticsService : IDiagnosticsService, IInitializable, ITickable, System.IDisposable
+    public sealed class FoundationDiagnosticsService : IDiagnosticsService, VContainer.Unity.IInitializable, VContainer.Unity.ITickable, System.IDisposable
     {
         private readonly IFoundationTimeProvider _timeProvider;
         private readonly ObservabilityConfig _config;
@@ -20,22 +21,22 @@ namespace Vareiko.Foundation.Observability
         private readonly IRemoteConfigService _remoteConfigService;
         private readonly IAssetService _assetService;
         private readonly IMonetizationObservabilityService _monetizationObservabilityService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
         private readonly DiagnosticsSnapshot _snapshot = new DiagnosticsSnapshot();
 
         private float _nextUpdateAt;
 
-        [Inject]
         public FoundationDiagnosticsService(
             IFoundationTimeProvider timeProvider,
-            [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] IConnectivityService connectivityService = null,
-            [InjectOptional] ILoadingService loadingService = null,
-            [InjectOptional] IBackendService backendService = null,
-            [InjectOptional] IRemoteConfigService remoteConfigService = null,
-            [InjectOptional] IAssetService assetService = null,
-            [InjectOptional] SignalBus signalBus = null,
-            [InjectOptional] IMonetizationObservabilityService monetizationObservabilityService = null)
+            ObservabilityConfig config = null,
+            IConnectivityService connectivityService = null,
+            ILoadingService loadingService = null,
+            IBackendService backendService = null,
+            IRemoteConfigService remoteConfigService = null,
+            IAssetService assetService = null,
+            IFoundationSignalBus signalBus = null,
+            IMonetizationObservabilityService monetizationObservabilityService = null)
         {
             _timeProvider = timeProvider;
             _config = config;
@@ -54,9 +55,9 @@ namespace Vareiko.Foundation.Observability
         {
             if (_signalBus != null)
             {
-                _signalBus.Subscribe<ApplicationBootCompletedSignal>(OnBootCompleted);
-                _signalBus.Subscribe<ApplicationBootFailedSignal>(OnBootFailed);
-                _signalBus.Subscribe<AppStateChangedSignal>(OnAppStateChanged);
+                _signalSubscriptions.Add(_signalBus.Subscribe<ApplicationBootCompletedSignal>(OnBootCompleted));
+                _signalSubscriptions.Add(_signalBus.Subscribe<ApplicationBootFailedSignal>(OnBootFailed));
+                _signalSubscriptions.Add(_signalBus.Subscribe<AppStateChangedSignal>(OnAppStateChanged));
             }
 
             Tick();
@@ -65,12 +66,11 @@ namespace Vareiko.Foundation.Observability
 
         public void Dispose()
         {
-            if (_signalBus != null)
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
             {
-                _signalBus.Unsubscribe<ApplicationBootCompletedSignal>(OnBootCompleted);
-                _signalBus.Unsubscribe<ApplicationBootFailedSignal>(OnBootFailed);
-                _signalBus.Unsubscribe<AppStateChangedSignal>(OnAppStateChanged);
+                _signalSubscriptions[i].Dispose();
             }
+            _signalSubscriptions.Clear();
         }
 
         public void Tick()
@@ -110,7 +110,7 @@ namespace Vareiko.Foundation.Observability
             _snapshot.LastUpdatedAt = _timeProvider.Time;
 
             _nextUpdateAt = _timeProvider.Time + GetRefreshInterval();
-            _signalBus?.Fire(new DiagnosticsSnapshotUpdatedSignal(_snapshot));
+            _signalBus?.Publish(new DiagnosticsSnapshotUpdatedSignal(_snapshot));
         }
 
         private void OnBootCompleted(ApplicationBootCompletedSignal signal)

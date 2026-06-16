@@ -2,26 +2,25 @@ using System;
 using System.Threading.Tasks;
 using Vareiko.Foundation.App;
 using UnityEngine;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.Observability
 {
-    public sealed class GlobalExceptionHandler : IInitializable, IDisposable
+    public sealed class GlobalExceptionHandler : VContainer.Unity.IInitializable, IDisposable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly IFoundationLogger _logger;
         private readonly IAppStateMachine _appStateMachine;
         private readonly ObservabilityConfig _config;
         private readonly ICrashReportingService _crashReportingService;
         private bool _subscribed;
 
-        [Inject]
         public GlobalExceptionHandler(
-            [InjectOptional] IFoundationLogger logger = null,
-            [InjectOptional] IAppStateMachine appStateMachine = null,
-            [InjectOptional] ObservabilityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null,
-            [InjectOptional] ICrashReportingService crashReportingService = null)
+            IFoundationLogger logger = null,
+            IAppStateMachine appStateMachine = null,
+            ObservabilityConfig config = null,
+            IFoundationSignalBus signalBus = null,
+            ICrashReportingService crashReportingService = null)
         {
             _signalBus = signalBus;
             _logger = logger;
@@ -103,7 +102,7 @@ namespace Vareiko.Foundation.Observability
             string safeStackTrace = stackTrace ?? string.Empty;
             FoundationCrashReport crashReport = new FoundationCrashReport(DateTime.UtcNow, source, message, safeStackTrace, details);
 
-            _signalBus?.Fire(new UnhandledExceptionCapturedSignal(source, message, safeStackTrace));
+            _signalBus?.Publish(new UnhandledExceptionCapturedSignal(source, message, safeStackTrace));
             _logger?.Error($"Unhandled exception from {source}: {details}", "UnhandledException");
             TrySubmitCrashReport(crashReport);
 
@@ -130,12 +129,12 @@ namespace Vareiko.Foundation.Observability
             try
             {
                 _crashReportingService.Report(report);
-                _signalBus?.Fire(new CrashReportSubmittedSignal(report.Source));
+                _signalBus?.Publish(new CrashReportSubmittedSignal(report.Source));
             }
             catch (Exception exception)
             {
                 string error = exception != null ? exception.Message : "Crash report submission failed.";
-                _signalBus?.Fire(new CrashReportSubmissionFailedSignal(report.Source, error));
+                _signalBus?.Publish(new CrashReportSubmissionFailedSignal(report.Source, error));
                 _logger?.Warn($"Crash report submission failed: {error}", "CrashReporting");
             }
         }

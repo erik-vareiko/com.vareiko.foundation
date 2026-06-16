@@ -3,7 +3,6 @@ using NUnit.Framework;
 using UnityEngine;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Observability
 {
@@ -12,7 +11,7 @@ namespace Vareiko.Foundation.Tests.Observability
         [Test]
         public void Log_WithBoundSink_WritesSinkAndSignal()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             LogMessageEmittedSignal emitted = default;
             bool fired = false;
             signalBus.Subscribe<LogMessageEmittedSignal>(signal =>
@@ -43,7 +42,7 @@ namespace Vareiko.Foundation.Tests.Observability
             try
             {
                 ReflectionTestUtil.SetPrivateField(config, "_minimumLogLevel", FoundationLogLevel.Warning);
-                SignalBus signalBus = CreateSignalBus();
+                FakeSignalBus signalBus = new FakeSignalBus();
                 bool fired = false;
                 signalBus.Subscribe<LogMessageEmittedSignal>(_ => fired = true);
 
@@ -64,7 +63,7 @@ namespace Vareiko.Foundation.Tests.Observability
         [Test]
         public void Log_WithNullMessageAndCategory_UsesSafeDefaults()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             LogMessageEmittedSignal emitted = default;
             bool fired = false;
             signalBus.Subscribe<LogMessageEmittedSignal>(signal =>
@@ -84,14 +83,6 @@ namespace Vareiko.Foundation.Tests.Observability
             Assert.That(fired, Is.True);
             Assert.That(emitted.Message, Is.EqualTo(string.Empty));
             Assert.That(emitted.Category, Is.EqualTo("Foundation"));
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<LogMessageEmittedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private sealed class SpySink : IFoundationLogSink

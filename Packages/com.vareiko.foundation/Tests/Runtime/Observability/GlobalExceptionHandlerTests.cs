@@ -6,7 +6,6 @@ using UnityEngine;
 using Vareiko.Foundation.App;
 using Vareiko.Foundation.Observability;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Observability
 {
@@ -53,7 +52,7 @@ namespace Vareiko.Foundation.Tests.Observability
         [Test]
         public void ReportUnhandledException_FiresSignal_Logs_AndTransitionsToError()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             UnhandledExceptionCapturedSignal captured = default;
             bool hasSignal = false;
             signalBus.Subscribe<UnhandledExceptionCapturedSignal>(signal =>
@@ -115,7 +114,7 @@ namespace Vareiko.Foundation.Tests.Observability
         [Test]
         public void ReportUnhandledException_WithCrashReporter_EmitsSubmittedSignal()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             bool submitted = false;
             signalBus.Subscribe<CrashReportSubmittedSignal>(_ => submitted = true);
 
@@ -133,7 +132,7 @@ namespace Vareiko.Foundation.Tests.Observability
         [Test]
         public void ReportUnhandledException_WhenCrashReporterThrows_EmitsFailedSignal()
         {
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             CrashReportSubmissionFailedSignal failed = default;
             bool hasFailedSignal = false;
             signalBus.Subscribe<CrashReportSubmissionFailedSignal>(signal =>
@@ -170,16 +169,6 @@ namespace Vareiko.Foundation.Tests.Observability
             {
                 UnityEngine.Object.DestroyImmediate(config);
             }
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<UnhandledExceptionCapturedSignal>();
-            container.DeclareSignal<CrashReportSubmittedSignal>();
-            container.DeclareSignal<CrashReportSubmissionFailedSignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static bool IsSubscribed(GlobalExceptionHandler handler)

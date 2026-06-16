@@ -6,7 +6,6 @@ using UnityEngine;
 using Vareiko.Foundation.Ads;
 using Vareiko.Foundation.Consent;
 using Vareiko.Foundation.Tests.TestDoubles;
-using Zenject;
 
 namespace Vareiko.Foundation.Tests.Ads
 {
@@ -70,7 +69,7 @@ namespace Vareiko.Foundation.Tests.Ads
         public async Task LoadAndShow_WhenRewardedPlacement_FiresRewardAndUsesFallbackRewardPayload()
         {
             AdsConfig config = CreateConfig();
-            SignalBus signalBus = CreateSignalBus();
+            FakeSignalBus signalBus = new FakeSignalBus();
             int rewardGrantedAmount = 0;
             signalBus.Subscribe<AdRewardGrantedSignal>(signal => rewardGrantedAmount = signal.RewardAmount);
 
@@ -178,20 +177,6 @@ namespace Vareiko.Foundation.Tests.Ads
             {
                 Object.DestroyImmediate(config);
             }
-        }
-
-        private static SignalBus CreateSignalBus()
-        {
-            DiContainer container = new DiContainer();
-            SignalBusInstaller.Install(container);
-            container.DeclareSignal<AdsInitializedSignal>();
-            container.DeclareSignal<AdLoadedSignal>();
-            container.DeclareSignal<AdLoadFailedSignal>();
-            container.DeclareSignal<AdShownSignal>();
-            container.DeclareSignal<AdShowFailedSignal>();
-            container.DeclareSignal<AdRewardGrantedSignal>();
-            container.DeclareSignal<AdsOperationTelemetrySignal>();
-            return container.Resolve<SignalBus>();
         }
 
         private static AdsConfig CreateConfig(bool requireConsent = false)

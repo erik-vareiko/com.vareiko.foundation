@@ -5,12 +5,12 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Common;
 using Vareiko.Foundation.Connectivity;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class CloudCommandService : ICloudCommandService, IInitializable, IDisposable
+    public sealed class CloudCommandService : ICloudCommandService, VContainer.Unity.IInitializable, IDisposable
     {
         private readonly ICloudFunctionService _transport;
         private readonly BackendReliabilityConfig _reliabilityConfig;
@@ -18,21 +18,21 @@ namespace Vareiko.Foundation.Backend
         private readonly ICloudCommandRetryClassifier _retryClassifier;
         private readonly ICloudCommandQueueStore _queueStore;
         private readonly IConnectivityService _connectivityService;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly RetryPolicy _retryPolicy;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
 
         private readonly List<CloudCommandQueueItem> _queue = new List<CloudCommandQueueItem>();
         private bool _isFlushing;
 
-        [Inject]
         public CloudCommandService(
-            [Inject(Id = "CloudFunctionInner")] ICloudFunctionService transport,
-            [InjectOptional] BackendReliabilityConfig reliabilityConfig = null,
-            [InjectOptional] BackendCommandConfig commandConfig = null,
-            [InjectOptional] ICloudCommandRetryClassifier retryClassifier = null,
-            [InjectOptional] ICloudCommandQueueStore queueStore = null,
-            [InjectOptional] IConnectivityService connectivityService = null,
-            [InjectOptional] SignalBus signalBus = null)
+            ICloudFunctionService transport,
+            BackendReliabilityConfig reliabilityConfig = null,
+            BackendCommandConfig commandConfig = null,
+            ICloudCommandRetryClassifier retryClassifier = null,
+            ICloudCommandQueueStore queueStore = null,
+            IConnectivityService connectivityService = null,
+            IFoundationSignalBus signalBus = null)
         {
             _transport = transport;
             _reliabilityConfig = reliabilityConfig;
@@ -68,7 +68,7 @@ namespace Vareiko.Foundation.Backend
                 return;
             }
 
-            _signalBus.Subscribe<ConnectivityChangedSignal>(OnConnectivityChanged);
+            _signalSubscriptions.Add(_signalBus.Subscribe<ConnectivityChangedSignal>(OnConnectivityChanged));
         }
 
         public void Dispose()
@@ -85,7 +85,11 @@ namespace Vareiko.Foundation.Backend
                 return;
             }
 
-            _signalBus.Unsubscribe<ConnectivityChangedSignal>(OnConnectivityChanged);
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
+            {
+                _signalSubscriptions[i].Dispose();
+            }
+            _signalSubscriptions.Clear();
         }
 
         public async UniTask<CloudCommandResponse> ExecuteAsync(CloudCommandRequest request, CancellationToken cancellationToken = default)
@@ -127,7 +131,7 @@ namespace Vareiko.Foundation.Backend
                 }
 
                 int delayMs = _retryPolicy.GetDelayMs(attempt + 1);
-                _signalBus?.Fire(new BackendOperationRetriedSignal("CloudCommand:" + request.CommandName, attempt, maxAttempts, response.ErrorCode));
+                _signalBus?.Publish(new BackendOperationRetriedSignal("CloudCommand:" + request.CommandName, attempt, maxAttempts, response.ErrorCode));
                 if (delayMs > 0)
                 {
                     await UniTask.Delay(delayMs, cancellationToken: cancellationToken);
@@ -284,7 +288,7 @@ namespace Vareiko.Foundation.Backend
             long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             _queue.Add(CloudCommandQueueItem.Create(GetGatewayFunctionName(), payload, requestJson, request.IdempotencyKey, now));
             PersistQueue();
-            _signalBus?.Fire(new CloudFunctionQueuedSignal(request.CommandName, _queue.Count, reason));
+            _signalBus?.Publish(new CloudFunctionQueuedSignal(request.CommandName, _queue.Count, reason));
         }
 
         private void OnConnectivityChanged(ConnectivityChangedSignal signal)
@@ -338,7 +342,7 @@ namespace Vareiko.Foundation.Backend
             }
 
             PersistQueue();
-            _signalBus?.Fire(new CloudFunctionQueueFlushedSignal(startCount, flushed, _queue.Count));
+            _signalBus?.Publish(new CloudFunctionQueueFlushedSignal(startCount, flushed, _queue.Count));
         }
 
         private async UniTask<CloudCommandResponse> ExecuteQueuedItemAsync(CloudCommandQueueItem item)
@@ -431,7 +435,7 @@ namespace Vareiko.Foundation.Backend
             }
 
             PersistQueue();
-            _signalBus?.Fire(new CloudFunctionQueueRestoredSignal(restored));
+            _signalBus?.Publish(new CloudFunctionQueueRestoredSignal(restored));
         }
 
         private void PersistQueue()

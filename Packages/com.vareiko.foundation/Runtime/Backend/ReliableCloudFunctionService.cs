@@ -1,31 +1,32 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Common;
 using Vareiko.Foundation.Connectivity;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
-    public sealed class ReliableCloudFunctionService : ICloudFunctionService, IInitializable, System.IDisposable
+    public sealed class ReliableCloudFunctionService : ICloudFunctionService, VContainer.Unity.IInitializable, System.IDisposable
     {
         private readonly ICloudFunctionService _inner;
         private readonly IConnectivityService _connectivityService;
         private readonly BackendReliabilityConfig _config;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly RetryPolicy _retryPolicy;
         private readonly ICloudFunctionQueueStore _queueStore;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
         private readonly Queue<CloudFunctionQueueItem> _queue = new Queue<CloudFunctionQueueItem>();
         private bool _isFlushing;
 
-        [Inject]
         public ReliableCloudFunctionService(
-            [Inject(Id = "CloudFunctionInner")] ICloudFunctionService inner,
-            [InjectOptional] IConnectivityService connectivityService = null,
-            [InjectOptional] BackendReliabilityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null,
-            [InjectOptional] ICloudFunctionQueueStore queueStore = null)
+            ICloudFunctionService inner,
+            IConnectivityService connectivityService = null,
+            BackendReliabilityConfig config = null,
+            IFoundationSignalBus signalBus = null,
+            ICloudFunctionQueueStore queueStore = null)
         {
             _inner = inner;
             _connectivityService = connectivityService;
@@ -59,7 +60,7 @@ namespace Vareiko.Foundation.Backend
                 return;
             }
 
-            _signalBus.Subscribe<ConnectivityChangedSignal>(OnConnectivityChanged);
+            _signalSubscriptions.Add(_signalBus.Subscribe<ConnectivityChangedSignal>(OnConnectivityChanged));
         }
 
         public void Dispose()
@@ -76,7 +77,11 @@ namespace Vareiko.Foundation.Backend
                 return;
             }
 
-            _signalBus.Unsubscribe<ConnectivityChangedSignal>(OnConnectivityChanged);
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
+            {
+                _signalSubscriptions[i].Dispose();
+            }
+            _signalSubscriptions.Clear();
         }
 
         public async UniTask<CloudFunctionResult> ExecuteAsync(string functionName, string payloadJson = null, CancellationToken cancellationToken = default)
@@ -99,7 +104,7 @@ namespace Vareiko.Foundation.Backend
                 response => response.Success,
                 (attempt, maxAttempts, _) =>
                 {
-                    _signalBus?.Fire(new BackendOperationRetriedSignal("CloudFunction:" + functionName, attempt, maxAttempts, string.Empty));
+                    _signalBus?.Publish(new BackendOperationRetriedSignal("CloudFunction:" + functionName, attempt, maxAttempts, string.Empty));
                 },
                 cancellationToken);
 
@@ -146,7 +151,7 @@ namespace Vareiko.Foundation.Backend
 
             _queue.Enqueue(new CloudFunctionQueueItem(functionName.Trim(), payloadJson ?? string.Empty));
             PersistQueue();
-            _signalBus?.Fire(new CloudFunctionQueuedSignal(functionName, _queue.Count, reason));
+            _signalBus?.Publish(new CloudFunctionQueuedSignal(functionName, _queue.Count, reason));
         }
 
         private void OnConnectivityChanged(ConnectivityChangedSignal signal)
@@ -189,7 +194,7 @@ namespace Vareiko.Foundation.Backend
             }
 
             PersistQueue();
-            _signalBus?.Fire(new CloudFunctionQueueFlushedSignal(startCount, flushed, _queue.Count));
+            _signalBus?.Publish(new CloudFunctionQueueFlushedSignal(startCount, flushed, _queue.Count));
         }
 
         private void RestorePersistedQueue()
@@ -245,7 +250,7 @@ namespace Vareiko.Foundation.Backend
             }
 
             PersistQueue();
-            _signalBus?.Fire(new CloudFunctionQueueRestoredSignal(restored));
+            _signalBus?.Publish(new CloudFunctionQueueRestoredSignal(restored));
         }
 
         private void PersistQueue()

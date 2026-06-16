@@ -4,7 +4,8 @@
   "references": [
     "Vareiko.Foundation",
     "Vareiko.Foundation.Editor",
-    "Zenject"
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.UI"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

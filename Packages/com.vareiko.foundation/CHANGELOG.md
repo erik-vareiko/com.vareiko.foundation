@@ -1,6 +1,43 @@
 # Changelog
 
-## Unreleased
+## 3.0.0
+The "universal level-0" refactor: the package is now VContainer/MessagePipe-native, split into opt-in module assemblies, and ships a Core primitive layer (`Result<T>`, generic FSM, object pooling, `ITickService`, disposables) with a Newtonsoft-default save serializer. See `Documentation~/REFACTOR_PLAN_3_0.md` for the full phase log. Breaking changes are marked inline (DI/messaging cutover, `AppState` enum→struct, `ISaveSerializer` default swap, removed legacy UI bridge in 2.0).
+- Vertical Slice sample (Phase 4, G8): drop `VerticalSliceBootstrap` into an empty scene and press Play — full code-driven composition (project + scene scopes), an `IBootstrapTask` loading a dictionary-bearing save profile, a host-defined `AppState("Run")`, tick-driven pooled gameplay (`ITickService` + `ComponentPool`) and interval autosave. Both samples are now declared in `package.json` (`samples`), so they appear in the Package Manager UI.
+- Save serializer default swap (Phase 4, G9): `NewtonsoftJsonSaveSerializer` is the new default payload serializer behind `SecureSaveSerializer` — dictionaries, nullables and polymorphic payloads now serialize correctly. It writes the same `{"Value": ...}` envelope as the old JsonUtility serializer, so pre-3.0 saves keep loading; `JsonUnitySaveSerializer` stays available as a dependency-free fallback. New package dependency: `com.unity.nuget.newtonsoft-json` 3.2.1 (added to validator/CI required-deps). `SecureSaveSerializer` now composes over `ISaveSerializer` instead of the concrete JsonUtility type.
+- Core primitives (Phase 3, second batch):
+  - `Result` / `Result<T>` (`Vareiko.Foundation`) — canonical success/failure primitive (factories, `TryGetValue`, `GetValueOrDefault`, `AsResult`); the default for new foundation APIs. `IDiagnosticsSnapshotExportService.ExportAsync` migrated from its ad-hoc result struct to `Result<string>` (breaking); domain results carrying codes/flags (backend, cloud sync) intentionally keep their shapes.
+  - `StateMachine<TState>` (`Vareiko.Foundation`) — minimal generic FSM (transition guard, `TryEnter`/`ForceEnter`, change event, custom comparer).
+  - **`AppState` is no longer an enum** (breaking for `switch`/casts, source-compatible otherwise): it is a string-backed struct with the same well-known states (`Boot`…`Shutdown`), so hosts add custom states via `new AppState("MetaShop")`. `AppStateMachine` is rebuilt on `StateMachine<AppState>` with the same default lifecycle rules; custom states flow through them.
+  - Disposable utilities (`Vareiko.Foundation`) — `DisposableAction` (idempotent) and `CompositeDisposable` (the signal-subscription bag pattern).
+- Core primitives (Phase 3 of the 3.0 refactor, first batch):
+  - `ITickService` / `TickService` (`Vareiko.Foundation.Time`) — central ordered update loop: per-frame listeners with explicit ordering, `Delay`/`Repeat`/`NextFrame` timers (scaled or unscaled time), pause support, exception isolation per listener, `IDisposable` handles everywhere; driven by the container player-loop in play mode, manually via `Advance` in tests. Registered by `FoundationTimeInstaller` and resolvable from the project scope.
+  - Object pooling (`Vareiko.Foundation.Pooling`) — `IObjectPool<T>` with `ObjectPool<T>` for plain classes (factory, get/release/destroy callbacks, max size, prewarm, double-release detection) and `ComponentPool<T>` for prefab instances (activate/deactivate lifecycle, reparenting, overflow destruction, tolerance to externally destroyed instances), plus a `using`-scoped `GetScoped` helper.
+- Asmdef modularization (Phase 2 of the 3.0 refactor) — the monolithic `Vareiko.Foundation` assembly is split into 10 runtime assemblies:
+  - `Vareiko.Foundation.Core` (signals facade, time, common, app+bootstrap, config, connectivity, environment, input, loading, RNG, scene flow, validation framework), `…Persistence` (save+settings+consent), `…Audio`, `…UI` (incl. UINavigation), `…Assets`, `…Backend`, `…Features`, `…Monetization` (ads/IAP/push/attribution/analytics/economy/policy), `…Observability`, and the `Vareiko.Foundation` umbrella (composition root; references all modules)
+  - a host can now reference Core + a subset of modules and compile without the rest; the umbrella keeps the all-in `InstallProjectServices` path working unchanged
+  - `FOUNDATION_ADDRESSABLES` is now auto-defined via asmdef `versionDefines` when `com.unity.addressables` is installed (previously the define could not work in package form — the assembly had no Addressables reference)
+  - signal brokers are registered per module (`Foundation<Module>Installer.RegisterSignals`); the central `FoundationSignalBrokers` registry is removed
+  - ownership moves to keep the assembly graph acyclic: `CloudSaveSyncService` → backend module, `MonetizationObservabilityService` → monetization module (contract stays in observability), cross-module startup validation rules → composition root
+  - namespaces are unchanged — consumer code keeps compiling after adding the module references; hosts referencing the `Vareiko.Foundation` asmdef by name keep working via the umbrella
+- DI migration Phase 1c — VContainer/MessagePipe cutover (composition now runs on VContainer):
+  - all 31 module installers converted `DiContainer` → `IContainerBuilder`; `FoundationRuntimeInstaller` registers MessagePipe + the `IFoundationSignalBus` facade (`MessagePipeSignalBus`) + every signal broker once at the root
+  - root `FoundationProjectInstaller` / `FoundationSceneInstaller` / `FoundationDomainInstaller` are now VContainer `LifetimeScope`s (`Configure(IContainerBuilder)`)
+  - lifecycle services register via `RegisterEntryPoint`; `IInitializable`/`ITickable` fully-qualified to `VContainer.Unity.*`
+  - ex-`[InjectOptional]` parity: configs always bound (real or default), `List<T>` collection deps resolved via `IEnumerable<T>` factory registration, host-optional deps (`IApplicationLifecycleSource`, `ICrashReportingService`, `UIRegistry`, input adapter) resolved with `TryResolve`
+  - Backend decorator chains rebuilt with delegate registration; transitional `ZenjectFoundationSignalBus` removed; composition tests rewritten against VContainer
+- DI migration — scene MonoBehaviour injection (Zenject `SceneContext` parity):
+  - the 12 scene-placed `[Inject] Construct(...)` components (UI value binders, window button actions, `UIConfirmDialogPresenter`, `LoadingOverlayPresenter`, `DiagnosticsOverlayView`) ported to VContainer method injection with required dependencies
+  - `FoundationSceneInstaller` now injects every scene root GameObject hierarchy at container build (before entry points run); opt-out via the `_injectSceneObjects` inspector flag
+  - `FoundationSceneInstaller` defaults its parent scope to `FoundationProjectInstaller` so scene services resolve project services without inspector wiring
+- DI migration — Zenject fully removed:
+  - stripped `using Zenject;` and `[Inject]`/`[InjectOptional]` attributes from all remaining services (VContainer ignored them; no behavior change)
+  - removed the `Zenject` reference from all asmdefs and `net.bobbo.extenject` from `package.json` (replaced by `jp.hadashikick.vcontainer` + `com.cysharp.messagepipe`)
+  - `FoundationRuntimeInstaller.InstallProjectServices` now returns the `MessagePipeOptions` so hosts can register message brokers for their own signal types
+  - module scaffolding templates and the BasicSetup sample rewritten for VContainer (`LifetimeScope` roots instead of `ProjectContext`/`SceneContext`)
+- DI migration — verification closed (Phase 1 done):
+  - EditMode: 214 passed / 27 failed, all 27 the frozen `TEST_BASELINE.md` set, zero new failures
+  - new `FoundationCompositionPlayModeTests` boots the real project + scene scopes in play mode and asserts single bootstrap run, scene-wide injection (incl. inactive objects), and parent-scope resolution
+  - `AudioServicePlayModeSmokeTests` updated to the 2.0 lazy audio-root behavior (was stale)
 - Changed default save storage:
   - `FoundationSaveInstaller` now binds `ISaveStorage` to `PlayerPrefsSaveStorage` by default
   - `PlayerPrefsSaveStorage` stores one JSON payload per `slot/key` pair using stable relative PlayerPrefs keys

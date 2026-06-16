@@ -1,5 +1,5 @@
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.UI
 {
@@ -15,7 +15,7 @@ namespace Vareiko.Foundation.UI
         private IUIWindowResultService _windowResultService;
 
         [Inject]
-        public void Construct([InjectOptional] IUIWindowResultService windowResultService = null)
+        public void Construct(IUIWindowResultService windowResultService)
         {
             _windowResultService = windowResultService;
         }

@@ -2,21 +2,20 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Vareiko.Foundation.Common;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.Backend
 {
     public sealed class RetryingBackendService : IBackendService
     {
         private readonly IBackendService _inner;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly RetryPolicy _retryPolicy;
 
-        [Inject]
         public RetryingBackendService(
-            [Inject(Id = "BackendInner")] IBackendService inner,
-            [InjectOptional] BackendReliabilityConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            IBackendService inner,
+            BackendReliabilityConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _inner = inner;
             _signalBus = signalBus;
@@ -36,7 +35,7 @@ namespace Vareiko.Foundation.Backend
             return _retryPolicy.ExecuteAsync(
                 token => _inner.LoginAnonymousAsync(customId, token),
                 result => result.Success,
-                (attempt, maxAttempts, _) => _signalBus?.Fire(new BackendOperationRetriedSignal("LoginAnonymous", attempt, maxAttempts, string.Empty)),
+                (attempt, maxAttempts, _) => _signalBus?.Publish(new BackendOperationRetriedSignal("LoginAnonymous", attempt, maxAttempts, string.Empty)),
                 cancellationToken);
         }
 
@@ -45,7 +44,7 @@ namespace Vareiko.Foundation.Backend
             return _retryPolicy.ExecuteAsync(
                 _inner.GetPlayerDataAsync,
                 result => result.Success,
-                (attempt, maxAttempts, _) => _signalBus?.Fire(new BackendOperationRetriedSignal("GetPlayerData", attempt, maxAttempts, string.Empty)),
+                (attempt, maxAttempts, _) => _signalBus?.Publish(new BackendOperationRetriedSignal("GetPlayerData", attempt, maxAttempts, string.Empty)),
                 cancellationToken);
         }
 
@@ -54,7 +53,7 @@ namespace Vareiko.Foundation.Backend
             return _retryPolicy.ExecuteAsync(
                 token => _inner.SetPlayerDataAsync(data, token),
                 result => result,
-                (attempt, maxAttempts, _) => _signalBus?.Fire(new BackendOperationRetriedSignal("SetPlayerData", attempt, maxAttempts, string.Empty)),
+                (attempt, maxAttempts, _) => _signalBus?.Publish(new BackendOperationRetriedSignal("SetPlayerData", attempt, maxAttempts, string.Empty)),
                 cancellationToken);
         }
     }

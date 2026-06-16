@@ -1,5 +1,19 @@
 {
   "dependencies": {
+    "com.cysharp.messagepipe": {
+      "version": "1.8.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.cysharp.messagepipe.vcontainer": {
+      "version": "1.8.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.cysharp.unitask": {
       "version": "2.5.10",
       "depth": 0,
@@ -97,6 +111,13 @@
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.6",
       "depth": 3,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -207,11 +228,14 @@
       "dependencies": {
         "com.cysharp.unitask": "2.5.10",
         "com.unity.inputsystem": "1.7.0",
-        "net.bobbo.extenject": "9.3.2"
+        "jp.hadashikick.vcontainer": "1.18.0",
+        "com.cysharp.messagepipe": "1.8.1",
+        "com.cysharp.messagepipe.vcontainer": "1.8.1",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
       }
     },
-    "net.bobbo.extenject": {
-      "version": "9.3.2",
+    "jp.hadashikick.vcontainer": {
+      "version": "1.18.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},

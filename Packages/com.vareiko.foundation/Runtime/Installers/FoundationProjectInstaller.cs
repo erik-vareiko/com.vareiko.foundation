@@ -15,11 +15,12 @@ using Vareiko.Foundation.Push;
 using Vareiko.Foundation.Rng;
 using Vareiko.Foundation.Save;
 using UnityEngine;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Vareiko.Foundation.Installers
 {
-    public sealed class FoundationProjectInstaller : MonoInstaller
+    public sealed class FoundationProjectInstaller : LifetimeScope
     {
         [SerializeField] private AnalyticsConfig _analyticsConfig;
         [SerializeField] private AttributionConfig _attributionConfig;
@@ -43,10 +44,10 @@ namespace Vareiko.Foundation.Installers
         [SerializeField] private ObservabilityConfig _observabilityConfig;
         [SerializeField] private DeterministicRngConfig _deterministicRngConfig;
 
-        public override void InstallBindings()
+        protected override void Configure(IContainerBuilder builder)
         {
             FoundationRuntimeInstaller.InstallProjectServices(
-                Container,
+                builder,
                 _analyticsConfig,
                 _attributionConfig,
                 _backendConfig,

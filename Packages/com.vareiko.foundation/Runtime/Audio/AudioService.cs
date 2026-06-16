@@ -1,14 +1,16 @@
 using System;
+using System.Collections.Generic;
 using Vareiko.Foundation.Settings;
+using Vareiko.Foundation.Signals;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Audio
 {
-    public sealed class AudioService : IAudioService, IInitializable, IDisposable
+    public sealed class AudioService : IAudioService, VContainer.Unity.IInitializable, IDisposable
     {
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly ISettingsService _settingsService;
+        private readonly List<IDisposable> _signalSubscriptions = new List<IDisposable>();
 
         private GameObject _root;
         private AudioSource _musicSource;
@@ -18,8 +20,7 @@ namespace Vareiko.Foundation.Audio
         private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
 
-        [Inject]
-        public AudioService([InjectOptional] ISettingsService settingsService = null, [InjectOptional] SignalBus signalBus = null)
+        public AudioService(ISettingsService settingsService = null, IFoundationSignalBus signalBus = null)
         {
             _signalBus = signalBus;
             _settingsService = settingsService;
@@ -29,7 +30,7 @@ namespace Vareiko.Foundation.Audio
         {
             if (_signalBus != null)
             {
-                _signalBus.Subscribe<SettingsChangedSignal>(HandleSettingsChanged);
+                _signalSubscriptions.Add(_signalBus.Subscribe<SettingsChangedSignal>(HandleSettingsChanged));
             }
 
             if (_settingsService != null && _settingsService.Current != null)
@@ -47,10 +48,11 @@ namespace Vareiko.Foundation.Audio
 
         public void Dispose()
         {
-            if (_signalBus != null)
+            for (int i = 0; i < _signalSubscriptions.Count; i++)
             {
-                _signalBus.Unsubscribe<SettingsChangedSignal>(HandleSettingsChanged);
+                _signalSubscriptions[i].Dispose();
             }
+            _signalSubscriptions.Clear();
 
             if (_root != null)
             {
@@ -130,7 +132,12 @@ namespace Vareiko.Foundation.Audio
             }
 
             _root = new GameObject("[Foundation] AudioService");
-            UnityEngine.Object.DontDestroyOnLoad(_root);
+            // DontDestroyOnLoad is play-mode only; guard it so the container build (which runs
+            // entry-point Initialize) doesn't throw under EditMode tests.
+            if (Application.isPlaying)
+            {
+                UnityEngine.Object.DontDestroyOnLoad(_root);
+            }
 
             _musicSource = _root.AddComponent<AudioSource>();
             _musicSource.playOnAwake = false;
@@ -171,7 +178,7 @@ namespace Vareiko.Foundation.Audio
 
         private void FireVolumeSignal()
         {
-            _signalBus?.Fire(new AudioVolumesChangedSignal(_masterVolume, _musicVolume, _sfxVolume));
+            _signalBus?.Publish(new AudioVolumesChangedSignal(_masterVolume, _musicVolume, _sfxVolume));
         }
     }
 }

@@ -106,7 +106,7 @@ namespace Vareiko.Foundation.EditorTests
             return FoundationProjectValidator.RunValidation(new FoundationProjectValidator.ValidationOptions
             {
                 ValidateReleaseGate = false,
-                ValidateProjectContextPrefab = false,
+                ValidateProjectScopePrefab = false,
                 ValidateScenes = true,
                 UseOpenScenesOnly = true
             });

@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using Zenject;
 
 namespace Vareiko.Foundation.UI
 {
@@ -8,7 +7,6 @@ namespace Vareiko.Foundation.UI
         private readonly IUIService _uiService;
         private readonly IUIWindowResultService _windowResultService;
 
-        [Inject]
         public UIConfirmDialogService(IUIService uiService, IUIWindowResultService windowResultService)
         {
             _uiService = uiService;

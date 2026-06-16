@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Zenject;
+using Vareiko.Foundation.Signals;
 
 namespace Vareiko.Foundation.AssetManagement
 {
@@ -16,18 +16,17 @@ namespace Vareiko.Foundation.AssetManagement
         }
 
         private readonly List<IAssetProvider> _providers;
-        private readonly SignalBus _signalBus;
+        private readonly IFoundationSignalBus _signalBus;
         private readonly AssetProviderType _activeProvider;
         private readonly Dictionary<int, AssetReferenceEntry> _assetRefs = new Dictionary<int, AssetReferenceEntry>();
         private readonly Dictionary<string, int> _keyRefs = new Dictionary<string, int>(System.StringComparer.Ordinal);
 
         private int _totalReferenceCount;
 
-        [Inject]
         public AssetService(
-            [InjectOptional] List<IAssetProvider> providers = null,
-            [InjectOptional] AssetServiceConfig config = null,
-            [InjectOptional] SignalBus signalBus = null)
+            List<IAssetProvider> providers = null,
+            AssetServiceConfig config = null,
+            IFoundationSignalBus signalBus = null)
         {
             _providers = providers ?? new List<IAssetProvider>(0);
             _signalBus = signalBus;
@@ -44,7 +43,7 @@ namespace Vareiko.Foundation.AssetManagement
             if (provider == null)
             {
                 AssetLoadResult<T> fail = AssetLoadResult<T>.Fail("No asset provider is configured.");
-                _signalBus?.Fire(new AssetLoadFailedSignal(key, fail.Error));
+                _signalBus?.Publish(new AssetLoadFailedSignal(key, fail.Error));
                 return fail;
             }
 
@@ -56,11 +55,11 @@ namespace Vareiko.Foundation.AssetManagement
                     TrackLoadedAsset(key, loaded.Asset);
                 }
 
-                _signalBus?.Fire(new AssetLoadedSignal(key, typeof(T).Name));
+                _signalBus?.Publish(new AssetLoadedSignal(key, typeof(T).Name));
             }
             else
             {
-                _signalBus?.Fire(new AssetLoadFailedSignal(key, loaded.Error));
+                _signalBus?.Publish(new AssetLoadFailedSignal(key, loaded.Error));
             }
 
             return loaded;
@@ -86,11 +85,11 @@ namespace Vareiko.Foundation.AssetManagement
                 {
                     _assetRefs.Remove(assetId);
                     bool finalReleaseSuccess = provider != null && await provider.ReleaseAsync(asset, cancellationToken);
-                    _signalBus?.Fire(new AssetReleasedSignal(entry.Key, 0, _assetRefs.Count));
+                    _signalBus?.Publish(new AssetReleasedSignal(entry.Key, 0, _assetRefs.Count));
                     return finalReleaseSuccess;
                 }
 
-                _signalBus?.Fire(new AssetReleasedSignal(entry.Key, entry.ReferenceCount, _assetRefs.Count));
+                _signalBus?.Publish(new AssetReleasedSignal(entry.Key, entry.ReferenceCount, _assetRefs.Count));
                 return true;
             }
 
@@ -100,7 +99,7 @@ namespace Vareiko.Foundation.AssetManagement
             }
 
             bool released = await provider.ReleaseAsync(asset, cancellationToken);
-            _signalBus?.Fire(new AssetReleasedSignal(string.Empty, 0, _assetRefs.Count));
+            _signalBus?.Publish(new AssetReleasedSignal(string.Empty, 0, _assetRefs.Count));
             return released;
         }
 
@@ -114,7 +113,7 @@ namespace Vareiko.Foundation.AssetManagement
 
             await provider.WarmupAsync(keys, cancellationToken);
             int count = keys != null ? keys.Count : 0;
-            _signalBus?.Fire(new AssetWarmupCompletedSignal(count));
+            _signalBus?.Publish(new AssetWarmupCompletedSignal(count));
         }
 
         public void Dispose()
@@ -126,7 +125,7 @@ namespace Vareiko.Foundation.AssetManagement
                 for (int i = 0; i < leakedEntries.Count; i++)
                 {
                     AssetReferenceEntry leaked = leakedEntries[i];
-                    _signalBus?.Fire(new AssetLeakDetectedSignal(leaked.Key, leaked.ReferenceCount));
+                    _signalBus?.Publish(new AssetLeakDetectedSignal(leaked.Key, leaked.ReferenceCount));
                     if (provider != null && leaked.Asset != null)
                     {
                         _ = provider.ReleaseAsync(leaked.Asset);
@@ -160,7 +159,7 @@ namespace Vareiko.Foundation.AssetManagement
 
             _totalReferenceCount++;
             UpdateKeyReferenceCount(entry.Key, 1);
-            _signalBus?.Fire(new AssetReferenceChangedSignal(entry.Key, GetKeyReferenceCount(entry.Key), _assetRefs.Count));
+            _signalBus?.Publish(new AssetReferenceChangedSignal(entry.Key, GetKeyReferenceCount(entry.Key), _assetRefs.Count));
         }
 
         private void UpdateKeyReferenceCount(string key, int delta)

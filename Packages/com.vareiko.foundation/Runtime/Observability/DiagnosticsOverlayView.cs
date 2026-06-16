@@ -1,5 +1,5 @@
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Vareiko.Foundation.Observability
 {
@@ -15,8 +15,8 @@ namespace Vareiko.Foundation.Observability
 
         [Inject]
         public void Construct(
-            [InjectOptional] IDiagnosticsService diagnosticsService = null,
-            [InjectOptional] ObservabilityConfig config = null)
+            IDiagnosticsService diagnosticsService,
+            ObservabilityConfig config)
         {
             _diagnosticsService = diagnosticsService;
             _config = config;

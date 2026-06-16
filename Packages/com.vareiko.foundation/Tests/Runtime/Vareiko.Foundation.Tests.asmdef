@@ -3,8 +3,19 @@
   "rootNamespace": "Vareiko.Foundation.Tests",
   "references": [
     "Vareiko.Foundation",
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.Persistence",
+    "Vareiko.Foundation.Audio",
+    "Vareiko.Foundation.UI",
+    "Vareiko.Foundation.Assets",
+    "Vareiko.Foundation.Backend",
+    "Vareiko.Foundation.Features",
+    "Vareiko.Foundation.Monetization",
+    "Vareiko.Foundation.Observability",
     "UniTask",
-    "Zenject"
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

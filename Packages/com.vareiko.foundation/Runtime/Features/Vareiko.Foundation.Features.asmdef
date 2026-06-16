@@ -1,0 +1,21 @@
+{
+  "name": "Vareiko.Foundation.Features",
+  "rootNamespace": "Vareiko.Foundation",
+  "references": [
+    "Vareiko.Foundation.Core",
+    "Vareiko.Foundation.Backend",
+    "UniTask",
+    "VContainer",
+    "MessagePipe",
+    "MessagePipe.VContainer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

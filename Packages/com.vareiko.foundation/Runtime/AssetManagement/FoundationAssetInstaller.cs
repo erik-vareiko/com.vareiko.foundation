@@ -1,36 +1,37 @@
-using Zenject;
+using System.Collections.Generic;
+using UnityEngine;
+using Vareiko.Foundation.Signals;
+using VContainer;
+using MessagePipe;
 
 namespace Vareiko.Foundation.AssetManagement
 {
     public static class FoundationAssetInstaller
     {
-        public static void Install(DiContainer container, AssetServiceConfig config = null)
+        public static void Install(IContainerBuilder builder, AssetServiceConfig config = null)
         {
-            if (container.HasBinding<IAssetService>())
-            {
-                return;
-            }
+            builder.RegisterInstance(config != null ? config : ScriptableObject.CreateInstance<AssetServiceConfig>());
+            builder.Register<ResourcesAssetProvider>(Lifetime.Singleton).As<IAssetProvider>();
+            builder.Register<AddressablesAssetProvider>(Lifetime.Singleton).As<IAssetProvider>();
+            builder.Register<AssetService>(resolver => new AssetService(
+                    new List<IAssetProvider>(resolver.Resolve<IEnumerable<IAssetProvider>>()),
+                    resolver.Resolve<AssetServiceConfig>(),
+                    resolver.Resolve<IFoundationSignalBus>()),
+                Lifetime.Singleton)
+                .As<IAssetService>();
+        }
 
-            if (!container.HasBinding<SignalBus>())
-            {
-                SignalBusInstaller.Install(container);
-            }
-
-            if (config != null)
-            {
-                container.BindInstance(config).IfNotBound();
-            }
-
-            container.DeclareSignal<AssetLoadedSignal>();
-            container.DeclareSignal<AssetLoadFailedSignal>();
-            container.DeclareSignal<AssetWarmupCompletedSignal>();
-            container.DeclareSignal<AssetReferenceChangedSignal>();
-            container.DeclareSignal<AssetReleasedSignal>();
-            container.DeclareSignal<AssetLeakDetectedSignal>();
-
-            container.Bind<IAssetProvider>().To<ResourcesAssetProvider>().AsSingle();
-            container.Bind<IAssetProvider>().To<AddressablesAssetProvider>().AsSingle();
-            container.Bind<IAssetService>().To<AssetService>().AsSingle();
+        // Message brokers live in the project scope (GlobalMessagePipe provider), so the
+        // project composition calls this even when the module services install in the
+        // scene scope.
+        public static void RegisterSignals(IContainerBuilder builder, MessagePipeOptions signalOptions)
+        {
+            builder.RegisterMessageBroker<AssetLoadedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AssetLoadFailedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AssetReleasedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AssetReferenceChangedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AssetWarmupCompletedSignal>(signalOptions);
+            builder.RegisterMessageBroker<AssetLeakDetectedSignal>(signalOptions);
         }
     }
 }

@@ -1,7 +1,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Zenject;
 
 namespace Vareiko.Foundation.Backend
 {
@@ -9,8 +8,7 @@ namespace Vareiko.Foundation.Backend
     {
         private readonly BackendConfig _config;
 
-        [Inject]
-        public PlayFabCloudFunctionService([InjectOptional] BackendConfig config = null)
+        public PlayFabCloudFunctionService(BackendConfig config = null)
         {
             _config = config;
         }
