@@ -1,6 +1,7 @@
 # Changelog
 
-## Unreleased
+## 3.0.0
+The "universal level-0" refactor: the package is now VContainer/MessagePipe-native, split into opt-in module assemblies, and ships a Core primitive layer (`Result<T>`, generic FSM, object pooling, `ITickService`, disposables) with a Newtonsoft-default save serializer. See `Documentation~/REFACTOR_PLAN_3_0.md` for the full phase log. Breaking changes are marked inline (DI/messaging cutover, `AppState` enum→struct, `ISaveSerializer` default swap, removed legacy UI bridge in 2.0).
 - Vertical Slice sample (Phase 4, G8): drop `VerticalSliceBootstrap` into an empty scene and press Play — full code-driven composition (project + scene scopes), an `IBootstrapTask` loading a dictionary-bearing save profile, a host-defined `AppState("Run")`, tick-driven pooled gameplay (`ITickService` + `ComponentPool`) and interval autosave. Both samples are now declared in `package.json` (`samples`), so they appear in the Package Manager UI.
 - Save serializer default swap (Phase 4, G9): `NewtonsoftJsonSaveSerializer` is the new default payload serializer behind `SecureSaveSerializer` — dictionaries, nullables and polymorphic payloads now serialize correctly. It writes the same `{"Value": ...}` envelope as the old JsonUtility serializer, so pre-3.0 saves keep loading; `JsonUnitySaveSerializer` stays available as a dependency-free fallback. New package dependency: `com.unity.nuget.newtonsoft-json` 3.2.1 (added to validator/CI required-deps). `SecureSaveSerializer` now composes over `ISaveSerializer` instead of the concrete JsonUtility type.
 - Core primitives (Phase 3, second batch):

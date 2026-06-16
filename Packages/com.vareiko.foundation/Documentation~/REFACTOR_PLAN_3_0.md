@@ -1,6 +1,7 @@
 # Foundation v3.0 — Universal Level-0 Refactor Plan
 
-> Status: planning (created 2026-06-08). Target: `com.vareiko.foundation` 3.0.0.
+> Status: complete (2026-06-16) — all phases (0–4) landed; `com.vareiko.foundation`
+> bumped to 3.0.0. Created 2026-06-08.
 > Supersedes the v1.0/v2.0 roadmap in `BACKLOG.md` for the architecture direction.
 
 ## Goal
@@ -189,5 +190,5 @@ the owner: grouped granularity, Observability via direct refs):
 - Replacing UniTask, Input System, Addressables, or ScriptableObject configs.
 
 ## Tracking
-Update this file's phase "Done when" checkboxes as work lands. Reflect shipped
-phases in `CHANGELOG.md` and bump `package.json` toward `3.0.0`.
+All phases shipped and reflected in `CHANGELOG.md`; `package.json` bumped to
+`3.0.0` (2026-06-16). Refactor closed — further work tracked outside this plan.
